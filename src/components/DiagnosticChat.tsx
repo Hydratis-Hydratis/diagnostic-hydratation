@@ -3,6 +3,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatOptions } from "./ChatOptions";
 import { ChatInput } from "./ChatInput";
 import { ProgressIndicator } from "./ProgressIndicator";
+import { TypingIndicator } from "./TypingIndicator";
 import { questions } from "@/data/questions";
 import { DiagnosticData } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
@@ -19,6 +20,8 @@ export const DiagnosticChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [diagnosticData, setDiagnosticData] = useState<DiagnosticData>({});
   const [isComplete, setIsComplete] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showInput, setShowInput] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -30,13 +33,29 @@ export const DiagnosticChat = () => {
   }, [messages]);
 
   useEffect(() => {
-    // Display first question
+    // Display first question with typing indicator
     if (currentQuestionIndex === 0) {
       setTimeout(() => {
-        addBotMessage(questions[0].text);
-      }, 500);
+        setIsTyping(true);
+        setTimeout(() => {
+          setIsTyping(false);
+          addBotMessage(questions[0].text);
+          setShowInput(true);
+        }, getTypingDelay(questions[0].text));
+      }, 800);
     }
   }, []);
+
+  // Calculate realistic typing delay based on message length
+  const getTypingDelay = (message: string): number => {
+    const baseDelay = 1000; // 1 second minimum
+    const wordsPerMinute = 60;
+    const words = message.split(' ').length;
+    const typingTime = (words / wordsPerMinute) * 60 * 1000;
+    // Random variation ±20%
+    const variation = 0.8 + Math.random() * 0.4;
+    return Math.min(baseDelay + (typingTime * variation), 4000); // Max 4 seconds
+  };
 
   const getCurrentTime = () => {
     const now = new Date();
@@ -68,6 +87,9 @@ export const DiagnosticChat = () => {
   const handleAnswer = (answer: string) => {
     const currentQuestion = questions[currentQuestionIndex];
     
+    // Hide input immediately
+    setShowInput(false);
+    
     // Add user message
     addUserMessage(answer);
     
@@ -77,30 +99,42 @@ export const DiagnosticChat = () => {
       [currentQuestion.id]: answer,
     }));
 
-    // Move to next question
-    if (currentQuestionIndex < questions.length - 1) {
-      setTimeout(() => {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
-        addBotMessage(questions[currentQuestionIndex + 1].text);
-      }, 800);
-    } else {
-      // Complete
-      setTimeout(() => {
-        setIsComplete(true);
-        addBotMessage(
-          "Merci beaucoup pour tes réponses ! 💧\n\nTon diagnostic d'hydratation a été enregistré. Tu recevras bientôt des recommandations personnalisées par email."
-        );
+    // Wait a bit before showing typing indicator
+    setTimeout(() => {
+      setIsTyping(true);
+      
+      // Move to next question with realistic delay
+      if (currentQuestionIndex < questions.length - 1) {
+        const nextQuestion = questions[currentQuestionIndex + 1];
+        const typingDelay = getTypingDelay(nextQuestion.text);
         
-        // Show success toast
-        toast({
-          title: "Diagnostic terminé !",
-          description: "Merci d'avoir complété le questionnaire.",
-        });
+        setTimeout(() => {
+          setIsTyping(false);
+          setCurrentQuestionIndex(currentQuestionIndex + 1);
+          addBotMessage(nextQuestion.text);
+          setShowInput(true);
+        }, typingDelay);
+      } else {
+        // Complete - final message
+        const finalMessage = "Merci beaucoup pour tes réponses ! 💧\n\nTon diagnostic d'hydratation a été enregistré. Tu recevras bientôt des recommandations personnalisées par email.";
+        const typingDelay = getTypingDelay(finalMessage);
         
-        // Log data (in production, send to backend)
-        console.log("Diagnostic Data:", { ...diagnosticData, [currentQuestion.id]: answer });
-      }, 800);
-    }
+        setTimeout(() => {
+          setIsTyping(false);
+          setIsComplete(true);
+          addBotMessage(finalMessage);
+          
+          // Show success toast
+          toast({
+            title: "Diagnostic terminé !",
+            description: "Merci d'avoir complété le questionnaire.",
+          });
+          
+          // Log data (in production, send to backend)
+          console.log("Diagnostic Data:", { ...diagnosticData, [currentQuestion.id]: answer });
+        }, typingDelay);
+      }
+    }, 600); // Small delay before showing typing indicator
   };
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -124,8 +158,11 @@ export const DiagnosticChat = () => {
           />
         ))}
         
+        {/* Typing Indicator */}
+        {isTyping && <TypingIndicator />}
+        
         {/* Current Question Input/Options */}
-        {!isComplete && messages.length > 0 && currentQuestion && (
+        {!isComplete && showInput && currentQuestion && (
           <div className="pt-4">
             {currentQuestion.type === "options" && currentQuestion.options ? (
               <ChatOptions
