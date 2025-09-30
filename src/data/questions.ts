@@ -1,0 +1,80 @@
+import { Question } from "@/types/diagnostic";
+
+export const questions: Question[] = [
+  {
+    id: "gender",
+    text: "Bonjour ! Je suis ravie de t'aider avec ton diagnostic d'hydratation.\n\nPour commencer, es-tu...",
+    type: "options",
+    options: ["Un homme", "Une femme", "Autre"],
+  },
+  {
+    id: "age",
+    text: "Merci ! Quel âge as-tu ?",
+    type: "options",
+    options: ["- 18", "18-24", "25-34", "35-44", "45-54", "55+"],
+    multiColumn: true,
+  },
+  {
+    id: "height",
+    text: "Quelle est ta taille (en cm) ?",
+    type: "input",
+    inputType: "number",
+    placeholder: "Ex: 170",
+  },
+  {
+    id: "weight",
+    text: "Quel est ton poids (en kg) ?",
+    type: "input",
+    inputType: "number",
+    placeholder: "Ex: 70",
+  },
+  {
+    id: "activity",
+    text: "Quelle est ton activité physique par semaine ? 🏃🏻",
+    type: "options",
+    options: ["Peu ou pas", "1-2 fois", "3-4 fois", "5+ fois"],
+    multiColumn: true,
+  },
+  {
+    id: "waterIntake",
+    text: "Quelle est la quantité d'eau que tu bois par jour ?",
+    type: "options",
+    options: ["Moins de 1L", "1-1.5L", "1.5-2L", "Plus de 2L"],
+    multiColumn: true,
+  },
+  {
+    id: "alcohol",
+    text: "Consommes-tu régulièrement de l'alcool ?",
+    type: "options",
+    options: ["Jamais", "Occasionnellement", "Régulièrement", "Fréquemment"],
+    multiColumn: true,
+  },
+  {
+    id: "fatigue",
+    text: "Es-tu souvent fatigué(e) ou as-tu des maux de tête ?",
+    type: "options",
+    options: ["Jamais", "Parfois", "Souvent", "Très souvent"],
+    multiColumn: true,
+  },
+  {
+    id: "urineColor",
+    text: "Quelle est la couleur de ton urine ?",
+    type: "options",
+    options: ["Claire", "Jaune clair", "Jaune foncé", "Ambre/Brun"],
+    multiColumn: true,
+  },
+  {
+    id: "firstName",
+    text: "Super ! On arrive bientôt au bout.\n\nQuel est ton prénom ?",
+    type: "input",
+    inputType: "text",
+    placeholder: "Ton prénom",
+  },
+  {
+    id: "email",
+    text: "Merci d'avoir répondu à ce questionnaire !\n\nPour recevoir ton diagnostic personnalisé, quelle est ton adresse e-mail ?",
+    type: "input",
+    inputType: "email",
+    placeholder: "ton.email@exemple.com",
+  },
+];
