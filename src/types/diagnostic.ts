@@ -15,7 +15,7 @@ export interface DiagnosticData {
 export interface Question {
   id: keyof DiagnosticData;
   text: string;
-  type: "options" | "input";
+  type: "options" | "input" | "colorScale";
   inputType?: "text" | "email" | "number";
   options?: string[];
   placeholder?: string;

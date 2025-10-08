@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatOptions } from "./ChatOptions";
 import { ChatInput } from "./ChatInput";
+import { ColorScaleSelector } from "./ColorScaleSelector";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { TypingIndicator } from "./TypingIndicator";
 import { questions } from "@/data/questions";
@@ -170,6 +171,8 @@ export const DiagnosticChat = () => {
                 onSelect={handleAnswer}
                 multiColumn={currentQuestion.multiColumn}
               />
+            ) : currentQuestion.type === "colorScale" ? (
+              <ColorScaleSelector onSelect={handleAnswer} />
             ) : (
               <ChatInput
                 onSubmit={handleAnswer}

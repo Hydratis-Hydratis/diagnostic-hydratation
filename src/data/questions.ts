@@ -59,9 +59,7 @@ export const questions: Question[] = [
   {
     id: "urineColor",
     text: "Quelle est la couleur de ton urine ?",
-    type: "options",
-    options: ["Claire", "Jaune clair", "Jaune foncé", "Ambre/Brun"],
-    multiColumn: true,
+    type: "colorScale",
   },
   {
     id: "firstName",
