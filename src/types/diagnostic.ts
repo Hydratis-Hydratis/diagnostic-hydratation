@@ -24,11 +24,18 @@ export interface DiagnosticData {
   urine_couleur?: string;
   
   // Étape 5 - Habitudes
-  consommation_boissons?: string[];
-  nb_cafe?: string;
-  nb_the?: string;
-  nb_energisante?: string;
-  nb_alcool?: string;
+  boissons_journalieres?: {
+    eau: number;
+    soda: number;
+    soda_zero: number;
+    jus: number;
+    cafe_sucre: number;
+    cafe_the: number;
+    vin: number;
+    biere: number;
+    boisson_sport: number;
+    boisson_energisante: number;
+  };
   
   // Infos finales
   firstName?: string;
@@ -38,7 +45,7 @@ export interface DiagnosticData {
 export interface Question {
   id: keyof DiagnosticData;
   text: string;
-  type: "options" | "input" | "colorScale" | "multiSelect";
+  type: "options" | "input" | "colorScale" | "multiSelect" | "beverageSelector";
   inputType?: "text" | "email" | "number";
   options?: string[];
   placeholder?: string;

@@ -41,11 +41,21 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   const urine_couleur = parseInt(data.urine_couleur || "4");
   const crampes = data.crampes || "Non";
   const courbatures = data.courbatures || "Non";
-  const boissons = data.consommation_boissons || [];
-  const nb_cafe = parseInt(data.nb_cafe || "0");
-  const nb_the = parseInt(data.nb_the || "0");
-  const nb_energisante = parseInt(data.nb_energisante || "0");
-  const nb_alcool = parseInt(data.nb_alcool || "0");
+  
+  // Calcul des boissons à partir des quantités sélectionnées
+  const boissons = data.boissons_journalieres;
+  let nb_cafe = 0;
+  let nb_the = 0;
+  let nb_energisante = 0;
+  let nb_alcool = 0;
+  
+  if (boissons) {
+    // Convertir les quantités de boissons en équivalents pour le calcul
+    nb_cafe = boissons.cafe_sucre + boissons.cafe_the;
+    nb_the = boissons.cafe_the; // déjà compté dans nb_cafe
+    nb_energisante = boissons.boisson_energisante;
+    nb_alcool = boissons.vin + boissons.biere;
+  }
 
   // Métabolisme basal (Harris-Benedict)
   const MB = sexe === "Un homme"
@@ -109,7 +119,7 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   if (crampes === "Oui") score -= 8;
   if (courbatures === "Oui") score -= 5;
   if (transpiration === "Forte") score -= 5;
-  if (boissons.includes("Alcool") && nb_alcool >= 2) score -= 6;
+  if (nb_alcool >= 2) score -= 6;
   if (score < 0) score = 0;
 
   // Statut
@@ -123,7 +133,7 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   if (temperature_ext === "> 28°C") notes.push("Chaleur : fractionner les apports, viser une boisson plus sodée.");
   if (situation_particuliere.startsWith("Enceinte")) notes.push("Grossesse : privilégier une hydratation régulière, avis médical en cas de malaise.");
   if (situation_particuliere === "Allaitante") notes.push("Allaitement : ajouter ~700 mL/j au-delà du besoin de base.");
-  if (boissons.includes("Alcool")) notes.push("L'abus d'alcool est dangereux pour la santé.");
+  if (nb_alcool > 0) notes.push("L'abus d'alcool est dangereux pour la santé.");
   if (transpiration === "Forte") notes.push("Transpiration forte : surveiller la masse avant/après séance, compenser 150% des pertes.");
 
   // Sortie

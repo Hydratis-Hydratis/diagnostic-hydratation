@@ -4,6 +4,7 @@ import { ChatOptions } from "./ChatOptions";
 import { ChatInput } from "./ChatInput";
 import { ColorScaleSelector } from "./ColorScaleSelector";
 import { MultiSelectOptions } from "./MultiSelectOptions";
+import { BeverageSelector, BeverageQuantities } from "./BeverageSelector";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { TypingIndicator } from "./TypingIndicator";
 import { questions } from "@/data/questions";
@@ -25,6 +26,18 @@ export const DiagnosticChat = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [showInput, setShowInput] = useState(false);
+  const [beverageQuantities, setBeverageQuantities] = useState<BeverageQuantities>({
+    eau: 0,
+    soda: 0,
+    soda_zero: 0,
+    jus: 0,
+    cafe_sucre: 0,
+    cafe_the: 0,
+    vin: 0,
+    biere: 0,
+    boisson_sport: 0,
+    boisson_energisante: 0,
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -94,7 +107,17 @@ export const DiagnosticChat = () => {
     setShowInput(false);
     
     // Format answer for display
-    const displayAnswer = Array.isArray(answer) ? answer.join(", ") : answer;
+    let displayAnswer: string;
+    let actualAnswer: string | string[] | object = answer;
+    
+    if (currentQuestion.type === "beverageSelector") {
+      const quantities = JSON.parse(answer as string) as BeverageQuantities;
+      actualAnswer = quantities;
+      const total = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
+      displayAnswer = `${total} verre${total > 1 ? 's' : ''} de différentes boissons`;
+    } else {
+      displayAnswer = Array.isArray(answer) ? answer.join(", ") : answer;
+    }
     
     // Add user message
     addUserMessage(displayAnswer);
@@ -102,7 +125,7 @@ export const DiagnosticChat = () => {
     // Save answer
     const updatedData = {
       ...diagnosticData,
-      [currentQuestion.id]: answer,
+      [currentQuestion.id]: actualAnswer,
     };
     setDiagnosticData(updatedData);
 
@@ -132,25 +155,6 @@ export const DiagnosticChat = () => {
             nextIndex++;
             continue;
           }
-        }
-        
-        // Skip beverage quantity questions if beverage not selected
-        const boissons = updatedData.consommation_boissons as string[] || [];
-        if (nextQuestion.id === "nb_cafe" && !boissons.includes("Café")) {
-          nextIndex++;
-          continue;
-        }
-        if (nextQuestion.id === "nb_the" && !boissons.includes("Thé")) {
-          nextIndex++;
-          continue;
-        }
-        if (nextQuestion.id === "nb_energisante" && !boissons.includes("Boissons énergisantes")) {
-          nextIndex++;
-          continue;
-        }
-        if (nextQuestion.id === "nb_alcool" && !boissons.includes("Alcool")) {
-          nextIndex++;
-          continue;
         }
         
         break;
@@ -238,6 +242,19 @@ export const DiagnosticChat = () => {
                 options={currentQuestion.options}
                 onSubmit={handleAnswer}
               />
+            ) : currentQuestion.type === "beverageSelector" ? (
+              <div className="space-y-4">
+                <BeverageSelector
+                  quantities={beverageQuantities}
+                  onChange={setBeverageQuantities}
+                />
+                <button
+                  onClick={() => handleAnswer(JSON.stringify(beverageQuantities))}
+                  className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Valider mes consommations
+                </button>
+              </div>
             ) : (
               <ChatInput
                 onSubmit={handleAnswer}

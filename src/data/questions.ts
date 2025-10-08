@@ -158,49 +158,9 @@ export const questions: Question[] = [
   
   // ===== ÉTAPE 5 - HABITUDES =====
   {
-    id: "consommation_boissons",
-    text: "☕ **Étape 5 - Habitudes de consommation**\n\nQuelles boissons consommes-tu régulièrement ?\n\n_(Tu peux en sélectionner plusieurs)_",
-    type: "multiSelect",
-    options: [
-      "Eau",
-      "Café",
-      "Thé",
-      "Sodas",
-      "Boissons énergisantes",
-      "Alcool"
-    ],
-    step: "Habitudes",
-  },
-  {
-    id: "nb_cafe",
-    text: "Combien de cafés consommes-tu par jour ?",
-    type: "input",
-    inputType: "number",
-    placeholder: "Ex: 2",
-    step: "Habitudes",
-  },
-  {
-    id: "nb_the",
-    text: "Combien de thés consommes-tu par jour ?",
-    type: "input",
-    inputType: "number",
-    placeholder: "Ex: 3",
-    step: "Habitudes",
-  },
-  {
-    id: "nb_energisante",
-    text: "Combien de boissons énergisantes consommes-tu par jour ?",
-    type: "input",
-    inputType: "number",
-    placeholder: "Ex: 1",
-    step: "Habitudes",
-  },
-  {
-    id: "nb_alcool",
-    text: "Combien de verres d'alcool consommes-tu par jour ?",
-    type: "input",
-    inputType: "number",
-    placeholder: "Ex: 1",
+    id: "boissons_journalieres",
+    text: "☕ **Étape 5 - Habitudes de consommation**\n\nIndique combien de verres/portions de chaque boisson tu as consommés aujourd'hui.",
+    type: "beverageSelector",
     step: "Habitudes",
   },
   
