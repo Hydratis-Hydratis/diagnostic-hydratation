@@ -10,6 +10,7 @@ import { questions } from "@/data/questions";
 import { DiagnosticData } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
 import { toast } from "@/hooks/use-toast";
+import { calculateHydration } from "@/lib/hydrationCalculator";
 
 interface Message {
   text: string;
@@ -148,8 +149,11 @@ export const DiagnosticChat = () => {
           setShowInput(true);
         }, typingDelay);
       } else {
-        // Complete - final message
-        const finalMessage = "Merci beaucoup pour tes réponses ! 💧\n\nTon diagnostic d'hydratation a été enregistré. Tu recevras bientôt des recommandations personnalisées par email.";
+        // Complete - calculate results and show final message
+        const results = calculateHydration(updatedData);
+        
+        const finalMessage = `Merci beaucoup pour tes réponses, ${updatedData.firstName || 'toi'} ! 💧\n\n**📊 Résultats de ton diagnostic d'hydratation**\n\n🎯 **Statut** : ${results.statut}\n📈 **Score d'hydratation** : ${results.score}/100\n\n💧 **Besoin en eau quotidien** : ${results.hydratation_jour_ml} mL/jour\n💊 **Recommandation Hydratis** : ${results.nb_pastilles} pastille${results.nb_pastilles > 1 ? 's' : ''} par jour\n\n**Détails métaboliques :**\n• Métabolisme basal : ${results.MB} kcal/jour\n• Dépense énergétique : ${results.DEJ} kcal/jour\n• Pertes hydriques totales : ${results.pertes_tot} mL/jour\n• Production d'eau métabolique : ${results.eau_metabo} mL/jour\n\nTu recevras bientôt des recommandations personnalisées par email à ${updatedData.email}. 💙`;
+        
         const typingDelay = getTypingDelay(finalMessage);
         
         setTimeout(() => {
@@ -160,11 +164,12 @@ export const DiagnosticChat = () => {
           // Show success toast
           toast({
             title: "Diagnostic terminé !",
-            description: "Merci d'avoir complété le questionnaire.",
+            description: `Score : ${results.score}/100 - ${results.statut}`,
           });
           
           // Log data (in production, send to backend)
           console.log("Diagnostic Data:", updatedData);
+          console.log("Hydration Results:", results);
         }, typingDelay);
       }
     }, 600); // Small delay before showing typing indicator
