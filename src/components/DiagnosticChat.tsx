@@ -3,6 +3,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatOptions } from "./ChatOptions";
 import { ChatInput } from "./ChatInput";
 import { ColorScaleSelector } from "./ColorScaleSelector";
+import { MultiSelectOptions } from "./MultiSelectOptions";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { TypingIndicator } from "./TypingIndicator";
 import { questions } from "@/data/questions";
@@ -85,33 +86,64 @@ export const DiagnosticChat = () => {
     ]);
   };
 
-  const handleAnswer = (answer: string) => {
+  const handleAnswer = (answer: string | string[]) => {
     const currentQuestion = questions[currentQuestionIndex];
     
     // Hide input immediately
     setShowInput(false);
     
+    // Format answer for display
+    const displayAnswer = Array.isArray(answer) ? answer.join(", ") : answer;
+    
     // Add user message
-    addUserMessage(answer);
+    addUserMessage(displayAnswer);
     
     // Save answer
-    setDiagnosticData((prev) => ({
-      ...prev,
+    const updatedData = {
+      ...diagnosticData,
       [currentQuestion.id]: answer,
-    }));
+    };
+    setDiagnosticData(updatedData);
 
     // Wait a bit before showing typing indicator
     setTimeout(() => {
       setIsTyping(true);
       
+      // Find next question (skip conditional questions if needed)
+      let nextIndex = currentQuestionIndex + 1;
+      
+      while (nextIndex < questions.length) {
+        const nextQuestion = questions[nextIndex];
+        
+        // Check if question should be skipped based on conditional logic
+        if (nextQuestion.conditional) {
+          const dependsOnValue = updatedData[nextQuestion.conditional.dependsOn];
+          if (dependsOnValue !== nextQuestion.conditional.value) {
+            nextIndex++;
+            continue;
+          }
+        }
+        
+        // Check if question should be skipped based on "No" answer
+        if (nextQuestion.skipIfNo) {
+          const skipValue = updatedData[nextQuestion.skipIfNo];
+          if (skipValue === "Non") {
+            nextIndex++;
+            continue;
+          }
+        }
+        
+        break;
+      }
+      
       // Move to next question with realistic delay
-      if (currentQuestionIndex < questions.length - 1) {
-        const nextQuestion = questions[currentQuestionIndex + 1];
+      if (nextIndex < questions.length) {
+        const nextQuestion = questions[nextIndex];
         const typingDelay = getTypingDelay(nextQuestion.text);
         
         setTimeout(() => {
           setIsTyping(false);
-          setCurrentQuestionIndex(currentQuestionIndex + 1);
+          setCurrentQuestionIndex(nextIndex);
           addBotMessage(nextQuestion.text);
           setShowInput(true);
         }, typingDelay);
@@ -132,7 +164,7 @@ export const DiagnosticChat = () => {
           });
           
           // Log data (in production, send to backend)
-          console.log("Diagnostic Data:", { ...diagnosticData, [currentQuestion.id]: answer });
+          console.log("Diagnostic Data:", updatedData);
         }, typingDelay);
       }
     }, 600); // Small delay before showing typing indicator
@@ -173,6 +205,11 @@ export const DiagnosticChat = () => {
               />
             ) : currentQuestion.type === "colorScale" ? (
               <ColorScaleSelector onSelect={handleAnswer} />
+            ) : currentQuestion.type === "multiSelect" && currentQuestion.options ? (
+              <MultiSelectOptions
+                options={currentQuestion.options}
+                onSubmit={handleAnswer}
+              />
             ) : (
               <ChatInput
                 onSubmit={handleAnswer}
