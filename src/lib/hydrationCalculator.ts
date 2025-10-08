@@ -6,10 +6,12 @@ export interface HydrationResult {
   pertes_tot: number;
   eau_metabo: number;
   besoin_total_ml: number;
+  extra_ml: number;
   hydratation_jour_ml: number;
   nb_pastilles: number;
   score: number;
   statut: string;
+  notes: string[];
 }
 
 // Convertit la tranche d'âge en nombre médian
@@ -39,6 +41,11 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   const urine_couleur = parseInt(data.urine_couleur || "4");
   const crampes = data.crampes || "Non";
   const courbatures = data.courbatures || "Non";
+  const boissons = data.consommation_boissons || [];
+  const nb_cafe = parseInt(data.nb_cafe || "0");
+  const nb_the = parseInt(data.nb_the || "0");
+  const nb_energisante = parseInt(data.nb_energisante || "0");
+  const nb_alcool = parseInt(data.nb_alcool || "0");
 
   // Métabolisme basal (Harris-Benedict)
   const MB = sexe === "Un homme"
@@ -79,11 +86,18 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   if (situation_particuliere === "Allaitante") extra_ml += 700;
   if (metier_physique === "Oui") extra_ml += 500;
 
-  // Volume recommandé
-  const hydratation_jour_ml = Math.round(besoin_total_ml + extra_ml);
+  // Boissons diurétiques (ajout compensatoire)
+  const diuretiques = (nb_cafe + nb_the + nb_energisante) * 150; // ~150 mL par unité
+  const alcool_comp = nb_alcool * 300; // ~300 mL par verre
+  extra_ml += diuretiques + alcool_comp;
 
-  // Recommandation pastilles Hydratis
-  let nb_pastilles = Math.ceil(hydratation_jour_ml / 500 / 2); // 2 pastilles/500 ml
+  // Volume recommandé avec garde-fou plancher
+  let hydratation_jour_ml = Math.round(besoin_total_ml + extra_ml);
+  if (hydratation_jour_ml < 1500) hydratation_jour_ml = 1500; // garde-fou plancher
+
+  // Recommandation pastilles Hydratis (2 pastilles/500 ml)
+  let nb_pastilles = Math.ceil(hydratation_jour_ml / 500 / 2);
+  if (temperature_ext === "> 28°C") nb_pastilles += 1; // règle arborescence
   nb_pastilles = Math.min(nb_pastilles, 5);
   if (age >= 60 && age < 70) nb_pastilles = Math.min(nb_pastilles, 3);
   if (age >= 70) nb_pastilles = Math.min(nb_pastilles, 2);
@@ -91,8 +105,11 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   // Score d'hydratation
   let score = 100;
   if (urine_couleur >= 6) score -= 20;
-  if (crampes === "Oui" || courbatures === "Oui") score -= 10;
+  else if (urine_couleur >= 4) score -= 8;
+  if (crampes === "Oui") score -= 8;
+  if (courbatures === "Oui") score -= 5;
   if (transpiration === "Forte") score -= 5;
+  if (boissons.includes("Alcool") && nb_alcool >= 2) score -= 6;
   if (score < 0) score = 0;
 
   // Statut
@@ -101,6 +118,14 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
                : score >= 50 ? "Légère déshydratation"
                : "Déshydratation probable";
 
+  // Messages additionnels
+  const notes: string[] = [];
+  if (temperature_ext === "> 28°C") notes.push("Chaleur : fractionner les apports, viser une boisson plus sodée.");
+  if (situation_particuliere.startsWith("Enceinte")) notes.push("Grossesse : privilégier une hydratation régulière, avis médical en cas de malaise.");
+  if (situation_particuliere === "Allaitante") notes.push("Allaitement : ajouter ~700 mL/j au-delà du besoin de base.");
+  if (boissons.includes("Alcool")) notes.push("L'abus d'alcool est dangereux pour la santé.");
+  if (transpiration === "Forte") notes.push("Transpiration forte : surveiller la masse avant/après séance, compenser 150% des pertes.");
+
   // Sortie
   return {
     MB: Math.round(MB),
@@ -108,9 +133,11 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
     pertes_tot: Math.round(pertes_tot),
     eau_metabo: Math.round(eau_metabo),
     besoin_total_ml: Math.round(besoin_total_ml),
+    extra_ml: Math.round(extra_ml),
     hydratation_jour_ml,
     nb_pastilles,
     score,
-    statut
+    statut,
+    notes
   };
 };

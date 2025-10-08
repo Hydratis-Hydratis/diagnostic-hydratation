@@ -134,6 +134,25 @@ export const DiagnosticChat = () => {
           }
         }
         
+        // Skip beverage quantity questions if beverage not selected
+        const boissons = updatedData.consommation_boissons as string[] || [];
+        if (nextQuestion.id === "nb_cafe" && !boissons.includes("Café")) {
+          nextIndex++;
+          continue;
+        }
+        if (nextQuestion.id === "nb_the" && !boissons.includes("Thé")) {
+          nextIndex++;
+          continue;
+        }
+        if (nextQuestion.id === "nb_energisante" && !boissons.includes("Boissons énergisantes")) {
+          nextIndex++;
+          continue;
+        }
+        if (nextQuestion.id === "nb_alcool" && !boissons.includes("Alcool")) {
+          nextIndex++;
+          continue;
+        }
+        
         break;
       }
       
@@ -152,7 +171,11 @@ export const DiagnosticChat = () => {
         // Complete - calculate results and show final message
         const results = calculateHydration(updatedData);
         
-        const finalMessage = `Merci beaucoup pour tes réponses, ${updatedData.firstName || 'toi'} ! 💧\n\n**📊 Résultats de ton diagnostic d'hydratation**\n\n🎯 **Statut** : ${results.statut}\n📈 **Score d'hydratation** : ${results.score}/100\n\n💧 **Besoin en eau quotidien** : ${results.hydratation_jour_ml} mL/jour\n💊 **Recommandation Hydratis** : ${results.nb_pastilles} pastille${results.nb_pastilles > 1 ? 's' : ''} par jour\n\n**Détails métaboliques :**\n• Métabolisme basal : ${results.MB} kcal/jour\n• Dépense énergétique : ${results.DEJ} kcal/jour\n• Pertes hydriques totales : ${results.pertes_tot} mL/jour\n• Production d'eau métabolique : ${results.eau_metabo} mL/jour\n\nTu recevras bientôt des recommandations personnalisées par email à ${updatedData.email}. 💙`;
+        const notesText = results.notes.length > 0 
+          ? `\n\n**📋 Notes importantes :**\n${results.notes.map(note => `• ${note}`).join('\n')}`
+          : '';
+        
+        const finalMessage = `Merci beaucoup pour tes réponses, ${updatedData.firstName || 'toi'} ! 💧\n\n**📊 Résultats de ton diagnostic d'hydratation**\n\n🎯 **Statut** : ${results.statut}\n📈 **Score d'hydratation** : ${results.score}/100\n\n💧 **Besoin en eau quotidien** : ${results.hydratation_jour_ml} mL/jour\n💊 **Recommandation Hydratis** : ${results.nb_pastilles} pastille${results.nb_pastilles > 1 ? 's' : ''} par jour\n\n**Détails métaboliques :**\n• Métabolisme basal : ${results.MB} kcal/jour\n• Dépense énergétique : ${results.DEJ} kcal/jour\n• Pertes hydriques totales : ${results.pertes_tot} mL/jour\n• Production d'eau métabolique : ${results.eau_metabo} mL/jour\n• Ajustements contextuels : ${results.extra_ml} mL/jour${notesText}\n\nTu recevras bientôt des recommandations personnalisées par email à ${updatedData.email}. 💙`;
         
         const typingDelay = getTypingDelay(finalMessage);
         

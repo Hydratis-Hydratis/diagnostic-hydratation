@@ -171,6 +171,38 @@ export const questions: Question[] = [
     ],
     step: "Habitudes",
   },
+  {
+    id: "nb_cafe",
+    text: "Combien de cafés consommes-tu par jour ?",
+    type: "input",
+    inputType: "number",
+    placeholder: "Ex: 2",
+    step: "Habitudes",
+  },
+  {
+    id: "nb_the",
+    text: "Combien de thés consommes-tu par jour ?",
+    type: "input",
+    inputType: "number",
+    placeholder: "Ex: 3",
+    step: "Habitudes",
+  },
+  {
+    id: "nb_energisante",
+    text: "Combien de boissons énergisantes consommes-tu par jour ?",
+    type: "input",
+    inputType: "number",
+    placeholder: "Ex: 1",
+    step: "Habitudes",
+  },
+  {
+    id: "nb_alcool",
+    text: "Combien de verres d'alcool consommes-tu par jour ?",
+    type: "input",
+    inputType: "number",
+    placeholder: "Ex: 1",
+    step: "Habitudes",
+  },
   
   // ===== INFOS FINALES =====
   {

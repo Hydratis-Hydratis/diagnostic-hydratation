@@ -25,6 +25,10 @@ export interface DiagnosticData {
   
   // Étape 5 - Habitudes
   consommation_boissons?: string[];
+  nb_cafe?: string;
+  nb_the?: string;
+  nb_energisante?: string;
+  nb_alcool?: string;
   
   // Infos finales
   firstName?: string;
