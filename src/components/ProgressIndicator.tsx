@@ -11,7 +11,7 @@ export const ProgressIndicator = ({ current, total }: ProgressIndicatorProps) =>
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs font-medium text-muted-foreground">
-            Question {current + 1} sur {total}
+            Étape {current + 1} sur {total}
           </span>
           <span className="text-xs font-medium text-primary">
             {Math.round(percentage)}%

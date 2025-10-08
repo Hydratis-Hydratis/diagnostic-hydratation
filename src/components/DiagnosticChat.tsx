@@ -1,17 +1,40 @@
 import { useState, useEffect, useRef } from "react";
 import { ChatMessage } from "./ChatMessage";
-import { ChatOptions } from "./ChatOptions";
-import { ChatInput } from "./ChatInput";
-import { ColorScaleSelector } from "./ColorScaleSelector";
-import { MultiSelectOptions } from "./MultiSelectOptions";
-import { BeverageSelector, BeverageQuantities } from "./BeverageSelector";
+import { ThematicScreen } from "./ThematicScreen";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { TypingIndicator } from "./TypingIndicator";
 import { questions } from "@/data/questions";
-import { DiagnosticData } from "@/types/diagnostic";
+import { DiagnosticData, Question } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
 import { toast } from "@/hooks/use-toast";
 import { calculateHydration } from "@/lib/hydrationCalculator";
+
+// Group questions by step
+const groupQuestionsByStep = (): { step: string; questions: Question[]; icon: string }[] => {
+  const groups: { [key: string]: Question[] } = {};
+  
+  questions.forEach(q => {
+    const step = q.step || "Informations";
+    if (!groups[step]) groups[step] = [];
+    groups[step].push(q);
+  });
+  
+  const stepIcons: { [key: string]: string } = {
+    "Profil": "👤",
+    "Environnement": "🌡️",
+    "Activité physique": "🏃",
+    "Signaux cliniques": "🩺",
+    "Habitudes": "☕",
+  };
+  
+  return Object.entries(groups).map(([step, questions]) => ({
+    step,
+    questions,
+    icon: stepIcons[step] || "📋"
+  }));
+};
+
+const questionGroups = groupQuestionsByStep();
 
 interface Message {
   text: string;
@@ -20,24 +43,12 @@ interface Message {
 }
 
 export const DiagnosticChat = () => {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [diagnosticData, setDiagnosticData] = useState<DiagnosticData>({});
   const [isComplete, setIsComplete] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [showInput, setShowInput] = useState(false);
-  const [beverageQuantities, setBeverageQuantities] = useState<BeverageQuantities>({
-    eau: 0,
-    soda: 0,
-    soda_zero: 0,
-    jus: 0,
-    cafe_sucre: 0,
-    cafe_the: 0,
-    vin: 0,
-    biere: 0,
-    boisson_sport: 0,
-    boisson_energisante: 0,
-  });
+  const [showScreen, setShowScreen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -49,15 +60,15 @@ export const DiagnosticChat = () => {
   }, [messages]);
 
   useEffect(() => {
-    // Display first question with typing indicator
-    if (currentQuestionIndex === 0) {
+    // Display welcome message and first screen
+    if (currentGroupIndex === 0) {
       setTimeout(() => {
         setIsTyping(true);
         setTimeout(() => {
           setIsTyping(false);
-          addBotMessage(questions[0].text);
-          setShowInput(true);
-        }, getTypingDelay(questions[0].text));
+          addBotMessage("Bonjour ! Je suis ravie de t'aider avec ton diagnostic d'hydratation. 💧\n\nRéponds aux questions ci-dessous pour obtenir une évaluation personnalisée de tes besoins en hydratation.");
+          setShowScreen(true);
+        }, 2000);
       }, 800);
     }
   }, []);
@@ -100,77 +111,43 @@ export const DiagnosticChat = () => {
     ]);
   };
 
-  const handleAnswer = (answer: string | string[]) => {
-    const currentQuestion = questions[currentQuestionIndex];
+  const handleScreenSubmit = (answers: Partial<DiagnosticData>) => {
+    // Hide screen immediately
+    setShowScreen(false);
     
-    // Hide input immediately
-    setShowInput(false);
+    // Create summary message
+    const answersArray = Object.entries(answers).map(([key, value]) => {
+      if (key === 'boissons_journalieres' && typeof value === 'object') {
+        const quantities = value as Record<string, number>;
+        const total = Object.values(quantities).reduce((sum: number, qty: number) => sum + qty, 0);
+        return `${total} verre${total > 1 ? 's' : ''} de boissons`;
+      }
+      return Array.isArray(value) ? value.join(", ") : String(value);
+    });
     
-    // Format answer for display
-    let displayAnswer: string;
-    let actualAnswer: string | string[] | object = answer;
+    addUserMessage(`✓ ${questionGroups[currentGroupIndex].step} complété`);
     
-    if (currentQuestion.type === "beverageSelector") {
-      const quantities = JSON.parse(answer as string) as BeverageQuantities;
-      actualAnswer = quantities;
-      const total = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
-      displayAnswer = `${total} verre${total > 1 ? 's' : ''} de différentes boissons`;
-    } else {
-      displayAnswer = Array.isArray(answer) ? answer.join(", ") : answer;
-    }
-    
-    // Add user message
-    addUserMessage(displayAnswer);
-    
-    // Save answer
+    // Save answers
     const updatedData = {
       ...diagnosticData,
-      [currentQuestion.id]: actualAnswer,
+      ...answers,
     };
     setDiagnosticData(updatedData);
 
-    // Wait a bit before showing typing indicator
+    // Wait before showing next screen or results
     setTimeout(() => {
       setIsTyping(true);
       
-      // Find next question (skip conditional questions if needed)
-      let nextIndex = currentQuestionIndex + 1;
+      const nextGroupIndex = currentGroupIndex + 1;
       
-      while (nextIndex < questions.length) {
-        const nextQuestion = questions[nextIndex];
-        
-        // Check if question should be skipped based on conditional logic
-        if (nextQuestion.conditional) {
-          const dependsOnValue = updatedData[nextQuestion.conditional.dependsOn];
-          if (dependsOnValue !== nextQuestion.conditional.value) {
-            nextIndex++;
-            continue;
-          }
-        }
-        
-        // Check if question should be skipped based on "No" answer
-        if (nextQuestion.skipIfNo) {
-          const skipValue = updatedData[nextQuestion.skipIfNo];
-          if (skipValue === "Non") {
-            nextIndex++;
-            continue;
-          }
-        }
-        
-        break;
-      }
-      
-      // Move to next question with realistic delay
-      if (nextIndex < questions.length) {
-        const nextQuestion = questions[nextIndex];
-        const typingDelay = getTypingDelay(nextQuestion.text);
-        
+      if (nextGroupIndex < questionGroups.length) {
         setTimeout(() => {
           setIsTyping(false);
-          setCurrentQuestionIndex(nextIndex);
-          addBotMessage(nextQuestion.text);
-          setShowInput(true);
-        }, typingDelay);
+          const nextGroup = questionGroups[nextGroupIndex];
+          addBotMessage(`${nextGroup.icon} **${nextGroup.step}**\n\nContinuons avec quelques questions sur ce thème.`);
+          setCurrentGroupIndex(nextGroupIndex);
+          setShowScreen(true);
+        }, 1500);
       } else {
         // Complete - calculate results and show final message
         const results = calculateHydration(updatedData);
@@ -180,8 +157,6 @@ export const DiagnosticChat = () => {
           : '';
         
         const finalMessage = `Merci beaucoup pour tes réponses, ${updatedData.firstName || 'toi'} ! 💧\n\n**📊 Résultats de ton diagnostic d'hydratation**\n\n🎯 **Statut** : ${results.statut}\n📈 **Score d'hydratation** : ${results.score}/100\n\n💧 **Besoin en eau quotidien** : ${results.hydratation_jour_ml} mL/jour\n💊 **Recommandation Hydratis** : ${results.nb_pastilles} pastille${results.nb_pastilles > 1 ? 's' : ''} par jour\n\n**Détails métaboliques :**\n• Métabolisme basal : ${results.MB} kcal/jour\n• Dépense énergétique : ${results.DEJ} kcal/jour\n• Pertes hydriques totales : ${results.pertes_tot} mL/jour\n• Production d'eau métabolique : ${results.eau_metabo} mL/jour\n• Ajustements contextuels : ${results.extra_ml} mL/jour${notesText}\n\nTu recevras bientôt des recommandations personnalisées par email à ${updatedData.email}. 💙`;
-        
-        const typingDelay = getTypingDelay(finalMessage);
         
         setTimeout(() => {
           setIsTyping(false);
@@ -197,22 +172,23 @@ export const DiagnosticChat = () => {
           // Log data (in production, send to backend)
           console.log("Diagnostic Data:", updatedData);
           console.log("Hydration Results:", results);
-        }, typingDelay);
+        }, 2000);
       }
-    }, 600); // Small delay before showing typing indicator
+    }, 600);
   };
 
-  const currentQuestion = questions[currentQuestionIndex];
+  const currentGroup = questionGroups[currentGroupIndex];
+  const totalSteps = questionGroups.length;
 
   return (
     <div className="flex flex-col h-full">
       {/* Progress Indicator */}
       {!isComplete && messages.length > 0 && (
-        <ProgressIndicator current={currentQuestionIndex} total={questions.length} />
+        <ProgressIndicator current={currentGroupIndex} total={totalSteps} />
       )}
       
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
         {messages.map((message, index) => (
           <ChatMessage
             key={index}
@@ -226,42 +202,15 @@ export const DiagnosticChat = () => {
         {/* Typing Indicator */}
         {isTyping && <TypingIndicator />}
         
-        {/* Current Question Input/Options */}
-        {!isComplete && showInput && currentQuestion && (
+        {/* Current Thematic Screen */}
+        {!isComplete && showScreen && currentGroup && (
           <div className="pt-4">
-            {currentQuestion.type === "options" && currentQuestion.options ? (
-              <ChatOptions
-                options={currentQuestion.options}
-                onSelect={handleAnswer}
-                multiColumn={currentQuestion.multiColumn}
-              />
-            ) : currentQuestion.type === "colorScale" ? (
-              <ColorScaleSelector onSelect={handleAnswer} />
-            ) : currentQuestion.type === "multiSelect" && currentQuestion.options ? (
-              <MultiSelectOptions
-                options={currentQuestion.options}
-                onSubmit={handleAnswer}
-              />
-            ) : currentQuestion.type === "beverageSelector" ? (
-              <div className="space-y-4">
-                <BeverageSelector
-                  quantities={beverageQuantities}
-                  onChange={setBeverageQuantities}
-                />
-                <button
-                  onClick={() => handleAnswer(JSON.stringify(beverageQuantities))}
-                  className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-                >
-                  Valider mes consommations
-                </button>
-              </div>
-            ) : (
-              <ChatInput
-                onSubmit={handleAnswer}
-                placeholder={currentQuestion.placeholder}
-                type={currentQuestion.inputType}
-              />
-            )}
+            <ThematicScreen
+              questions={currentGroup.questions}
+              stepName={`${currentGroup.icon} ${currentGroup.step}`}
+              onSubmit={handleScreenSubmit}
+              previousAnswers={diagnosticData}
+            />
           </div>
         )}
         
