@@ -253,7 +253,21 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
 
   // ========== TOTAUX ET RECOMMANDATIONS ==========
   
-  const besoin_total_ml = besoins_basals_ml + besoins_exercice_ml;
+  let besoin_total_ml = besoins_basals_ml + besoins_exercice_ml;
+  const besoin_total_original = besoin_total_ml;
+  
+  // ========== PLAFOND DE 6000 ML ==========
+  const PLAFOND_MAX = 6000;
+  let alerte_plafond = "";
+  
+  if (besoin_total_ml >= 4500 && besoin_total_ml < 5000) {
+    alerte_plafond = "💧 Vos besoins hydriques sont élevés. Pensez à vous hydrater régulièrement tout au long de la journée.";
+  } else if (besoin_total_ml >= 5000 && besoin_total_ml < PLAFOND_MAX) {
+    alerte_plafond = "⚠️ Vos besoins hydriques sont exceptionnellement élevés en raison de la combinaison de plusieurs facteurs (chaleur, activité physique intense, etc.). Fractionnez bien votre hydratation et consultez un professionnel de santé si nécessaire.";
+  } else if (besoin_total_ml >= PLAFOND_MAX) {
+    alerte_plafond = `⚠️ Vos besoins calculés dépassent ${PLAFOND_MAX / 1000}L (${besoin_total_original} mL), ce qui concerne les athlètes de haut niveau en conditions extrêmes. La valeur a été plafonnée à ${PLAFOND_MAX / 1000}L. Un suivi médical sportif est fortement recommandé pour une hydratation personnalisée.`;
+    besoin_total_ml = PLAFOND_MAX;
+  }
   
   // Calcul de l'hydratation réelle
   let hydratation_reelle_ml = 0;
@@ -291,6 +305,11 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
 
   // ========== MESSAGES PERSONNALISÉS CONTEXTUELS ==========
   const notes: string[] = [...boissonData.notes];
+  
+  // Ajouter l'alerte de plafond en premier si elle existe
+  if (alerte_plafond) {
+    notes.unshift(alerte_plafond);
+  }
   
   // 💧 1. Eau consommée
   if (hydratation_reelle_ml > 0) {
