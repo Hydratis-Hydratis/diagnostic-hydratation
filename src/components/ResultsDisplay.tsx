@@ -2,8 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap } from "lucide-react";
+import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles } from "lucide-react";
 import type { HydrationResult } from "@/lib/hydrationCalculator";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface ResultsDisplayProps {
   results: HydrationResult;
@@ -246,6 +247,121 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
               <Badge className="bg-purple-500 text-white text-lg font-bold px-4 py-1">
                 {totalPastilles} pastille{totalPastilles > 1 ? 's' : ''}/jour
               </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Graphique de répartition */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <TrendingUp className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Répartition de tes besoins</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Visualisation des besoins hydriques</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={[
+                  { name: 'Besoins quotidiens', value: results.besoins_basals_ml, color: 'hsl(var(--primary))' },
+                  ...(results.besoins_exercice_ml > 0 ? [{ name: 'Besoins sportifs', value: results.besoins_exercice_ml, color: 'hsl(var(--chart-2))' }] : [])
+                ]}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                <Cell fill="hsl(var(--primary))" />
+                {results.besoins_exercice_ml > 0 && <Cell fill="hsl(var(--chart-2))" />}
+              </Pie>
+              <Tooltip 
+                formatter={(value: number) => `${value} mL`}
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))', 
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Explication Hydratis */}
+      <Card className="border-purple-500/30 bg-gradient-to-br from-purple-500/5 to-transparent">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-purple-500/10">
+              <Sparkles className="w-6 h-6 text-purple-500" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Pourquoi les pastilles Hydratis ?</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Une hydratation optimale et efficace</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
+              <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                <Droplet className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-sm mb-1">Hydratation accélérée</h4>
+                <p className="text-xs text-muted-foreground">
+                  Les pastilles Hydratis contiennent un mélange optimal d'électrolytes (sodium, potassium, magnésium) qui accélèrent l'absorption de l'eau par l'organisme jusqu'à 3 fois plus rapidement qu'avec de l'eau seule.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
+              <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                <Zap className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-sm mb-1">Compensation des pertes</h4>
+                <p className="text-xs text-muted-foreground">
+                  Lors d'un effort physique, de la chaleur ou de la déshydratation, tu perds non seulement de l'eau mais aussi des minéraux essentiels. Hydratis compense ces pertes pour maintenir ton équilibre hydrique.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
+              <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                <Activity className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-sm mb-1">Performance et récupération</h4>
+                <p className="text-xs text-muted-foreground">
+                  Une hydratation optimale améliore tes performances sportives, réduit la fatigue et accélère la récupération musculaire après l'effort.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
+              <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                <Info className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-sm mb-1">Comment utiliser ?</h4>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Dissous une pastille dans 200-250 mL d'eau. Pour le sport, prends une pastille pendant l'effort et une autre après pour optimiser ta récupération.
+                </p>
+                <div className="text-xs text-primary font-medium">
+                  💡 Astuce : Commence ta journée avec une pastille pour bien t'hydrater dès le réveil !
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

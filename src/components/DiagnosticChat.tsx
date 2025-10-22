@@ -41,6 +41,8 @@ interface Message {
   text: string;
   isBot: boolean;
   timestamp: string;
+  stepIndex?: number;
+  answers?: Partial<DiagnosticData>;
 }
 
 export const DiagnosticChat = () => {
@@ -112,28 +114,73 @@ export const DiagnosticChat = () => {
     ]);
   };
 
+  const createPersonalizedSummary = (answers: Partial<DiagnosticData>, stepIndex: number): string => {
+    const stepName = questionGroups[stepIndex].step;
+    
+    // Créer un résumé personnalisé selon l'étape
+    if (stepName === "Profil") {
+      const sexe = answers.sexe === "Un homme" ? "un homme" : "une femme";
+      const age = answers.age;
+      const poids = answers.poids_kg;
+      if (age && poids) {
+        return `Super ! Tu es ${sexe} de ${age} ans pesant ${poids} kg.`;
+      }
+      return `Super ! Tes informations de profil sont enregistrées.`;
+    } else if (stepName === "Environnement") {
+      const temp = answers.temperature_ext;
+      if (temp) {
+        return `Noté ! Tu vis dans un environnement à ${temp}.`;
+      }
+      return "Noté ! Tes informations d'environnement sont enregistrées.";
+    } else if (stepName === "Activité physique") {
+      const sportPratique = answers.sport_pratique;
+      if (sportPratique === "Oui") {
+        const sports = answers.sports_selectionnes;
+        if (sports && Array.isArray(sports)) {
+          const sportNames = sports.map((s: any) => s.name).join(", ");
+          return `Génial ! Tu pratiques : ${sportNames}. 💪`;
+        }
+        return "Parfait ! Tes informations sportives sont enregistrées.";
+      }
+      return "C'est noté, nous avons pris en compte ton niveau d'activité.";
+    } else if (stepName === "Signaux cliniques") {
+      const urine = answers.urine_couleur;
+      if (urine && typeof urine === "number" && urine > 3) {
+        return "Attention, ta couleur d'urine indique une déshydratation possible. 💧";
+      }
+      return "Merci pour ces informations précieuses sur ton hydratation actuelle.";
+    } else if (stepName === "Habitudes") {
+      return "Parfait ! J'ai toutes les informations sur tes habitudes de consommation. ☕";
+    }
+    
+    return `✓ ${stepName} complété`;
+  };
+
   const handleScreenSubmit = (answers: Partial<DiagnosticData>) => {
     // Hide screen immediately
     setShowScreen(false);
     
-    // Create summary message
-    const answersArray = Object.entries(answers).map(([key, value]) => {
-      if (key === 'boissons_journalieres' && typeof value === 'object') {
-        const quantities = value as Record<string, number>;
-        const total = Object.values(quantities).reduce((sum: number, qty: number) => sum + qty, 0);
-        return `${total} verre${total > 1 ? 's' : ''} de boissons`;
-      }
-      return Array.isArray(value) ? value.join(", ") : String(value);
-    });
-    
-    addUserMessage(`✓ ${questionGroups[currentGroupIndex].step} complété`);
-    
-    // Save answers
+    // Save answers first
     const updatedData = {
       ...diagnosticData,
       ...answers,
     };
     setDiagnosticData(updatedData);
+    
+    // Create personalized summary message
+    const summary = createPersonalizedSummary(answers, currentGroupIndex);
+    
+    // Add user message with step info and answers for edit functionality
+    setMessages((prev) => [
+      ...prev,
+      {
+        text: summary,
+        isBot: false,
+        timestamp: getCurrentTime(),
+        stepIndex: currentGroupIndex,
+        answers: answers,
+      },
+    ]);
 
     // Wait before showing next screen or results
     setTimeout(() => {
@@ -171,27 +218,51 @@ export const DiagnosticChat = () => {
     }, 600);
   };
 
+  const handleEditStep = (stepIndex: number) => {
+    setCurrentGroupIndex(stepIndex);
+    setShowScreen(true);
+    setIsComplete(false);
+  };
+
   const currentGroup = questionGroups[currentGroupIndex];
   const totalSteps = questionGroups.length;
   const results = isComplete ? calculateHydration(diagnosticData) : null;
+  const stepNames = questionGroups.map(g => g.step);
 
   return (
     <div className="flex flex-col h-full">
       {/* Progress Indicator */}
       {!isComplete && messages.length > 0 && (
-        <ProgressIndicator current={currentGroupIndex} total={totalSteps} />
+        <ProgressIndicator 
+          current={currentGroupIndex} 
+          total={totalSteps}
+          steps={stepNames}
+        />
       )}
       
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
         {messages.map((message, index) => (
-          <ChatMessage
-            key={index}
-            message={message.text}
-            isBot={message.isBot}
-            avatar={message.isBot ? pharmacistAvatar : undefined}
-            timestamp={message.timestamp}
-          />
+          <div key={index} className="space-y-2">
+            <ChatMessage
+              message={message.text}
+              isBot={message.isBot}
+              avatar={message.isBot ? pharmacistAvatar : undefined}
+              timestamp={message.timestamp}
+            />
+            {/* Bouton Modifier pour les réponses utilisateur */}
+            {!message.isBot && message.stepIndex !== undefined && !isComplete && (
+              <div className="flex justify-end px-2">
+                <button
+                  onClick={() => handleEditStep(message.stepIndex!)}
+                  className="text-xs text-primary hover:underline flex items-center gap-1 transition-colors"
+                >
+                  <span>✏️</span>
+                  <span>Modifier</span>
+                </button>
+              </div>
+            )}
+          </div>
         ))}
         
         {/* Typing Indicator */}
