@@ -162,14 +162,14 @@ const getAjustBoissons = (boissons: any): { total: number; notes: string[] } => 
   // Vin
   const vin = boissons.vin || 0;
   if (vin >= 1) {
-    total += 500;
+    total += 100;
     notes.push("L'alcool déshydrate : compensez avec de l'eau. L'abus d'alcool est dangereux pour la santé.");
   }
   
   // Bière
   const biere = boissons.biere || 0;
   if (biere >= 1) {
-    total += 300;
+    total += 100;
     notes.push("La bière est diurétique : pensez à bien vous hydrater.");
   }
   
