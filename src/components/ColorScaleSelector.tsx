@@ -21,9 +21,7 @@ export const ColorScaleSelector = ({ onSelect }: ColorScaleSelectorProps) => {
 
   const handleSelect = (index: number, value: string) => {
     setSelectedIndex(index);
-    setTimeout(() => {
-      onSelect(value);
-    }, 300);
+    onSelect(value);
   };
 
   return (

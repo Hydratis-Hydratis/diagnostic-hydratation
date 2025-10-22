@@ -10,9 +10,7 @@ export const TranspirationScale = ({ onSelect }: TranspirationScaleProps) => {
 
   const handleSelect = (value: number) => {
     setSelectedValue(value);
-    setTimeout(() => {
-      onSelect(value.toString());
-    }, 300);
+    onSelect(value.toString());
   };
 
   return (
