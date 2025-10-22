@@ -9,6 +9,20 @@ interface TranspirationScaleProps {
 export const TranspirationScale = ({ onSelect }: TranspirationScaleProps) => {
   const [selectedValue, setSelectedValue] = useState<number>(5);
 
+  const transpirationLabels: Record<number, string> = {
+    0: "Pas du tout",
+    1: "Très peu",
+    2: "Peu",
+    3: "Un peu",
+    4: "Légèrement",
+    5: "Moyennement",
+    6: "Assez",
+    7: "Beaucoup",
+    8: "Très beaucoup",
+    9: "Énormément",
+    10: "Énormément",
+  };
+
   const handleValueChange = (value: number[]) => {
     setSelectedValue(value[0]);
     onSelect(value[0].toString());
@@ -21,10 +35,11 @@ export const TranspirationScale = ({ onSelect }: TranspirationScaleProps) => {
       </p>
       
       <div className="px-4 py-6">
-        <div className="flex justify-center mb-6">
+        <div className="flex flex-col items-center mb-6 gap-2">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 border-2 border-primary">
             <span className="text-2xl font-bold text-primary">{selectedValue}</span>
           </div>
+          <span className="text-sm font-medium text-foreground">{transpirationLabels[selectedValue]}</span>
         </div>
         
         <Slider
