@@ -125,12 +125,7 @@ const getDureeHeures = (dureeSeance: string): number => {
   return 0;
 };
 
-// Ajustement selon couleur urine
-const getAjustUrine = (urineCouleur: number): number => {
-  if (urineCouleur <= 3) return 0; // Claire à jaune pâle
-  if (urineCouleur <= 5) return 300; // Jaune foncé
-  return 600; // Ambrée / très foncée
-};
+// Note: La couleur d'urine est utilisée uniquement comme indicateur, pas pour ajuster les besoins
 
 // Ajustement boissons déshydratantes
 const getAjustBoissons = (boissons: any): { total: number; notes: string[] } => {
@@ -229,8 +224,8 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   // 5. Ajustement physiologique (grossesse/allaitement)
   const ajust_physiologique = facteurSexe.bonus;
   
-  // 6. Ajustement symptômes (urine + métier physique)
-  let ajust_symptomes = getAjustUrine(urine_couleur);
+  // 6. Ajustement symptômes (métier physique uniquement)
+  let ajust_symptomes = 0;
   if (metier_physique === "Oui") ajust_symptomes += 500;
   
   const besoins_basals_ml = Math.max(
@@ -340,15 +335,15 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
     }
   }
   
-  // 🚻 2. Couleur de l'urine
+  // 🚻 2. Couleur de l'urine (indicateur uniquement)
   if (urine_couleur <= 3) {
-    notes.push("🚻 La couleur claire de vos urines montre une hydratation satisfaisante.");
+    notes.push("🚻 La couleur claire de vos urines indique une bonne hydratation actuelle.");
   } else if (urine_couleur <= 5) {
-    notes.push("🚻 Une teinte légèrement jaune indique un début de déshydratation : buvez un peu plus d'eau dans les prochaines heures.");
+    notes.push("🚻 ⚠️ Vos urines sont légèrement foncées : cela indique que vous êtes actuellement en début de déshydratation. Buvez de l'eau dès maintenant pour corriger cet état.");
   } else if (urine_couleur <= 7) {
-    notes.push(`🚻 Vos urines sont assez foncées : ajoutez ${getAjustUrine(urine_couleur)} mL d'eau aujourd'hui pour améliorer votre hydratation.`);
+    notes.push("🚻 ⚠️ La couleur foncée de vos urines indique que vous êtes actuellement déshydraté(e). Augmentez votre consommation d'eau dès maintenant pour retrouver une hydratation optimale.");
   } else {
-    notes.push("🚻 Une couleur ambrée ou foncée peut signaler un manque d'eau important : buvez +1 à +1,5 L dans les prochaines heures. Si cette teinte persiste malgré une bonne hydratation, consultez un professionnel de santé.");
+    notes.push("🚻 ⚠️ Vos urines très foncées signalent une déshydratation importante. Buvez de l'eau immédiatement (500-750 mL dans l'heure). Si cette couleur persiste malgré une bonne hydratation, consultez un professionnel de santé.");
   }
   
   // 💪 3. Crampes et courbatures
