@@ -76,6 +76,8 @@ export const questions: Question[] = [
     options: ["Oui", "Non"],
     step: "Activité physique",
   },
+  // Note: Cette question s'affiche si sport_pratique OU metier_physique est "Oui"
+  // La logique complète (OR) est implémentée dans ThematicScreen.tsx (cas spécial pour id="transpiration")
   {
     id: "transpiration",
     text: "Sur une échelle de 0 à 10, à quel point transpires-tu ? (0 = pas du tout, 10 = énormément)",

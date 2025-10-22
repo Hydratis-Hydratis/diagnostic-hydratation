@@ -47,7 +47,8 @@ export const ThematicScreen = ({
       return dependsOnValue === q.conditional.value;
     }
     if (q.conditionalMultiple) {
-      // Also check if metier_physique is "Oui" for transpiration scale
+      // Cas spécial : la transpiration s'affiche si l'utilisateur a répondu "Oui" 
+      // à sport_pratique OU metier_physique (logique OR plutôt que la logique standard)
       if (q.id === "transpiration") {
         const sportValue = previousAnswers["sport_pratique"] || answers["sport_pratique"];
         const metierValue = previousAnswers["metier_physique"] || answers["metier_physique"];
