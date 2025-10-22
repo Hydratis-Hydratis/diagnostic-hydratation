@@ -39,7 +39,6 @@ export const ThematicScreen = ({
     boisson_energisante: 0,
   });
   const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
-  const [showSummary, setShowSummary] = useState(false);
 
   // Filter questions based on conditionals and previous answers
   const visibleQuestions = questions.filter(q => {
@@ -77,13 +76,10 @@ export const ThematicScreen = ({
     return true;
   });
 
-  const handleContinueClick = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-    setShowSummary(true);
-  };
-
-  const handleConfirmSubmit = () => {
+    
     const submittedAnswers = { ...answers };
     
     // Add beverage quantities if present
@@ -116,34 +112,6 @@ export const ThematicScreen = ({
     }
     
     onSubmit(submittedAnswers);
-    setShowSummary(false);
-  };
-
-  const getSummaryText = () => {
-    const summaryItems: string[] = [];
-    
-    visibleQuestions.forEach(q => {
-      const value = answers[q.id];
-      if (value !== undefined && value !== null && value !== "") {
-        if (q.type === "beverageSelector") {
-          const total = Object.values(beverageQuantities).reduce((sum, qty) => sum + qty, 0);
-          if (total > 0) {
-            summaryItems.push(`${total} verre(s) de boissons`);
-          }
-        } else if (q.type === "sportSelector") {
-          if (selectedSports.length > 0) {
-            summaryItems.push(`Sport(s) : ${selectedSports.map(s => s.name).join(", ")}`);
-          }
-        } else if (q.type === "colorScale") {
-          summaryItems.push(`${q.text.split("?")[0]} : Niveau ${value}`);
-        } else {
-          const cleanLabel = q.text.replace(/\*\*.*?\*\*\n\n/g, '').split("?")[0];
-          summaryItems.push(`${cleanLabel} : ${value}`);
-        }
-      }
-    });
-    
-    return summaryItems;
   };
 
   const getOptionIcon = (question: Question, option: string) => {
@@ -285,54 +253,18 @@ export const ThematicScreen = ({
           </p>
         </div>
 
-        {!showSummary ? (
-          <form onSubmit={handleContinueClick} className="space-y-6">
-            {visibleQuestions.map(renderQuestion)}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {visibleQuestions.map(renderQuestion)}
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              size="lg"
-              disabled={!canSubmit}
-            >
-              Continuer
-            </Button>
-          </form>
-        ) : (
-          <div className="space-y-6">
-            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-              <h4 className="font-semibold text-sm mb-3 text-primary">📋 Récapitulatif de tes réponses</h4>
-              <ul className="space-y-2 text-sm">
-                {getSummaryText().map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span className="text-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div className="flex gap-3">
-              <Button 
-                type="button"
-                variant="outline" 
-                className="flex-1" 
-                size="lg"
-                onClick={() => setShowSummary(false)}
-              >
-                Modifier
-              </Button>
-              <Button 
-                type="button"
-                className="flex-1" 
-                size="lg"
-                onClick={handleConfirmSubmit}
-              >
-                Confirmer
-              </Button>
-            </div>
-          </div>
-        )}
+          <Button 
+            type="submit" 
+            className="w-full" 
+            size="lg"
+            disabled={!canSubmit}
+          >
+            Continuer
+          </Button>
+        </form>
       </div>
     </div>
   );
