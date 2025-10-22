@@ -98,18 +98,6 @@ export const questions: Question[] = [
       value: "Oui"
     }
   },
-  // Note: Cette question s'affiche si sport_pratique OU metier_physique est "Oui"
-  // La logique complète (OR) est implémentée dans ThematicScreen.tsx (cas spécial pour id="transpiration")
-  {
-    id: "transpiration",
-    text: "Sur une échelle de 0 à 10, à quel point transpires-tu ? (0 = pas du tout, 10 = énormément)",
-    type: "colorScale",
-    step: "Activité physique",
-    conditionalMultiple: {
-      dependsOn: "sport_pratique",
-      values: ["Oui"]
-    }
-  },
   {
     id: "duree_minutes",
     text: "Quelle est la durée moyenne de tes séances (en minutes) ?",
@@ -120,6 +108,18 @@ export const questions: Question[] = [
     conditional: {
       dependsOn: "sport_pratique",
       value: "Oui"
+    }
+  },
+  // Note: Cette question s'affiche si sport_pratique OU metier_physique est "Oui"
+  // La logique complète (OR) est implémentée dans ThematicScreen.tsx (cas spécial pour id="transpiration")
+  {
+    id: "transpiration",
+    text: "Sur une échelle de 0 à 10, à quel point transpires-tu ? (0 = pas du tout, 10 = énormément)",
+    type: "colorScale",
+    step: "Activité physique",
+    conditionalMultiple: {
+      dependsOn: "sport_pratique",
+      values: ["Oui"]
     }
   },
   
