@@ -23,8 +23,11 @@ export interface HydrationResult {
   
   // Totaux et recommandations
   besoin_total_ml: number;
+  hydratation_reelle_ml: number;
+  ecart_hydratation_ml: number;
   nb_pastilles_basal: number;
   nb_pastilles_exercice: number;
+  nb_pastilles_post_exercice: number;
   score: number;
   statut: string;
   notes: string[];
@@ -252,6 +255,17 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   
   const besoin_total_ml = besoins_basals_ml + besoins_exercice_ml;
   
+  // Calcul de l'hydratation réelle
+  let hydratation_reelle_ml = 0;
+  if (boissons) {
+    // 1 verre = 250 ml
+    const totalVerres = Object.values(boissons).reduce((sum: number, qty: number) => sum + qty, 0);
+    hydratation_reelle_ml = totalVerres * 250;
+  }
+  
+  // Écart entre besoins et hydratation réelle
+  const ecart_hydratation_ml = besoin_total_ml - hydratation_reelle_ml;
+  
   // Pastilles Hydratis
   // Pour les besoins basals : 2 pastilles / 500 ml
   let nb_pastilles_basal = Math.ceil(besoins_basals_ml / 500 / 2);
@@ -262,6 +276,9 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   
   // Pour l'exercice : 1 pastille / 500 ml
   const nb_pastilles_exercice = besoins_exercice_ml > 0 ? Math.ceil(besoins_exercice_ml / 500) : 0;
+  
+  // Pour la récupération post-exercice : 1 pastille si besoins exercice > 0
+  const nb_pastilles_post_exercice = besoins_exercice_ml > 0 ? 1 : 0;
 
   // Score d'hydratation
   let score = 100;
@@ -329,8 +346,11 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
       ajust_temperature: ajust_temperature_exercice,
     },
     besoin_total_ml,
+    hydratation_reelle_ml,
+    ecart_hydratation_ml,
     nb_pastilles_basal,
     nb_pastilles_exercice,
+    nb_pastilles_post_exercice,
     score,
     statut,
     notes,
