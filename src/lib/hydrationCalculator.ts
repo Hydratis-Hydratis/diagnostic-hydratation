@@ -33,17 +33,32 @@ export interface HydrationResult {
   notes: string[];
 }
 
-// Convertit la tranche d'âge en valeurs pour le calcul
-const getAgeData = (ageRange: string): { median: number; mlPerKg: number; facteurMetabo: number } => {
-  const ageMap: Record<string, { median: number; mlPerKg: number; facteurMetabo: number }> = {
-    "3-10 ans": { median: 6.5, mlPerKg: 55, facteurMetabo: 1.3 },
-    "11-17 ans": { median: 14, mlPerKg: 45, facteurMetabo: 1.1 },
-    "18-49 ans": { median: 33, mlPerKg: 32.5, facteurMetabo: 1.0 },
-    "50-60 ans": { median: 55, mlPerKg: 30, facteurMetabo: 0.9 },
-    "61-69 ans": { median: 65, mlPerKg: 30, facteurMetabo: 0.9 },
-    "70+ ans": { median: 75, mlPerKg: 25, facteurMetabo: 0.8 }
-  };
-  return ageMap[ageRange] || ageMap["18-49 ans"];
+// Convertit l'âge exact en valeurs pour le calcul
+const getAgeData = (ageInput: string): { median: number; mlPerKg: number; facteurMetabo: number } => {
+  const age = parseInt(ageInput);
+  
+  // Si l'âge n'est pas valide, utiliser la valeur par défaut adulte
+  if (isNaN(age) || age < 1) {
+    return { median: 33, mlPerKg: 32.5, facteurMetabo: 1.0 };
+  }
+  
+  // Déterminer la tranche d'âge et retourner les paramètres correspondants
+  if (age >= 3 && age <= 10) {
+    return { median: age, mlPerKg: 55, facteurMetabo: 1.3 };
+  } else if (age >= 11 && age <= 17) {
+    return { median: age, mlPerKg: 45, facteurMetabo: 1.1 };
+  } else if (age >= 18 && age <= 49) {
+    return { median: age, mlPerKg: 32.5, facteurMetabo: 1.0 };
+  } else if (age >= 50 && age <= 60) {
+    return { median: age, mlPerKg: 30, facteurMetabo: 0.9 };
+  } else if (age >= 61 && age <= 69) {
+    return { median: age, mlPerKg: 30, facteurMetabo: 0.9 };
+  } else if (age >= 70) {
+    return { median: age, mlPerKg: 25, facteurMetabo: 0.8 };
+  } else {
+    // Pour les enfants < 3 ans, utiliser les paramètres des 3-10 ans
+    return { median: 3, mlPerKg: 55, facteurMetabo: 1.3 };
+  }
 };
 
 // Facteur selon le sexe

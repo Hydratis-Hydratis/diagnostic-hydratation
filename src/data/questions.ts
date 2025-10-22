@@ -28,10 +28,10 @@ export const questions: Question[] = [
   },
   {
     id: "age",
-    text: "Quelle est ta tranche d'âge ?",
-    type: "options",
-    options: ["3-10 ans", "11-17 ans", "18-49 ans", "50-60 ans", "61-69 ans", "70+ ans"],
-    multiColumn: true,
+    text: "Quel âge as-tu ?",
+    type: "input",
+    inputType: "number",
+    placeholder: "Ex: 25",
     step: "Profil",
   },
   {
