@@ -297,35 +297,90 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
                : score >= 50 ? "Légère déshydratation"
                : "Déshydratation probable";
 
-  // Notes additionnelles
+  // ========== MESSAGES PERSONNALISÉS CONTEXTUELS ==========
   const notes: string[] = [...boissonData.notes];
   
-  if (temperature_ext === "> 28°C") {
-    notes.push("Chaleur : fractionnez vos apports hydriques tout au long de la journée.");
+  // 💧 1. Eau consommée
+  if (hydratation_reelle_ml > 0) {
+    const pourcentage_besoins = Math.round((hydratation_reelle_ml / besoin_total_ml) * 100);
+    const manque_ml = Math.max(0, besoin_total_ml - hydratation_reelle_ml);
+    
+    if (pourcentage_besoins >= 90) {
+      notes.push(`💧 Vous êtes sur la bonne voie avec ${hydratation_reelle_ml} mL d'eau par jour, continuez à boire régulièrement tout au long de la journée.`);
+    } else if (pourcentage_besoins >= 70) {
+      notes.push(`💧 Votre apport en eau représente environ ${pourcentage_besoins}% de vos besoins journaliers. Essayez d'ajouter environ ${manque_ml} mL d'eau pour atteindre votre objectif d'hydratation.`);
+    } else {
+      notes.push(`💧 Vous avez bu ${hydratation_reelle_ml} mL d'eau pure aujourd'hui. Essayez d'ajouter environ ${manque_ml} mL d'eau pour atteindre votre objectif. L'eau reste votre meilleur allié : c'est la seule boisson 100% hydratante.`);
+    }
   }
   
+  // 🚻 2. Couleur de l'urine
+  if (urine_couleur <= 3) {
+    notes.push("🚻 La couleur claire de vos urines montre une hydratation satisfaisante.");
+  } else if (urine_couleur <= 5) {
+    notes.push("🚻 Une teinte légèrement jaune indique un début de déshydratation : buvez un peu plus d'eau dans les prochaines heures.");
+  } else if (urine_couleur <= 7) {
+    notes.push(`🚻 Vos urines sont assez foncées : ajoutez ${getAjustUrine(urine_couleur)} mL d'eau aujourd'hui pour améliorer votre hydratation.`);
+  } else {
+    notes.push("🚻 Une couleur ambrée ou foncée peut signaler un manque d'eau important : buvez +1 à +1,5 L dans les prochaines heures. Si cette teinte persiste malgré une bonne hydratation, consultez un professionnel de santé.");
+  }
+  
+  // 💪 3. Crampes et courbatures
+  if (crampes === "Non" && courbatures === "Non") {
+    notes.push("💪 Aucun signe musculaire notable : vos apports hydriques et électrolytiques sont bien adaptés.");
+  } else if (crampes === "Oui" && courbatures === "Non") {
+    notes.push("💪 De légères crampes peuvent indiquer un petit déficit en magnésium ou sodium. Buvez 250 mL supplémentaires et veillez à consommer des aliments riches en électrolytes.");
+  } else if (crampes === "Non" && courbatures === "Oui") {
+    notes.push("💪 Les courbatures peuvent être atténuées par une bonne hydratation qui facilite l'élimination des métabolites. Buvez 250 mL supplémentaires.");
+  } else {
+    notes.push("💪 Des crampes et courbatures fréquentes signalent souvent un déséquilibre hydro-électrolytique. Buvez 500 mL d'eau en plus et privilégiez une boisson contenant sodium, potassium et magnésium. Si les crampes persistent, un avis médical est recommandé.");
+  }
+  
+  // 🏃 4. Activité physique
+  if (sport_pratique === "Oui" && besoins_exercice_ml > 0) {
+    notes.push(`🏃 L'effort augmente vos pertes hydriques : prévoyez une hydratation adaptée avant, pendant et après l'exercice. Pour cette séance, vos pertes estimées sont d'environ ${besoins_exercice_ml} mL.`);
+    
+    if (duree_heures > 0) {
+      const ml_par_heure = Math.round(besoins_exercice_ml / duree_heures);
+      notes.push(`🏃 En moyenne, cela représente ${ml_par_heure} mL par heure d'effort, à répartir en petites gorgées. Après l'effort, buvez environ 1,5 fois la perte de poids observée pour une récupération optimale.`);
+    }
+    
+    if (transpiration_echelle >= 7) {
+      notes.push("🏃 Votre transpiration est importante : pensez à intégrer une boisson contenant sodium et magnésium. Pour un effort de cette intensité, la consommation d'une solution hypotonique comme Hydratis peut aider à mieux retenir l'eau.");
+    }
+  }
+  
+  // 🌡️ 5. Température extérieure
+  if (temperature_ext === "> 28°C") {
+    notes.push(`🌡️ Par temps chaud, ajoutez ${getAjustTemperatureBasal(temperature_ext)} mL d'eau supplémentaires. Au-delà de 30°C, la transpiration augmente fortement : buvez plus souvent, même sans soif. En cas de chaleur ou d'humidité élevée, privilégiez des solutions hydratantes riches en électrolytes.`);
+  } else if (temperature_ext === "18-28°C") {
+    notes.push("🌡️ La température ambiante influence directement vos besoins hydriques. Gardez le réflexe de boire régulièrement tout au long de la journée.");
+  } else if (temperature_ext === "< 10°C" || temperature_ext === "10-18°C") {
+    notes.push("🌡️ Sous 20°C, vos besoins restent proches de la moyenne, mais gardez le réflexe de boire régulièrement.");
+  }
+  
+  // 💦 6. Transpiration / sensation d'effort
+  if (sport_pratique === "Oui") {
+    if (transpiration_echelle >= 7) {
+      notes.push("💦 Votre transpiration a été intense : vos besoins dépassent probablement 1 L d'eau pour cette séance. N'oubliez pas d'apporter aussi des électrolytes pour reconstituer les pertes en sodium et potassium. La soif est un signal tardif de déshydratation : buvez avant de la ressentir.");
+    } else if (transpiration_echelle >= 4) {
+      notes.push(`💦 Votre sensation de transpiration correspond à une perte modérée : pensez à boire environ ${besoins_exercice_ml} mL pendant et après l'effort.`);
+    } else {
+      notes.push("💦 Même si vous transpirez peu, l'eau reste essentielle pour réguler la température corporelle.");
+    }
+  }
+  
+  // Situation particulière
   if (situation_particuliere?.startsWith("Enceinte")) {
-    notes.push("Grossesse : privilégiez une hydratation régulière. Consultez un médecin en cas de malaise.");
+    notes.push("🤰 Grossesse : privilégiez une hydratation régulière. Consultez un médecin en cas de malaise.");
   }
   
   if (situation_particuliere === "Allaitante") {
-    notes.push("Allaitement : vos besoins en eau sont augmentés d'environ 700 mL/jour.");
-  }
-  
-  if (crampes === "Oui") {
-    notes.push("Crampes fréquentes : veillez à votre hydratation et à vos apports en électrolytes (sodium, potassium, magnésium).");
-  }
-  
-  if (courbatures === "Oui") {
-    notes.push("Courbatures : une bonne hydratation facilite la récupération musculaire.");
-  }
-  
-  if (transpiration_echelle >= 7 && sport_pratique === "Oui") {
-    notes.push("Forte transpiration : pesez-vous avant et après l'effort pour compenser 150% des pertes hydriques.");
+    notes.push("🤱 Allaitement : vos besoins en eau sont augmentés d'environ 700 mL/jour.");
   }
   
   if (metier_physique === "Oui") {
-    notes.push("Métier physique : pensez à vous hydrater régulièrement au cours de la journée.");
+    notes.push("💼 Métier physique : pensez à vous hydrater régulièrement au cours de la journée, même sans sensation de soif.");
   }
 
   return {
