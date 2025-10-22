@@ -280,16 +280,8 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   // Pour la récupération post-exercice : 1 pastille si besoins exercice > 0
   const nb_pastilles_post_exercice = besoins_exercice_ml > 0 ? 1 : 0;
 
-  // Score d'hydratation
-  let score = 100;
-  if (urine_couleur >= 6) score -= 20;
-  else if (urine_couleur >= 4) score -= 8;
-  if (crampes === "Oui") score -= 8;
-  if (courbatures === "Oui") score -= 5;
-  if (transpiration_echelle >= 7) score -= 5;
-  const totalAlcool = (boissons?.vin || 0) + (boissons?.biere || 0);
-  if (totalAlcool >= 2) score -= 6;
-  score = Math.max(score, 0);
+  // Score d'hydratation : (Hydratation actuelle / Besoin total quotidien) * 100
+  const score = Math.round((hydratation_reelle_ml / besoin_total_ml) * 100);
 
   // Statut
   const statut = score >= 85 ? "Hydratation optimale"
