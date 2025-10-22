@@ -93,7 +93,10 @@ export const questions: Question[] = [
     text: "Quel(s) sport(s) pratiques-tu ? (Tu peux en sélectionner plusieurs)",
     type: "sportSelector",
     step: "Activité physique",
-    skipIfNo: "sport_pratique",
+    conditional: {
+      dependsOn: "sport_pratique",
+      value: "Oui"
+    }
   },
   {
     id: "frequence",
@@ -102,7 +105,10 @@ export const questions: Question[] = [
     options: ["Jamais", "1-2 fois/semaine", "3-5 fois/semaine", "6+ fois/semaine"],
     multiColumn: true,
     step: "Activité physique",
-    skipIfNo: "sport_pratique",
+    conditional: {
+      dependsOn: "sport_pratique",
+      value: "Oui"
+    }
   },
   {
     id: "duree_minutes",
@@ -111,7 +117,10 @@ export const questions: Question[] = [
     inputType: "number",
     placeholder: "Ex: 45",
     step: "Activité physique",
-    skipIfNo: "sport_pratique",
+    conditional: {
+      dependsOn: "sport_pratique",
+      value: "Oui"
+    }
   },
   
   // ===== ÉTAPE 4 - SIGNAUX CLINIQUES =====
