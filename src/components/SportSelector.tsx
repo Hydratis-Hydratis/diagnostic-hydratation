@@ -20,9 +20,18 @@ const sportsData: Sport[] = [
   { name: "Cyclisme", category: "Endurance continue", coefficient: 1.0 },
   { name: "Marche rapide", category: "Endurance continue", coefficient: 1.0 },
   { name: "Vélo d'appartement", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Vélo elliptique", category: "Endurance continue", coefficient: 1.0 },
   { name: "Rameur", category: "Endurance continue", coefficient: 1.0 },
   { name: "Trail", category: "Endurance continue", coefficient: 1.0 },
   { name: "Marathon", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Semi-marathon", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Triathlon", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Duathlon", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Marche nordique", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Randonnée", category: "Endurance continue", coefficient: 1.0 },
+  { name: "VTT", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Cyclisme sur route", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Spinning", category: "Endurance continue", coefficient: 1.0 },
   
   // Intermittent/collectif/HIIT
   { name: "HIIT", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
@@ -30,6 +39,8 @@ const sportsData: Sport[] = [
   { name: "Interval Training", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
   { name: "Tabata", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
   { name: "Circuit Training", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
+  { name: "Boot Camp", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
+  { name: "Functional Training", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
   
   // Musculation/Force
   { name: "Musculation", category: "Musculation/Force", coefficient: 0.6 },
@@ -37,29 +48,172 @@ const sportsData: Sport[] = [
   { name: "Powerlifting", category: "Musculation/Force", coefficient: 0.6 },
   { name: "Renforcement musculaire", category: "Musculation/Force", coefficient: 0.6 },
   { name: "Fitness", category: "Musculation/Force", coefficient: 0.6 },
+  { name: "Bodybuilding", category: "Musculation/Force", coefficient: 0.6 },
+  { name: "Street Workout", category: "Musculation/Force", coefficient: 0.6 },
+  { name: "Calisthenics", category: "Musculation/Force", coefficient: 0.6 },
+  { name: "TRX", category: "Musculation/Force", coefficient: 0.6 },
   
-  // Natation
+  // Natation et sports aquatiques
   { name: "Natation", category: "Natation", coefficient: 0.8 },
+  { name: "Natation synchronisée", category: "Natation", coefficient: 0.8 },
   { name: "Aquagym", category: "Natation", coefficient: 0.8 },
+  { name: "Aquabike", category: "Natation", coefficient: 0.8 },
   { name: "Water-polo", category: "Natation", coefficient: 0.8 },
+  { name: "Plongeon", category: "Natation", coefficient: 0.8 },
+  { name: "Surf", category: "Natation", coefficient: 0.8 },
+  { name: "Bodyboard", category: "Natation", coefficient: 0.8 },
+  { name: "Stand Up Paddle", category: "Natation", coefficient: 0.8 },
+  { name: "Kayak", category: "Natation", coefficient: 0.8 },
+  { name: "Canoë", category: "Natation", coefficient: 0.8 },
+  { name: "Aviron", category: "Natation", coefficient: 0.8 },
+  { name: "Kitesurf", category: "Natation", coefficient: 0.8 },
+  { name: "Windsurf", category: "Natation", coefficient: 0.8 },
+  { name: "Planche à voile", category: "Natation", coefficient: 0.8 },
+  { name: "Voile", category: "Natation", coefficient: 0.8 },
+  { name: "Ski nautique", category: "Natation", coefficient: 0.8 },
+  { name: "Wakeboard", category: "Natation", coefficient: 0.8 },
+  { name: "Plongée sous-marine", category: "Natation", coefficient: 0.8 },
   
   // Sports collectifs
   { name: "Football", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Football américain", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Futsal", category: "Sports collectifs", coefficient: 0.85 },
   { name: "Basketball", category: "Sports collectifs", coefficient: 0.85 },
   { name: "Handball", category: "Sports collectifs", coefficient: 0.85 },
   { name: "Volleyball", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Beach-volley", category: "Sports collectifs", coefficient: 0.85 },
   { name: "Rugby", category: "Sports collectifs", coefficient: 0.85 },
-  { name: "Tennis", category: "Sports collectifs", coefficient: 0.85 },
-  { name: "Badminton", category: "Sports collectifs", coefficient: 0.85 },
-  { name: "Squash", category: "Sports collectifs", coefficient: 0.85 },
-  { name: "Padel", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Rugby à 7", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Hockey sur gazon", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Hockey sur glace", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Baseball", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Softball", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Cricket", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Ultimate Frisbee", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Lacrosse", category: "Sports collectifs", coefficient: 0.85 },
+  { name: "Polo", category: "Sports collectifs", coefficient: 0.85 },
+  
+  // Sports de raquette
+  { name: "Tennis", category: "Sports de raquette", coefficient: 0.85 },
+  { name: "Tennis de table", category: "Sports de raquette", coefficient: 0.85 },
+  { name: "Badminton", category: "Sports de raquette", coefficient: 0.85 },
+  { name: "Squash", category: "Sports de raquette", coefficient: 0.85 },
+  { name: "Padel", category: "Sports de raquette", coefficient: 0.85 },
+  { name: "Pickleball", category: "Sports de raquette", coefficient: 0.85 },
+  { name: "Racquetball", category: "Sports de raquette", coefficient: 0.85 },
+  
+  // Sports de combat
+  { name: "Boxe anglaise", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Boxe française", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Kickboxing", category: "Sports de combat", coefficient: 0.9 },
+  { name: "MMA", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Muay Thai", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Karaté", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Judo", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Jiu-jitsu brésilien", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Taekwondo", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Aïkido", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Krav Maga", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Lutte", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Escrime", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Kendo", category: "Sports de combat", coefficient: 0.9 },
+  { name: "Capoeira", category: "Sports de combat", coefficient: 0.9 },
+  
+  // Sports d'hiver
+  { name: "Ski alpin", category: "Sports d'hiver", coefficient: 0.85 },
+  { name: "Ski de fond", category: "Sports d'hiver", coefficient: 1.0 },
+  { name: "Ski de randonnée", category: "Sports d'hiver", coefficient: 1.0 },
+  { name: "Snowboard", category: "Sports d'hiver", coefficient: 0.85 },
+  { name: "Raquettes à neige", category: "Sports d'hiver", coefficient: 1.0 },
+  { name: "Patinage artistique", category: "Sports d'hiver", coefficient: 0.85 },
+  { name: "Patinage de vitesse", category: "Sports d'hiver", coefficient: 1.0 },
+  { name: "Curling", category: "Sports d'hiver", coefficient: 0.6 },
+  { name: "Bobsleigh", category: "Sports d'hiver", coefficient: 0.85 },
+  { name: "Luge", category: "Sports d'hiver", coefficient: 0.85 },
+  { name: "Biathlon", category: "Sports d'hiver", coefficient: 1.0 },
+  
+  // Danse et gymnastique
+  { name: "Danse classique", category: "Danse", coefficient: 0.7 },
+  { name: "Danse contemporaine", category: "Danse", coefficient: 0.7 },
+  { name: "Danse de salon", category: "Danse", coefficient: 0.7 },
+  { name: "Salsa", category: "Danse", coefficient: 0.7 },
+  { name: "Bachata", category: "Danse", coefficient: 0.7 },
+  { name: "Kizomba", category: "Danse", coefficient: 0.7 },
+  { name: "Tango", category: "Danse", coefficient: 0.7 },
+  { name: "Hip-hop", category: "Danse", coefficient: 0.7 },
+  { name: "Breakdance", category: "Danse", coefficient: 0.9 },
+  { name: "Zumba", category: "Danse", coefficient: 0.7 },
+  { name: "Pole dance", category: "Danse", coefficient: 0.8 },
+  { name: "Gymnastique artistique", category: "Gymnastique", coefficient: 0.8 },
+  { name: "Gymnastique rythmique", category: "Gymnastique", coefficient: 0.8 },
+  { name: "Trampoline", category: "Gymnastique", coefficient: 0.8 },
+  { name: "Acrosport", category: "Gymnastique", coefficient: 0.8 },
+  { name: "Cheerleading", category: "Gymnastique", coefficient: 0.8 },
+  
+  // Sports de précision
+  { name: "Tir à l'arc", category: "Précision", coefficient: 0.5 },
+  { name: "Tir sportif", category: "Précision", coefficient: 0.5 },
+  { name: "Golf", category: "Précision", coefficient: 0.6 },
+  { name: "Pétanque", category: "Précision", coefficient: 0.5 },
+  { name: "Bowling", category: "Précision", coefficient: 0.5 },
+  { name: "Fléchettes", category: "Précision", coefficient: 0.5 },
+  { name: "Billard", category: "Précision", coefficient: 0.5 },
+  
+  // Sports équestres
+  { name: "Équitation", category: "Sports équestres", coefficient: 0.7 },
+  { name: "Dressage", category: "Sports équestres", coefficient: 0.7 },
+  { name: "Saut d'obstacles", category: "Sports équestres", coefficient: 0.7 },
+  { name: "Cross", category: "Sports équestres", coefficient: 0.7 },
+  { name: "Endurance équestre", category: "Sports équestres", coefficient: 0.8 },
+  { name: "Polo équestre", category: "Sports équestres", coefficient: 0.8 },
+  
+  // Sports extrêmes
+  { name: "Escalade", category: "Sports extrêmes", coefficient: 0.8 },
+  { name: "Alpinisme", category: "Sports extrêmes", coefficient: 0.9 },
+  { name: "Via ferrata", category: "Sports extrêmes", coefficient: 0.8 },
+  { name: "Parkour", category: "Sports extrêmes", coefficient: 0.9 },
+  { name: "Skateboard", category: "Sports extrêmes", coefficient: 0.7 },
+  { name: "Roller", category: "Sports extrêmes", coefficient: 0.7 },
+  { name: "BMX", category: "Sports extrêmes", coefficient: 0.8 },
+  { name: "Parachutisme", category: "Sports extrêmes", coefficient: 0.7 },
+  { name: "Parapente", category: "Sports extrêmes", coefficient: 0.7 },
+  { name: "Base jump", category: "Sports extrêmes", coefficient: 0.7 },
+  { name: "Deltaplane", category: "Sports extrêmes", coefficient: 0.7 },
+  { name: "Canyoning", category: "Sports extrêmes", coefficient: 0.9 },
+  { name: "Rafting", category: "Sports extrêmes", coefficient: 0.9 },
+  
+  // Sports motorisés
+  { name: "Karting", category: "Sports motorisés", coefficient: 0.6 },
+  { name: "Motocross", category: "Sports motorisés", coefficient: 0.7 },
+  { name: "Rallye", category: "Sports motorisés", coefficient: 0.6 },
+  { name: "Course automobile", category: "Sports motorisés", coefficient: 0.6 },
+  { name: "Jet ski", category: "Sports motorisés", coefficient: 0.7 },
   
   // Yoga/Pilates/Stretching
   { name: "Yoga", category: "Yoga/Pilates/Stretching", coefficient: 0.5 },
+  { name: "Hatha Yoga", category: "Yoga/Pilates/Stretching", coefficient: 0.5 },
+  { name: "Vinyasa Yoga", category: "Yoga/Pilates/Stretching", coefficient: 0.6 },
+  { name: "Ashtanga Yoga", category: "Yoga/Pilates/Stretching", coefficient: 0.6 },
+  { name: "Bikram Yoga", category: "Yoga/Pilates/Stretching", coefficient: 0.7 },
+  { name: "Yin Yoga", category: "Yoga/Pilates/Stretching", coefficient: 0.5 },
+  { name: "Power Yoga", category: "Yoga/Pilates/Stretching", coefficient: 0.6 },
   { name: "Pilates", category: "Yoga/Pilates/Stretching", coefficient: 0.5 },
   { name: "Stretching", category: "Yoga/Pilates/Stretching", coefficient: 0.5 },
   { name: "Tai Chi", category: "Yoga/Pilates/Stretching", coefficient: 0.5 },
+  { name: "Qi Gong", category: "Yoga/Pilates/Stretching", coefficient: 0.5 },
   { name: "Méditation active", category: "Yoga/Pilates/Stretching", coefficient: 0.5 },
+  { name: "Barre au sol", category: "Yoga/Pilates/Stretching", coefficient: 0.6 },
+  
+  // Autres sports
+  { name: "Athlétisme", category: "Autres", coefficient: 0.9 },
+  { name: "Décathlon", category: "Autres", coefficient: 0.9 },
+  { name: "Heptathlon", category: "Autres", coefficient: 0.9 },
+  { name: "Saut en hauteur", category: "Autres", coefficient: 0.8 },
+  { name: "Saut en longueur", category: "Autres", coefficient: 0.8 },
+  { name: "Lancer de poids", category: "Autres", coefficient: 0.7 },
+  { name: "Lancer de javelot", category: "Autres", coefficient: 0.7 },
+  { name: "Lancer de disque", category: "Autres", coefficient: 0.7 },
+  { name: "Lancer de marteau", category: "Autres", coefficient: 0.7 },
 ];
 
 export const SportSelector = ({ onSelect }: SportSelectorProps) => {
@@ -144,10 +298,7 @@ export const SportSelector = ({ onSelect }: SportSelectorProps) => {
                   )}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-sm">{sport.name}</p>
-                      <p className="text-xs text-muted-foreground">{sport.category}</p>
-                    </div>
+                    <p className="font-medium text-sm">{sport.name}</p>
                     {isSelected && (
                       <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                     )}
