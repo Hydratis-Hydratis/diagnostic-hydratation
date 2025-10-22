@@ -3,6 +3,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ThematicScreen } from "./ThematicScreen";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { TypingIndicator } from "./TypingIndicator";
+import { ResultsDisplay } from "./ResultsDisplay";
 import { questions } from "@/data/questions";
 import { DiagnosticData, Question } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
@@ -149,31 +150,12 @@ export const DiagnosticChat = () => {
           setShowScreen(true);
         }, 1500);
       } else {
-        // Complete - calculate results and show final message
+        // Complete - calculate results
         const results = calculateHydration(updatedData);
-        
-        const notesText = results.notes.length > 0 
-          ? `\n\n**📋 Notes importantes :**\n${results.notes.map(note => `• ${note}`).join('\n')}`
-          : '';
-        
-        // Comparaison hydratation réelle vs besoins
-        const hydratationComparaison = results.hydratation_reelle_ml > 0
-          ? `\n\n**💦 Hydratation actuelle vs Besoins :**\n• Hydratation réelle : **${results.hydratation_reelle_ml} mL/jour** (${Math.round(results.hydratation_reelle_ml / 250)} verres)\n• Besoins totaux : **${results.besoin_total_ml} mL/jour**\n• Écart : ${results.ecart_hydratation_ml > 0 ? `**+${results.ecart_hydratation_ml} mL manquants**` : `**${Math.abs(results.ecart_hydratation_ml)} mL en excès**`}`
-          : '';
-        
-        // Construction du message pour les besoins exercice
-        const exerciceSection = results.besoins_exercice_ml > 0
-          ? `\n\n**🏃 Besoins pendant l'exercice physique :**\n• Volume d'eau recommandé : **${results.besoins_exercice_ml} mL** par séance\n• Pertes par transpiration : ${results.details_exercice.pertes_transpiration} mL/kg/h\n• Facteur sport : ${results.details_exercice.facteur_sport}\n• Durée d'effort : ${results.details_exercice.duree_heures}h\n• Ajustement température : +${results.details_exercice.ajust_temperature} mL/h\n• Pastilles Hydratis : **${results.nb_pastilles_exercice}** pendant l'effort + **${results.nb_pastilles_post_exercice}** après l'effort`
-          : '';
-        
-        const totalPastilles = results.nb_pastilles_basal + results.nb_pastilles_exercice + results.nb_pastilles_post_exercice;
-        
-        const finalMessage = `Merci beaucoup pour tes réponses, ${updatedData.firstName || 'toi'} ! 💧\n\n**📊 Résultats de ton diagnostic d'hydratation**\n\n🎯 **Statut** : ${results.statut}\n📈 **Score d'hydratation** : ${results.score}/100\n\n**💧 Besoins hydriques quotidiens (hors exercice) :**\n• Volume d'eau recommandé : **${results.besoins_basals_ml} mL/jour**\n• Détails : Base ${results.details_basals.base_age_sexe} mL + ajustements (température +${results.details_basals.ajust_temperature} mL, boissons +${results.details_basals.ajust_boissons} mL, physiologique +${results.details_basals.ajust_physiologique} mL, symptômes +${results.details_basals.ajust_symptomes} mL)${exerciceSection}\n\n**📊 BESOIN TOTAL QUOTIDIEN : ${results.besoin_total_ml} mL/jour**${hydratationComparaison}\n\n**💊 Recommandations Pastilles Hydratis :**\n• Quotidien : **${results.nb_pastilles_basal}** pastilles/jour${results.besoins_exercice_ml > 0 ? `\n• Pendant l'effort : **${results.nb_pastilles_exercice}** pastilles\n• Récupération post-effort : **${results.nb_pastilles_post_exercice}** pastille\n• **Total recommandé : ${totalPastilles} pastilles/jour**` : ''}${notesText}\n\nTu recevras bientôt des recommandations personnalisées par email à ${updatedData.email}. 💙`;
         
         setTimeout(() => {
           setIsTyping(false);
           setIsComplete(true);
-          addBotMessage(finalMessage);
           
           // Show success toast
           toast({
@@ -191,6 +173,7 @@ export const DiagnosticChat = () => {
 
   const currentGroup = questionGroups[currentGroupIndex];
   const totalSteps = questionGroups.length;
+  const results = isComplete ? calculateHydration(diagnosticData) : null;
 
   return (
     <div className="flex flex-col h-full">
@@ -213,6 +196,13 @@ export const DiagnosticChat = () => {
         
         {/* Typing Indicator */}
         {isTyping && <TypingIndicator />}
+        
+        {/* Results Display */}
+        {isComplete && results && (
+          <div className="pt-4">
+            <ResultsDisplay results={results} firstName={diagnosticData.firstName} />
+          </div>
+        )}
         
         {/* Current Thematic Screen */}
         {!isComplete && showScreen && currentGroup && (
