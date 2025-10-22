@@ -8,6 +8,7 @@ export const questions: Question[] = [
     type: "options",
     options: ["Un homme", "Une femme", "Autre"],
     step: "Profil",
+    icon: "user"
   },
   {
     id: "situation_particuliere",
@@ -24,7 +25,8 @@ export const questions: Question[] = [
     conditional: {
       dependsOn: "sexe",
       value: "Une femme"
-    }
+    },
+    icon: "baby"
   },
   {
     id: "age",
@@ -55,9 +57,7 @@ export const questions: Question[] = [
   {
     id: "temperature_ext",
     text: "🌡️ **Étape 2 - Environnement**\n\nQuelle est la température extérieure habituelle ?",
-    type: "options",
-    options: ["< 10°C", "10-18°C", "18-28°C", "> 28°C"],
-    multiColumn: true,
+    type: "temperatureSelector",
     step: "Environnement",
   },
   
@@ -70,6 +70,20 @@ export const questions: Question[] = [
     step: "Activité physique",
   },
   {
+    id: "metier_physique",
+    text: "Exerces-tu un métier physique ?",
+    type: "options",
+    options: ["Oui", "Non"],
+    step: "Activité physique",
+  },
+  {
+    id: "sports_selectionnes",
+    text: "Quel(s) sport(s) pratiques-tu ? (Tu peux en sélectionner plusieurs)",
+    type: "sportSelector",
+    step: "Activité physique",
+    skipIfNo: "sport_pratique",
+  },
+  {
     id: "frequence",
     text: "Quelle est la fréquence de ta pratique sportive ?",
     type: "options",
@@ -79,27 +93,11 @@ export const questions: Question[] = [
     skipIfNo: "sport_pratique",
   },
   {
-    id: "duree_seance",
-    text: "Quelle est la durée moyenne de tes séances ?",
-    type: "options",
-    options: ["15-30 min", "30-60 min", "60-120 min", "120+ min"],
-    multiColumn: true,
-    step: "Activité physique",
-    skipIfNo: "sport_pratique",
-  },
-  {
-    id: "type_sport",
-    text: "Quel type d'activité sportive pratiques-tu principalement ?",
-    type: "options",
-    options: [
-      "Endurance continue",
-      "Intermittent/collectif/HIIT",
-      "Musculation/Force",
-      "Natation",
-      "Sports collectifs",
-      "Yoga/Pilates/Stretching"
-    ],
-    multiColumn: true,
+    id: "duree_minutes",
+    text: "Quelle est la durée moyenne de tes séances (en minutes) ?",
+    type: "input",
+    inputType: "number",
+    placeholder: "Ex: 45",
     step: "Activité physique",
     skipIfNo: "sport_pratique",
   },
@@ -111,11 +109,11 @@ export const questions: Question[] = [
     skipIfNo: "sport_pratique",
   },
   {
-    id: "metier_physique",
-    text: "Exerces-tu un métier physique ?",
-    type: "options",
-    options: ["Oui", "Non"],
+    id: "transpiration_metier",
+    text: "Sur une échelle de 0 à 10, à quel point transpires-tu pendant ton travail ? (0 = pas du tout, 10 = énormément)",
+    type: "colorScale",
     step: "Activité physique",
+    skipIfNo: "metier_physique",
   },
   
   // ===== ÉTAPE 4 - SIGNAUX CLINIQUES =====

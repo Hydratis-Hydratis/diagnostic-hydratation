@@ -13,10 +13,16 @@ export interface DiagnosticData {
   sport_pratique?: string;
   frequence?: string;
   duree_seance?: string;
+  duree_minutes?: string;
   type_sport?: string;
-  nom_sport?: string;
+  sports_selectionnes?: Array<{
+    name: string;
+    category: string;
+    coefficient: number;
+  }>;
   transpiration?: string;
   metier_physique?: string;
+  transpiration_metier?: string;
   
   // Étape 4 - Signaux cliniques
   crampes?: string;
@@ -45,7 +51,7 @@ export interface DiagnosticData {
 export interface Question {
   id: keyof DiagnosticData;
   text: string;
-  type: "options" | "input" | "colorScale" | "multiSelect" | "beverageSelector" | "transpirationScale";
+  type: "options" | "input" | "colorScale" | "multiSelect" | "beverageSelector" | "transpirationScale" | "temperatureSelector" | "sportSelector";
   inputType?: "text" | "email" | "number";
   options?: string[];
   placeholder?: string;
@@ -55,5 +61,10 @@ export interface Question {
     dependsOn: keyof DiagnosticData;
     value: string;
   };
+  conditionalMultiple?: {
+    dependsOn: keyof DiagnosticData;
+    values: string[];
+  };
   skipIfNo?: keyof DiagnosticData;
+  icon?: string;
 }
