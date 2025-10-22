@@ -6,6 +6,7 @@ import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { ColorScaleSelector } from "./ColorScaleSelector";
 import { BeverageSelector, BeverageQuantities } from "./BeverageSelector";
+import { TranspirationScale } from "./TranspirationScale";
 import { cn } from "@/lib/utils";
 
 interface ThematicScreenProps {
@@ -124,9 +125,15 @@ export const ThematicScreen = ({
             <Label className="text-sm font-medium text-foreground">
               {cleanText}
             </Label>
-            <ColorScaleSelector 
-              onSelect={(value) => setAnswers(prev => ({ ...prev, [question.id]: value }))}
-            />
+            {question.id === "urine_couleur" ? (
+              <ColorScaleSelector 
+                onSelect={(value) => setAnswers(prev => ({ ...prev, [question.id]: value }))}
+              />
+            ) : (
+              <TranspirationScale 
+                onSelect={(value) => setAnswers(prev => ({ ...prev, [question.id]: value }))}
+              />
+            )}
           </div>
         );
 
