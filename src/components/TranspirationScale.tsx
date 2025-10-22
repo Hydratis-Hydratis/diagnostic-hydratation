@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Slider } from "@/components/ui/slider";
 
 interface TranspirationScaleProps {
   onSelect: (value: string) => void;
 }
 
 export const TranspirationScale = ({ onSelect }: TranspirationScaleProps) => {
-  const [selectedValue, setSelectedValue] = useState<number | null>(null);
+  const [selectedValue, setSelectedValue] = useState<number>(5);
 
-  const handleSelect = (value: number) => {
-    setSelectedValue(value);
-    onSelect(value.toString());
+  const handleValueChange = (value: number[]) => {
+    setSelectedValue(value[0]);
+    onSelect(value[0].toString());
   };
 
   return (
@@ -18,31 +19,27 @@ export const TranspirationScale = ({ onSelect }: TranspirationScaleProps) => {
       <p className="text-xs uppercase tracking-wide mb-4 px-2" style={{ color: 'hsl(var(--chat-timestamp))' }}>
         Sélectionne ton niveau de transpiration
       </p>
-      <div className="grid grid-cols-11 gap-2">
-        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
-          <button
-            key={value}
-            onClick={() => handleSelect(value)}
-            className={cn(
-              "flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300",
-              "hover:scale-105 hover:shadow-lg active:scale-95",
-              selectedValue === value && "ring-2 ring-primary ring-offset-2 scale-105"
-            )}
-          >
-            <div
-              className={cn(
-                "w-full aspect-square rounded-lg border-2 flex items-center justify-center font-bold transition-all duration-300",
-                selectedValue === value ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border"
-              )}
-            >
-              {value}
-            </div>
-          </button>
-        ))}
-      </div>
-      <div className="flex justify-between mt-2 px-2">
-        <span className="text-xs text-muted-foreground">Pas du tout</span>
-        <span className="text-xs text-muted-foreground">Énormément</span>
+      
+      <div className="px-4 py-6">
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 border-2 border-primary">
+            <span className="text-2xl font-bold text-primary">{selectedValue}</span>
+          </div>
+        </div>
+        
+        <Slider
+          min={0}
+          max={10}
+          step={1}
+          value={[selectedValue]}
+          onValueChange={handleValueChange}
+          className="w-full"
+        />
+        
+        <div className="flex justify-between mt-4 px-1">
+          <span className="text-xs text-muted-foreground">Pas du tout</span>
+          <span className="text-xs text-muted-foreground">Énormément</span>
+        </div>
       </div>
     </div>
   );
