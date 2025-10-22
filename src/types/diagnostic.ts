@@ -22,7 +22,6 @@ export interface DiagnosticData {
   }>;
   transpiration?: string;
   metier_physique?: string;
-  transpiration_metier?: string;
   
   // Étape 4 - Signaux cliniques
   crampes?: string;

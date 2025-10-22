@@ -77,6 +77,16 @@ export const questions: Question[] = [
     step: "Activité physique",
   },
   {
+    id: "transpiration",
+    text: "Sur une échelle de 0 à 10, à quel point transpires-tu ? (0 = pas du tout, 10 = énormément)",
+    type: "colorScale",
+    step: "Activité physique",
+    conditionalMultiple: {
+      dependsOn: "sport_pratique",
+      values: ["Oui"]
+    }
+  },
+  {
     id: "sports_selectionnes",
     text: "Quel(s) sport(s) pratiques-tu ? (Tu peux en sélectionner plusieurs)",
     type: "sportSelector",
@@ -100,20 +110,6 @@ export const questions: Question[] = [
     placeholder: "Ex: 45",
     step: "Activité physique",
     skipIfNo: "sport_pratique",
-  },
-  {
-    id: "transpiration",
-    text: "Sur une échelle de 0 à 10, à quel point transpires-tu pendant l'effort ? (0 = pas du tout, 10 = énormément)",
-    type: "colorScale",
-    step: "Activité physique",
-    skipIfNo: "sport_pratique",
-  },
-  {
-    id: "transpiration_metier",
-    text: "Sur une échelle de 0 à 10, à quel point transpires-tu pendant ton travail ? (0 = pas du tout, 10 = énormément)",
-    type: "colorScale",
-    step: "Activité physique",
-    skipIfNo: "metier_physique",
   },
   
   // ===== ÉTAPE 4 - SIGNAUX CLINIQUES =====

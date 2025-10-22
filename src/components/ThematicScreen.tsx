@@ -46,6 +46,19 @@ export const ThematicScreen = ({
       const dependsOnValue = previousAnswers[q.conditional.dependsOn] || answers[q.conditional.dependsOn];
       return dependsOnValue === q.conditional.value;
     }
+    if (q.conditionalMultiple) {
+      // Also check if metier_physique is "Oui" for transpiration scale
+      if (q.id === "transpiration") {
+        const sportValue = previousAnswers["sport_pratique"] || answers["sport_pratique"];
+        const metierValue = previousAnswers["metier_physique"] || answers["metier_physique"];
+        return sportValue === "Oui" || metierValue === "Oui";
+      }
+      const dependsOnValue = previousAnswers[q.conditionalMultiple.dependsOn] || answers[q.conditionalMultiple.dependsOn];
+      if (typeof dependsOnValue === "string") {
+        return q.conditionalMultiple.values.includes(dependsOnValue);
+      }
+      return false;
+    }
     if (q.skipIfNo) {
       const skipValue = previousAnswers[q.skipIfNo] || answers[q.skipIfNo];
       return skipValue !== "Non";
@@ -56,7 +69,10 @@ export const ThematicScreen = ({
   const canSubmit = visibleQuestions.every(q => {
     if (q.type === "beverageSelector") return true;
     if (q.type === "sportSelector") return selectedSports.length > 0;
-    return answers[q.id] !== undefined && answers[q.id] !== "";
+    const value = answers[q.id];
+    if (value === undefined || value === null) return false;
+    if (typeof value === "string") return value !== "";
+    return true;
   });
 
   const handleSubmit = (e: React.FormEvent) => {
