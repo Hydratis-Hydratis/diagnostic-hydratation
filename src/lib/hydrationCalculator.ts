@@ -141,7 +141,7 @@ const getAjustBoissons = (boissons: any): { total: number; notes: string[] } => 
   // Soda/jus sucré
   const sodaJus = (boissons.soda || 0) + (boissons.jus || 0);
   if (sodaJus >= 1) {
-    total += 250;
+    total += 100;
     notes.push("Sodas et jus sucrés : limitez leur consommation et privilégiez l'eau.");
   }
   
@@ -155,7 +155,7 @@ const getAjustBoissons = (boissons: any): { total: number; notes: string[] } => 
   // Boisson énergisante
   const energisante = boissons.boisson_energisante || 0;
   if (energisante >= 1) {
-    total += 500;
+    total += 150;
     notes.push("Boissons énergisantes : très sucrées et caféinées, fortement déshydratantes.");
   }
   
