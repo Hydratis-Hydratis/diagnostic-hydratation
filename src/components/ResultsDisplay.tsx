@@ -70,16 +70,39 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Volume recommandé</p>
+          <div className="space-y-3">
+            <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
+              <p className="text-sm text-muted-foreground mb-2">Besoin hydrique total</p>
               <div className="text-3xl font-bold text-foreground">
-                {results.besoins_basals_ml}
+                {results.besoins_basals_brut_ml}
                 <span className="text-lg font-normal text-muted-foreground ml-1">mL</span>
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Environ {Math.round(results.besoins_basals_ml / 250)} verres d'eau par jour
-              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-green-500/5 border border-green-500/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">🍽️</span>
+                  <p className="text-xs font-medium text-muted-foreground">Via l'alimentation</p>
+                </div>
+                <div className="text-xl font-bold text-foreground">
+                  {results.apport_alimentation_basal_ml}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">mL</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">20%</p>
+              </div>
+              
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">💧</span>
+                  <p className="text-xs font-medium text-muted-foreground">À boire</p>
+                </div>
+                <div className="text-xl font-bold text-foreground">
+                  {results.besoins_basals_net_ml}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">mL</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">80% • {Math.round(results.besoins_basals_net_ml / 250)} verres</p>
+              </div>
             </div>
           </div>
 
@@ -193,19 +216,45 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 rounded-lg bg-primary/10 border-2 border-primary/30">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-muted-foreground">Besoins totaux du jour</span>
+          <div className="space-y-3">
+            <div className="p-4 rounded-lg bg-primary/10 border-2 border-primary/30">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Besoin hydrique total</p>
               <div className="text-3xl font-bold text-primary">
-                {results.besoin_total_ml}
+                {results.besoin_total_brut_ml}
                 <span className="text-lg font-normal text-muted-foreground ml-1">mL</span>
               </div>
+              {results.besoins_exercice_ml > 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  {results.besoins_basals_brut_ml} mL (quotidien) + {results.besoins_exercice_ml} mL (sport)
+                </p>
+              )}
             </div>
-            {results.besoins_exercice_ml > 0 && (
-              <div className="text-xs text-muted-foreground pt-2 border-t border-primary/20">
-                <p className="mt-2">Soit {results.besoins_basals_ml} mL (quotidien) + {results.besoins_exercice_ml} mL (sport)</p>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-green-500/5 border border-green-500/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">🍽️</span>
+                  <p className="text-xs font-medium text-muted-foreground">Via l'alimentation</p>
+                </div>
+                <div className="text-xl font-bold text-foreground">
+                  {results.apport_alimentation_ml}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">mL</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">20% du quotidien</p>
               </div>
-            )}
+              
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">💧</span>
+                  <p className="text-xs font-medium text-muted-foreground">À boire</p>
+                </div>
+                <div className="text-xl font-bold text-foreground">
+                  {results.besoin_hydration_nette_ml}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">mL</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">80% + sport</p>
+              </div>
+            </div>
           </div>
 
           {/* Comparison with Current Hydration */}
@@ -218,8 +267,8 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
                   <span className="font-semibold">{results.hydratation_reelle_ml} mL/jour</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Objectif recommandé</span>
-                  <span className="font-semibold">{results.besoin_total_ml} mL/jour</span>
+                  <span className="text-muted-foreground">Objectif recommandé (à boire)</span>
+                  <span className="font-semibold">{results.besoin_hydration_nette_ml} mL/jour</span>
                 </div>
                 {results.ecart_hydratation_ml > 0 ? (
                   <div className="flex justify-between items-center text-sm text-yellow-600 dark:text-yellow-500 pt-2 border-t">
@@ -252,7 +301,7 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
         </CardContent>
       </Card>
 
-      {/* Graphique de répartition */}
+      {/* Graphique de répartition quotidien vs sport */}
       <Card className="border-primary/20">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
@@ -261,7 +310,7 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
             </div>
             <div>
               <CardTitle className="text-xl">Répartition de tes besoins</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Visualisation des besoins hydriques</p>
+              <p className="text-sm text-muted-foreground mt-1">Besoins quotidiens vs sport</p>
             </div>
           </div>
         </CardHeader>
@@ -270,7 +319,7 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
             <PieChart>
               <Pie
                 data={[
-                  { name: 'Besoins quotidiens', value: results.besoins_basals_ml, color: 'hsl(var(--primary))' },
+                  { name: 'Besoins quotidiens', value: results.besoins_basals_net_ml, color: 'hsl(var(--primary))' },
                   ...(results.besoins_exercice_ml > 0 ? [{ name: 'Besoins sportifs', value: results.besoins_exercice_ml, color: 'hsl(var(--chart-2))' }] : [])
                 ]}
                 cx="50%"
@@ -295,6 +344,74 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Graphique Sources d'hydratation (Alimentation vs Boissons) */}
+      <Card className="border-green-500/30 bg-gradient-to-br from-green-500/5 to-transparent">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-green-500/10">
+              <Info className="w-6 h-6 text-green-500" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Sources d'hydratation</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Alimentation vs Boissons</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 rounded-lg bg-background border">
+            <p className="text-sm text-muted-foreground mb-3">
+              📚 <strong>Bon à savoir :</strong> L'hydratation provient de deux sources principales
+            </p>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-start gap-2">
+                <span className="text-blue-500 font-bold">💧 80%</span>
+                <span>de l'eau que tu bois (boissons)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-500 font-bold">🍽️ 20%</span>
+                <span>de ton alimentation (fruits, légumes, soupes, etc.)</span>
+              </li>
+            </ul>
+          </div>
+          
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={[
+                  { name: 'À boire (80%)', value: results.besoins_basals_net_ml },
+                  { name: 'Alimentation (20%)', value: results.apport_alimentation_basal_ml }
+                ]}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, value }) => `${name}: ${value} mL`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                <Cell fill="hsl(210, 100%, 50%)" />
+                <Cell fill="hsl(120, 60%, 50%)" />
+              </Pie>
+              <Tooltip 
+                formatter={(value: number) => `${value} mL`}
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))', 
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+          
+          <div className="p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
+            <p className="text-xs text-muted-foreground">
+              ⚡ Les besoins affichés tiennent compte de ces deux apports. L'objectif "à boire" correspond aux 80% que tu dois consommer en boissons.
+            </p>
+          </div>
         </CardContent>
       </Card>
 

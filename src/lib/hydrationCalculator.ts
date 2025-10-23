@@ -3,6 +3,9 @@ import { DiagnosticData } from "@/types/diagnostic";
 export interface HydrationResult {
   // Besoins basals quotidiens
   besoins_basals_ml: number;
+  besoins_basals_brut_ml: number; // Besoin hydrique total (eau + alimentation)
+  apport_alimentation_basal_ml: number; // 20% alimentation
+  besoins_basals_net_ml: number; // 80% à boire
   details_basals: {
     base_age_sexe: number;
     ajust_imc: number;
@@ -23,6 +26,9 @@ export interface HydrationResult {
   
   // Totaux et recommandations
   besoin_total_ml: number;
+  besoin_total_brut_ml: number; // Total eau + alimentation
+  apport_alimentation_ml: number; // 20% alimentation
+  besoin_hydration_nette_ml: number; // 80% à boire réellement
   hydratation_reelle_ml: number;
   ecart_hydratation_ml: number;
   nb_pastilles_basal: number;
@@ -228,10 +234,15 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   let ajust_symptomes = 0;
   if (metier_physique === "Oui") ajust_symptomes += 500;
   
-  const besoins_basals_ml = Math.max(
+  const besoins_basals_brut_ml = Math.max(
     base_age_sexe + ajust_temperature + ajust_boissons + ajust_physiologique + ajust_symptomes,
     1500 // garde-fou plancher
   );
+  
+  // Répartition 80/20 pour les besoins basals
+  const apport_alimentation_basal_ml = Math.round(besoins_basals_brut_ml * 0.20);
+  const besoins_basals_net_ml = besoins_basals_brut_ml - apport_alimentation_basal_ml;
+  const besoins_basals_ml = besoins_basals_net_ml; // Ce qu'il faut réellement boire
 
   // ========== CALCUL DES BESOINS PENDANT L'EXERCICE ==========
   
@@ -263,20 +274,30 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
 
   // ========== TOTAUX ET RECOMMANDATIONS ==========
   
-  let besoin_total_ml = besoins_basals_ml + besoins_exercice_ml;
-  const besoin_total_original = besoin_total_ml;
+  // Total brut (incluant alimentation pour les besoins basals)
+  let besoin_total_brut_ml = besoins_basals_brut_ml + besoins_exercice_ml;
+  const besoin_total_original = besoin_total_brut_ml;
+  
+  // Répartition 80/20 pour le total
+  const apport_alimentation_ml = apport_alimentation_basal_ml; // Alimentation uniquement sur basals
+  let besoin_hydration_nette_ml = besoins_basals_net_ml + besoins_exercice_ml; // Ce qu'il faut boire
+  let besoin_total_ml = besoin_hydration_nette_ml; // Ce qu'il faut réellement boire
   
   // ========== PLAFOND DE 6000 ML ==========
   const PLAFOND_MAX = 6000;
   let alerte_plafond = "";
   
-  if (besoin_total_ml >= 4500 && besoin_total_ml < 5000) {
+  if (besoin_total_brut_ml >= 4500 && besoin_total_brut_ml < 5000) {
     alerte_plafond = "💧 Vos besoins hydriques sont élevés. Pensez à vous hydrater régulièrement tout au long de la journée.";
-  } else if (besoin_total_ml >= 5000 && besoin_total_ml < PLAFOND_MAX) {
+  } else if (besoin_total_brut_ml >= 5000 && besoin_total_brut_ml < PLAFOND_MAX) {
     alerte_plafond = "⚠️ Vos besoins hydriques sont exceptionnellement élevés en raison de la combinaison de plusieurs facteurs (chaleur, activité physique intense, etc.). Fractionnez bien votre hydratation et consultez un professionnel de santé si nécessaire.";
-  } else if (besoin_total_ml >= PLAFOND_MAX) {
+  } else if (besoin_total_brut_ml >= PLAFOND_MAX) {
     alerte_plafond = `⚠️ Vos besoins calculés dépassent ${PLAFOND_MAX / 1000}L (${besoin_total_original} mL), ce qui concerne les athlètes de haut niveau en conditions extrêmes. La valeur a été plafonnée à ${PLAFOND_MAX / 1000}L. Un suivi médical sportif est fortement recommandé pour une hydratation personnalisée.`;
-    besoin_total_ml = PLAFOND_MAX;
+    besoin_total_brut_ml = PLAFOND_MAX;
+    // Recalculer les valeurs nettes avec le plafond
+    const ratio = PLAFOND_MAX / besoin_total_original;
+    besoin_total_ml = Math.round(besoin_hydration_nette_ml * ratio);
+    besoin_hydration_nette_ml = besoin_total_ml;
   }
   
   // Calcul de l'hydratation réelle
@@ -304,7 +325,7 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   // Pour la récupération post-exercice : 1 pastille si besoins exercice > 0
   const nb_pastilles_post_exercice = besoins_exercice_ml > 0 ? 1 : 0;
 
-  // Score d'hydratation : (Hydratation actuelle / Besoin total quotidien) * 100
+  // Score d'hydratation : (Hydratation actuelle / Besoin net à boire) * 100
   const score = Math.round((hydratation_reelle_ml / besoin_total_ml) * 100);
 
   // Statut
@@ -405,7 +426,11 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   }
 
   return {
+    // Besoins basals quotidiens
     besoins_basals_ml,
+    besoins_basals_brut_ml,
+    apport_alimentation_basal_ml,
+    besoins_basals_net_ml,
     details_basals: {
       base_age_sexe,
       ajust_imc,
@@ -422,6 +447,9 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
       ajust_temperature: ajust_temperature_exercice,
     },
     besoin_total_ml,
+    besoin_total_brut_ml,
+    apport_alimentation_ml,
+    besoin_hydration_nette_ml,
     hydratation_reelle_ml,
     ecart_hydratation_ml,
     nb_pastilles_basal,
