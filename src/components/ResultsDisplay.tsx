@@ -455,29 +455,6 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
         </CardContent>
       </Card>
 
-      {/* Detailed Notes - Accordion */}
-      {results.notes.length > 0 && (
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="notes" className="border rounded-lg px-4">
-            <AccordionTrigger className="hover:no-underline">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-primary" />
-                <span className="font-semibold">Conseils personnalisés ({results.notes.length})</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-2 pt-2">
-                {results.notes.map((note, index) => (
-                  <div key={index} className="flex gap-2 text-sm text-muted-foreground">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span>{note}</span>
-                  </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      )}
 
     </div>
   );
