@@ -320,10 +320,27 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   if (ageData.median >= 70) nb_pastilles_basal = Math.min(nb_pastilles_basal, 2);
   
   // Pour l'exercice : 1 pastille / 500 ml
-  const nb_pastilles_exercice = besoins_exercice_ml > 0 ? Math.ceil(besoins_exercice_ml / 500) : 0;
+  let nb_pastilles_exercice = besoins_exercice_ml > 0 ? Math.ceil(besoins_exercice_ml / 500) : 0;
   
   // Pour la récupération post-exercice : 1 pastille si besoins exercice > 0
-  const nb_pastilles_post_exercice = besoins_exercice_ml > 0 ? 1 : 0;
+  let nb_pastilles_post_exercice = besoins_exercice_ml > 0 ? 1 : 0;
+
+  // Plafond de 5 pastilles maximum par jour
+  const total_pastilles = nb_pastilles_basal + nb_pastilles_exercice + nb_pastilles_post_exercice;
+  if (total_pastilles > 5) {
+    // Ajuster proportionnellement pour ne pas dépasser 5
+    const ratio = 5 / total_pastilles;
+    nb_pastilles_basal = Math.max(1, Math.round(nb_pastilles_basal * ratio));
+    nb_pastilles_exercice = Math.max(0, Math.round(nb_pastilles_exercice * ratio));
+    nb_pastilles_post_exercice = Math.max(0, Math.round(nb_pastilles_post_exercice * ratio));
+    
+    // S'assurer que le total ne dépasse toujours pas 5
+    const new_total = nb_pastilles_basal + nb_pastilles_exercice + nb_pastilles_post_exercice;
+    if (new_total > 5) {
+      // Réduire le nombre de pastilles basales en dernier recours
+      nb_pastilles_basal = Math.max(1, nb_pastilles_basal - (new_total - 5));
+    }
+  }
 
   // Score d'hydratation : (Hydratation actuelle / Besoin net à boire) * 100
   const score = Math.round((hydratation_reelle_ml / besoin_total_ml) * 100);

@@ -119,20 +119,26 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
             </div>
           </div>
 
-          <div className="text-xs text-muted-foreground space-y-1 pt-2">
-            <p className="font-medium">Facteurs pris en compte :</p>
-            <ul className="space-y-0.5 ml-4">
-              <li>• Âge, sexe et morphologie</li>
-              <li>• Température extérieure ({results.details_basals.ajust_temperature} mL)</li>
-              <li>• Boissons consommées ({results.details_basals.ajust_boissons} mL)</li>
-              {results.details_basals.ajust_physiologique > 0 && (
-                <li>• Situation physiologique (+{results.details_basals.ajust_physiologique} mL)</li>
-              )}
-              {results.details_basals.ajust_symptomes > 0 && (
-                <li>• Symptômes et activité (+{results.details_basals.ajust_symptomes} mL)</li>
-              )}
-            </ul>
-          </div>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="facteurs" className="border-none">
+              <AccordionTrigger className="hover:no-underline py-2 text-xs">
+                <span className="text-muted-foreground">📊 Voir les facteurs pris en compte</span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <ul className="space-y-1 ml-4 text-xs text-muted-foreground">
+                  <li>• Âge, sexe et morphologie</li>
+                  <li>• Température extérieure ({results.details_basals.ajust_temperature} mL)</li>
+                  <li>• Boissons consommées ({results.details_basals.ajust_boissons} mL)</li>
+                  {results.details_basals.ajust_physiologique > 0 && (
+                    <li>• Situation physiologique (+{results.details_basals.ajust_physiologique} mL)</li>
+                  )}
+                  {results.details_basals.ajust_symptomes > 0 && (
+                    <li>• Symptômes et activité (+{results.details_basals.ajust_symptomes} mL)</li>
+                  )}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </CardContent>
       </Card>
 
@@ -301,119 +307,73 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
         </CardContent>
       </Card>
 
-      {/* Graphique de répartition quotidien vs sport */}
-      <Card className="border-primary/20">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <TrendingUp className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">Répartition de tes besoins</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Besoins quotidiens vs sport</p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={[
-                  { name: 'Besoins quotidiens', value: results.besoins_basals_net_ml, color: 'hsl(var(--primary))' },
-                  ...(results.besoins_exercice_ml > 0 ? [{ name: 'Besoins sportifs', value: results.besoins_exercice_ml, color: 'hsl(var(--chart-2))' }] : [])
-                ]}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                <Cell fill="hsl(var(--primary))" />
-                {results.besoins_exercice_ml > 0 && <Cell fill="hsl(var(--chart-2))" />}
-              </Pie>
-              <Tooltip 
-                formatter={(value: number) => `${value} mL`}
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
-                }}
-              />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
 
-      {/* Graphique Sources d'hydratation (Alimentation vs Boissons) */}
-      <Card className="border-green-500/30 bg-gradient-to-br from-green-500/5 to-transparent">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-500/10">
-              <Info className="w-6 h-6 text-green-500" />
+      {/* Sources d'hydratation - Accordion */}
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="sources" className="border rounded-lg px-4 border-green-500/30 bg-gradient-to-br from-green-500/5 to-transparent">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Info className="w-5 h-5 text-green-500" />
+              <span className="font-semibold">💡 D'où vient ton hydratation ? (Alimentation vs Boissons)</span>
             </div>
-            <div>
-              <CardTitle className="text-xl">Sources d'hydratation</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Alimentation vs Boissons</p>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-4 pt-2">
+              <div className="p-4 rounded-lg bg-background border">
+                <p className="text-sm text-muted-foreground mb-3">
+                  📚 <strong>Bon à savoir :</strong> L'hydratation provient de deux sources principales
+                </p>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 font-bold">💧 80%</span>
+                    <span>de l'eau que tu bois (boissons)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 font-bold">🍽️ 20%</span>
+                    <span>de ton alimentation (fruits, légumes, soupes, etc.)</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'À boire (80%)', value: results.besoins_basals_net_ml },
+                      { name: 'Alimentation (20%)', value: results.apport_alimentation_basal_ml }
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value} mL`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    <Cell fill="hsl(210, 100%, 50%)" />
+                    <Cell fill="hsl(120, 60%, 50%)" />
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number) => `${value} mL`}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+              
+              <div className="p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  ⚡ Les besoins affichés tiennent compte de ces deux apports. L'objectif "à boire" correspond aux 80% que tu dois consommer en boissons.
+                </p>
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="p-4 rounded-lg bg-background border">
-            <p className="text-sm text-muted-foreground mb-3">
-              📚 <strong>Bon à savoir :</strong> L'hydratation provient de deux sources principales
-            </p>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">💧 80%</span>
-                <span>de l'eau que tu bois (boissons)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 font-bold">🍽️ 20%</span>
-                <span>de ton alimentation (fruits, légumes, soupes, etc.)</span>
-              </li>
-            </ul>
-          </div>
-          
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={[
-                  { name: 'À boire (80%)', value: results.besoins_basals_net_ml },
-                  { name: 'Alimentation (20%)', value: results.apport_alimentation_basal_ml }
-                ]}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, value }) => `${name}: ${value} mL`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                <Cell fill="hsl(210, 100%, 50%)" />
-                <Cell fill="hsl(120, 60%, 50%)" />
-              </Pie>
-              <Tooltip 
-                formatter={(value: number) => `${value} mL`}
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
-                }}
-              />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-          
-          <div className="p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
-            <p className="text-xs text-muted-foreground">
-              ⚡ Les besoins affichés tiennent compte de ces deux apports. L'objectif "à boire" correspond aux 80% que tu dois consommer en boissons.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Explication Hydratis */}
       <Card className="border-purple-500/30 bg-gradient-to-br from-purple-500/5 to-transparent">
@@ -428,7 +388,7 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           <div className="space-y-3">
             <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
               <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
@@ -438,30 +398,6 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
                 <h4 className="font-semibold text-sm mb-1">Hydratation accélérée</h4>
                 <p className="text-xs text-muted-foreground">
                   Les pastilles Hydratis contiennent un mélange optimal d'électrolytes (sodium, potassium, magnésium) qui accélèrent l'absorption de l'eau par l'organisme jusqu'à 3 fois plus rapidement qu'avec de l'eau seule.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
-              <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
-                <Zap className="w-4 h-4 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-sm mb-1">Compensation des pertes</h4>
-                <p className="text-xs text-muted-foreground">
-                  Lors d'un effort physique, de la chaleur ou de la déshydratation, tu perds non seulement de l'eau mais aussi des minéraux essentiels. Hydratis compense ces pertes pour maintenir ton équilibre hydrique.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
-              <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
-                <Activity className="w-4 h-4 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-sm mb-1">Performance et récupération</h4>
-                <p className="text-xs text-muted-foreground">
-                  Une hydratation optimale améliore tes performances sportives, réduit la fatigue et accélère la récupération musculaire après l'effort.
                 </p>
               </div>
             </div>
@@ -481,6 +417,41 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
               </div>
             </div>
           </div>
+
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="details" className="border-none">
+              <AccordionTrigger className="hover:no-underline py-2 text-xs">
+                <span className="text-muted-foreground">ℹ️ En savoir plus sur les bénéfices</span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
+                    <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                      <Zap className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-sm mb-1">Compensation des pertes</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Lors d'un effort physique, de la chaleur ou de la déshydratation, tu perds non seulement de l'eau mais aussi des minéraux essentiels. Hydratis compense ces pertes pour maintenir ton équilibre hydrique.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
+                    <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                      <Activity className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-sm mb-1">Performance et récupération</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Une hydratation optimale améliore tes performances sportives, réduit la fatigue et accélère la récupération musculaire après l'effort.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </CardContent>
       </Card>
 
