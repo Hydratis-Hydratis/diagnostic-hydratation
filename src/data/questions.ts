@@ -114,8 +114,8 @@ export const questions: Question[] = [
   // La logique complète (OR) est implémentée dans ThematicScreen.tsx (cas spécial pour id="transpiration")
   {
     id: "transpiration",
-    text: "Sur une échelle de 0 à 10, à quel point transpires-tu ? (0 = pas du tout, 10 = énormément)",
-    type: "colorScale",
+    text: "À quel point transpires-tu pendant ton activité ?",
+    type: "transpirationScale",
     step: "Activité physique",
     conditionalMultiple: {
       dependsOn: "sport_pratique",

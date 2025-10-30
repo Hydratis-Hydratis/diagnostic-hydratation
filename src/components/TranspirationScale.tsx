@@ -10,17 +10,17 @@ export const TranspirationScale = ({ onSelect }: TranspirationScaleProps) => {
   const [selectedValue, setSelectedValue] = useState<number>(5);
 
   const transpirationLabels: Record<number, string> = {
-    0: "Pas du tout",
-    1: "Très peu",
-    2: "Peu",
-    3: "Un peu",
-    4: "Légèrement",
-    5: "Moyennement",
-    6: "Assez",
-    7: "Beaucoup",
-    8: "Très beaucoup",
-    9: "Énormément",
-    10: "Énormément",
+    0: "Pas du tout (peau sèche)",
+    1: "Très peu (front légèrement humide)",
+    2: "Peu (front et tempes humides)",
+    3: "Un peu (visage humide)",
+    4: "Modéré (visage et nuque humides)",
+    5: "Moyen (aisselles humides)",
+    6: "Assez (aisselles et dos humides)",
+    7: "Beaucoup (dos trempé)",
+    8: "Très beaucoup (vêtements humides)",
+    9: "Énormément (vêtements trempés)",
+    10: "Extrême (ruisselant de sueur)",
   };
 
   const handleValueChange = (value: number[]) => {

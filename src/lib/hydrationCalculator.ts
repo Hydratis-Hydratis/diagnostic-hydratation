@@ -343,7 +343,8 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   }
 
   // Score d'hydratation : (Hydratation actuelle / Besoin net à boire) * 100
-  const score = Math.round((hydratation_reelle_ml / besoin_total_ml) * 100);
+  let score = Math.round((hydratation_reelle_ml / besoin_total_ml) * 100);
+  score = Math.min(score, 100); // Plafonner à 100/100
 
   // Statut
   const statut = score >= 85 ? "Hydratation optimale"
