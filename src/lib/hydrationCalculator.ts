@@ -300,12 +300,11 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
     besoin_hydration_nette_ml = besoin_total_ml;
   }
   
-  // Calcul de l'hydratation réelle
+  // Calcul de l'hydratation réelle : UNIQUEMENT l'eau pure
   let hydratation_reelle_ml = 0;
-  if (boissons) {
-    // 1 verre = 250 ml
-    const totalVerres = Object.values(boissons).reduce((sum: number, qty: number) => sum + qty, 0);
-    hydratation_reelle_ml = totalVerres * 250;
+  if (boissons && boissons.eau) {
+    // 1 verre d'eau = 250 ml
+    hydratation_reelle_ml = boissons.eau * 250;
   }
   
   // Écart entre besoins et hydratation réelle
