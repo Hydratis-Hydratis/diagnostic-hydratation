@@ -189,15 +189,21 @@ export const ThematicScreen = ({
             <Label className="text-sm font-medium text-foreground">
               {cleanText}
             </Label>
-            {question.id === "urine_couleur" ? (
-              <ColorScaleSelector 
-                onSelect={(value) => setAnswers(prev => ({ ...prev, [question.id]: value }))}
-              />
-            ) : (
-              <TranspirationScale 
-                onSelect={(value) => setAnswers(prev => ({ ...prev, [question.id]: value }))}
-              />
-            )}
+            <ColorScaleSelector 
+              onSelect={(value) => setAnswers(prev => ({ ...prev, [question.id]: value }))}
+            />
+          </div>
+        );
+
+      case "transpirationScale":
+        return (
+          <div key={question.id} className="space-y-3">
+            <Label className="text-sm font-medium text-foreground">
+              {cleanText}
+            </Label>
+            <TranspirationScale 
+              onSelect={(value) => setAnswers(prev => ({ ...prev, [question.id]: value }))}
+            />
           </div>
         );
 
