@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Question, DiagnosticData } from "@/types/diagnostic";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -25,6 +25,7 @@ export const ThematicScreen = ({
   onSubmit,
   previousAnswers 
 }: ThematicScreenProps) => {
+  const screenRef = useRef<HTMLDivElement>(null);
   const [answers, setAnswers] = useState<Partial<DiagnosticData>>({});
   const [beverageQuantities, setBeverageQuantities] = useState<BeverageQuantities>({
     eau: 0,
@@ -39,6 +40,11 @@ export const ThematicScreen = ({
     boisson_energisante: 0,
   });
   const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
+
+  // Scroll to top when screen mounts
+  useEffect(() => {
+    screenRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   // Filter questions based on conditionals and previous answers
   const visibleQuestions = questions.filter(q => {
@@ -250,7 +256,7 @@ export const ThematicScreen = ({
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div ref={screenRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-primary mb-1">{stepName}</h3>
