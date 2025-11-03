@@ -397,7 +397,7 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
               <div className="flex-1">
                 <h4 className="font-semibold text-sm mb-1">Hydratation accélérée</h4>
                 <p className="text-xs text-muted-foreground">
-                  Les pastilles Hydratis contiennent un mélange optimal d'électrolytes (sodium, potassium, magnésium) qui accélèrent l'absorption de l'eau par l'organisme jusqu'à 3 fois plus rapidement qu'avec de l'eau seule.
+                  Les pastilles Hydratis contiennent un mélange optimal d'électrolytes (sodium, potassium, magnésium) qui accélèrent l'absorption de l'eau par l'organisme.
                 </p>
               </div>
             </div>
