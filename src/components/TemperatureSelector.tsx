@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Thermometer } from "lucide-react";
+import { Thermometer, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TemperatureSelectorProps {
   onSelect: (value: string) => void;
@@ -23,6 +24,22 @@ export const TemperatureSelector = ({ onSelect }: TemperatureSelectorProps) => {
 
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="flex items-center gap-2 mb-3">
+        <h3 className="text-sm font-medium text-muted-foreground">Quelle est la température extérieure habituelle ?</h3>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              <p className="text-sm">
+                La température influence vos besoins en eau : plus il fait chaud, 
+                plus les pertes hydriques augmentent par sudation.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         {temperatureRanges.map((temp) => (
           <button

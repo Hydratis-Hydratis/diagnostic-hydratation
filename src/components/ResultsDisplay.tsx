@@ -1,11 +1,15 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw } from "lucide-react";
 import type { HydrationResult } from "@/lib/hydrationCalculator";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts";
+import { useCountUp } from "@/hooks/use-count-up";
+import { cn } from "@/lib/utils";
 
 interface ResultsDisplayProps {
   results: HydrationResult;
@@ -15,6 +19,17 @@ interface ResultsDisplayProps {
 
 export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplayProps) => {
   const totalPastilles = results.nb_pastilles_basal + results.nb_pastilles_exercice + results.nb_pastilles_post_exercice;
+  const animatedScore = useCountUp(results.score, 2000);
+  const [visiblePills, setVisiblePills] = useState(0);
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setVisiblePills(1), 300),
+      setTimeout(() => setVisiblePills(2), 600),
+      setTimeout(() => setVisiblePills(3), 900),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
   
   const getStatusColor = (statut: string) => {
     if (statut.includes("Excellente") || statut.includes("Bonne")) return "bg-green-500";
@@ -50,7 +65,7 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
               </div>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-primary">{results.score}</div>
+              <div className="text-3xl font-bold text-primary animate-scale-in">{animatedScore}</div>
               <div className="text-sm text-muted-foreground">/100</div>
             </div>
           </div>
@@ -108,13 +123,33 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
             </div>
           </div>
 
-          <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20">
+          <div className={cn(
+            "p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 transition-all duration-500",
+            visiblePills >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          )}>
             <div className="flex items-center gap-2 mb-3">
               <Pill className="w-4 h-4 text-purple-500" />
               <p className="font-semibold text-sm">Pastilles quotidiennes</p>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">À répartir tout au long de la journée</span>
+              <span className="text-sm text-muted-foreground">
+                À répartir tout au long de la journée avec des 
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="underline decoration-dotted cursor-help mx-1">électrolytes</span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p className="text-sm font-semibold mb-1">Qu'est-ce qu'un électrolyte ?</p>
+                      <p className="text-sm">
+                        Les électrolytes (sodium, potassium, magnésium) sont des minéraux 
+                        essentiels perdus dans la sueur. Ils régulent l'équilibre hydrique, 
+                        la fonction musculaire et nerveuse.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </span>
               <Badge className="bg-purple-500 text-white text-base font-bold">
                 {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''}
               </Badge>
@@ -173,7 +208,10 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
             </div>
 
             <div className="grid gap-3">
-              <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20">
+              <div className={cn(
+                "p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 transition-all duration-500",
+                visiblePills >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              )}>
                 <div className="flex items-center gap-2 mb-3">
                   <Zap className="w-4 h-4 text-purple-500" />
                   <p className="font-semibold text-sm">Pastilles sport</p>
@@ -355,7 +393,7 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
                     <Cell fill="hsl(210, 100%, 50%)" />
                     <Cell fill="hsl(120, 60%, 50%)" />
                   </Pie>
-                  <Tooltip 
+                  <RechartsTooltip 
                     formatter={(value: number) => `${value} mL`}
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--card))', 
@@ -484,6 +522,167 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
           <p className="text-xs text-muted-foreground">
             Livraison rapide • Satisfait ou remboursé
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Section éducative - Pourquoi l'hydratation ? */}
+      <Card className="border-indigo-500/30 bg-gradient-to-br from-indigo-500/5 to-transparent">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-indigo-500/10">
+              <Sparkles className="w-6 h-6 text-indigo-500" />
+            </div>
+            <CardTitle className="text-xl">💡 Pourquoi l'hydratation est-elle si importante ?</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="single" collapsible className="w-full">
+            {/* Article 1 - Bienfaits */}
+            <AccordionItem value="bienfaits" className="border-b">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span className="font-semibold">Les bienfaits d'une bonne hydratation</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-3 pt-2">
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>Performance physique optimale</strong> : Maintient l'endurance et la force musculaire</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>Concentration mentale</strong> : Améliore la clarté d'esprit et la prise de décision</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>Régulation de la température</strong> : Évite les coups de chaleur et l'hyperthermie</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>Récupération accélérée</strong> : Élimine les toxines et réduit les courbatures</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>Santé de la peau</strong> : Maintient l'élasticité et l'éclat cutané</span>
+                    </li>
+                  </ul>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Article 2 - Risques de déshydratation */}
+            <AccordionItem value="risques" className="border-b">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-500" />
+                  <span className="font-semibold">Les risques de la déshydratation</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-3 pt-2">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Une déshydratation même légère (perte de 2% du poids corporel) peut avoir des conséquences :
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">⚠</span>
+                      <span><strong>Baisse de performance</strong> : -20% d'efficacité physique et mentale</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">⚠</span>
+                      <span><strong>Crampes et fatigue musculaire</strong> : Déséquilibre électrolytique</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">⚠</span>
+                      <span><strong>Maux de tête</strong> : Diminution du volume sanguin</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">⚠</span>
+                      <span><strong>Troubles digestifs</strong> : Constipation et ballonnements</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">⚠</span>
+                      <span><strong>Risque rénal</strong> : Calculs et infections urinaires</span>
+                    </li>
+                  </ul>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Article 3 - Rôle des électrolytes */}
+            <AccordionItem value="electrolytes" className="border-b">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-yellow-500" />
+                  <span className="font-semibold">Le rôle des électrolytes</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-3 pt-2">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Les électrolytes sont des minéraux essentiels pour le bon fonctionnement de l'organisme :
+                  </p>
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-lg bg-background border">
+                      <p className="font-semibold text-sm mb-1">💧 Sodium (Na+)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Régule l'équilibre hydrique et la pression artérielle. Principal électrolyte perdu dans la sueur.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-background border">
+                      <p className="font-semibold text-sm mb-1">🔋 Potassium (K+)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Essentiel pour la contraction musculaire et la fonction cardiaque.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-background border">
+                      <p className="font-semibold text-sm mb-1">💪 Magnésium (Mg2+)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Prévient les crampes, favorise la récupération et réduit la fatigue.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Article 4 - Articles Hydratis */}
+            <AccordionItem value="blog" className="border-none">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Info className="w-5 h-5 text-blue-500" />
+                  <span className="font-semibold">En savoir plus sur le blog Hydratis</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-3 pt-2">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Découvrez nos articles scientifiques et conseils pratiques :
+                  </p>
+                  <div className="space-y-2">
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <a href="https://hydratis.co/blogs/hydratation" target="_blank" rel="noopener noreferrer">
+                        📖 Guide complet de l'hydratation sportive
+                      </a>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <a href="https://hydratis.co/blogs/sante" target="_blank" rel="noopener noreferrer">
+                        🩺 Hydratation et santé quotidienne
+                      </a>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" asChild>
+                      <a href="https://hydratis.co/blogs/nutrition" target="_blank" rel="noopener noreferrer">
+                        🥗 Alimentation et hydratation
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </CardContent>
       </Card>
 

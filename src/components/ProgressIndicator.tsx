@@ -1,5 +1,7 @@
 import { CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+import confetti from "canvas-confetti";
 
 interface ProgressIndicatorProps {
   current: number;
@@ -9,6 +11,16 @@ interface ProgressIndicatorProps {
 
 export const ProgressIndicator = ({ current, total, steps }: ProgressIndicatorProps) => {
   const percentage = ((current + 1) / total) * 100;
+
+  useEffect(() => {
+    if (percentage === 100) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+  }, [percentage]);
 
   return (
     <div className="px-4 py-4 border-b border-border/50 bg-gradient-to-b from-background to-transparent">
