@@ -56,7 +56,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 2 - ENVIRONNEMENT =====
   {
     id: "temperature_ext",
-    text: "🌡️ **Étape 2 - Environnement**\n\nQuelle est la température extérieure habituelle ?",
+    text: "🌡️ **Étape 2 - Environnement**\n\nQuelle est la température extérieure habituelle ?\n\nLa température influence vos besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
     type: "temperatureSelector",
     step: "Environnement",
   },
@@ -148,7 +148,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 5 - HABITUDES =====
   {
     id: "boissons_journalieres",
-    text: "☕ **Étape 5 - Habitudes de consommation**\n\nIndique combien de verres/portions de chaque boisson tu as consommés aujourd'hui.",
+    text: "☕ **Étape 5 - Habitudes de consommation**\n\nIndique combien de verres/portions de chaque boisson tu consommes en moyenne tous les jours.",
     type: "beverageSelector",
     step: "Habitudes",
   },

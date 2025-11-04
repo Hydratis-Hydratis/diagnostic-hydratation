@@ -40,6 +40,7 @@ export interface DiagnosticData {
     biere: number;
     boisson_sport: number;
     boisson_energisante: number;
+    hydratis: number;
   };
   
   // Infos finales

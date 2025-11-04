@@ -38,6 +38,7 @@ export const ThematicScreen = ({
     biere: 0,
     boisson_sport: 0,
     boisson_energisante: 0,
+    hydratis: 0,
   });
   const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
 

@@ -72,7 +72,7 @@ export const DiagnosticChat = () => {
         setIsTyping(true);
         setTimeout(() => {
           setIsTyping(false);
-          addBotMessage("Bonjour ! Je suis ravie de t'aider avec ton diagnostic d'hydratation. 💧\n\nRéponds aux questions ci-dessous pour obtenir une évaluation personnalisée de tes besoins en hydratation.");
+          addBotMessage("Bonjour ! Réponds à quelques questions pour que je t'aide à mieux comprendre tes besoins d'hydratation. 💧");
           setShowScreen(true);
         }, 2000);
       }, 800);
@@ -126,34 +126,26 @@ export const DiagnosticChat = () => {
       const age = answers.age;
       const poids = answers.poids_kg;
       if (age && poids) {
-        return `Super ! Tu es ${sexe} de ${age} ans pesant ${poids} kg.`;
+        return `Je suis ${sexe} de ${age} ans de ${poids} kg 👌`;
       }
-      return `Super ! Tes informations de profil sont enregistrées.`;
+      return `Mes informations de profil sont enregistrées.`;
     } else if (stepName === "Environnement") {
-      const temp = answers.temperature_ext;
-      if (temp) {
-        return `Noté ! Tu vis dans un environnement à ${temp}.`;
-      }
-      return "Noté ! Tes informations d'environnement sont enregistrées.";
+      return "Température extérieure notée 🌡️";
     } else if (stepName === "Activité physique") {
       const sportPratique = answers.sport_pratique;
       if (sportPratique === "Oui") {
         const sports = answers.sports_selectionnes;
         if (sports && Array.isArray(sports)) {
-          const sportNames = sports.map((s: any) => s.name).join(", ");
-          return `Génial ! Tu pratiques : ${sportNames}. 💪`;
+          const sportNames = sports.map((s: any) => s.name).join(" et ");
+          return `Je pratique du ${sportNames} 💪`;
         }
-        return "Parfait ! Tes informations sportives sont enregistrées.";
+        return "Mes informations sportives sont enregistrées.";
       }
-      return "C'est noté, nous avons pris en compte ton niveau d'activité.";
+      return "Mon niveau d'activité est enregistré.";
     } else if (stepName === "Signaux cliniques") {
-      const urine = answers.urine_couleur;
-      if (urine && typeof urine === "number" && urine > 3) {
-        return "Attention, ta couleur d'urine indique une déshydratation possible. 💧";
-      }
-      return "Merci pour ces informations précieuses sur ton hydratation actuelle.";
+      return "Mes signaux cliniques sont notés 🩺";
     } else if (stepName === "Habitudes") {
-      return "Parfait ! J'ai toutes les informations sur tes habitudes de consommation. ☕";
+      return "Mes habitudes de consommation sont enregistrées ☕";
     }
     
     return `✓ ${stepName} complété`;
@@ -195,7 +187,7 @@ export const DiagnosticChat = () => {
         setTimeout(() => {
           setIsTyping(false);
           const nextGroup = questionGroups[nextGroupIndex];
-          addBotMessage(`${nextGroup.icon} **${nextGroup.step}**\n\nContinuons avec quelques questions sur ce thème.`);
+          addBotMessage(`${nextGroup.icon} **${nextGroup.step}**\n\nPassons maintenant à la suite.`);
           setCurrentGroupIndex(nextGroupIndex);
           setShowScreen(true);
         }, 1500);

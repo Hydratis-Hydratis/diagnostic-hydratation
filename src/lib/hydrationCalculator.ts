@@ -300,11 +300,14 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
     besoin_hydration_nette_ml = besoin_total_ml;
   }
   
-  // Calcul de l'hydratation réelle : UNIQUEMENT l'eau pure
+  // Calcul de l'hydratation réelle : eau pure + verres d'Hydratis
   let hydratation_reelle_ml = 0;
-  if (boissons && boissons.eau) {
+  if (boissons) {
     // 1 verre d'eau = 250 ml
-    hydratation_reelle_ml = boissons.eau * 250;
+    const eau_ml = (boissons.eau || 0) * 250;
+    // 1 verre d'Hydratis = 250 ml (compté comme de l'eau pure)
+    const hydratis_ml = (boissons.hydratis || 0) * 250;
+    hydratation_reelle_ml = eau_ml + hydratis_ml;
   }
   
   // Écart entre besoins et hydratation réelle

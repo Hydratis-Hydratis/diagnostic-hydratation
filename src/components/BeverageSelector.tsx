@@ -22,6 +22,7 @@ export interface BeverageQuantities {
   biere: number;
   boisson_sport: number;
   boisson_energisante: number;
+  hydratis: number;
 }
 
 interface BeverageItem {
@@ -31,8 +32,11 @@ interface BeverageItem {
   icon: string;
 }
 
+import hydratisIcon from "@/assets/beverages/hydratis.png";
+
 const beverages: BeverageItem[] = [
   { id: "eau", label: "Eau", volume: "25cl", icon: waterIcon },
+  { id: "hydratis", label: "Verre d'Hydratis", volume: "25cl", icon: hydratisIcon },
   { id: "soda", label: "Soda", volume: "33cl", icon: sodaIcon },
   { id: "soda_zero", label: "Soda 0%", volume: "33cl", icon: sodaZeroIcon },
   { id: "jus", label: "Jus de fruit", volume: "25cl", icon: juiceIcon },

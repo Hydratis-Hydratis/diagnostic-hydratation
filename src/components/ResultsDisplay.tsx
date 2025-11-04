@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles } from "lucide-react";
@@ -455,6 +456,35 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
         </CardContent>
       </Card>
 
+      {/* CTA Marketing - Découvrez nos produits */}
+      <Card className="border-primary/40 bg-gradient-to-br from-primary/10 to-purple-500/5">
+        <CardContent className="p-6 text-center space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-foreground">
+              Nos pastilles d'hydratation s'adaptent à vos besoins et vos préférences gustatives. 🍋
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Découvrez la solution la plus adaptée à votre profil
+            </p>
+          </div>
+          <Button 
+            size="lg" 
+            className="w-full sm:w-auto font-semibold text-lg px-8 py-6"
+            asChild
+          >
+            <a 
+              href="https://hydratis.co" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              Découvrir les produits Hydratis 💧
+            </a>
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Livraison rapide • Satisfait ou remboursé
+          </p>
+        </CardContent>
+      </Card>
 
     </div>
   );
