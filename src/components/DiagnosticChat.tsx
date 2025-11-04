@@ -20,19 +20,31 @@ const groupQuestionsByStep = (): { step: string; questions: Question[]; icon: st
     groups[step].push(q);
   });
   
+  // Définir l'ordre exact des étapes
+  const stepOrder = [
+    "Profil",
+    "Activité physique",
+    "Santé & Conditions",
+    "Habitudes",
+    "Informations"
+  ];
+  
   const stepIcons: { [key: string]: string } = {
     "Profil": "👤",
-    "Environnement": "🌡️",
     "Activité physique": "🏃",
-    "Signaux cliniques": "🩺",
+    "Santé & Conditions": "🩺",
     "Habitudes": "☕",
+    "Informations": "📋"
   };
   
-  return Object.entries(groups).map(([step, questions]) => ({
-    step,
-    questions,
-    icon: stepIcons[step] || "📋"
-  }));
+  // Créer les groupes dans l'ordre défini
+  return stepOrder
+    .filter(step => groups[step]) // Garder seulement les étapes qui existent
+    .map(step => ({
+      step,
+      questions: groups[step],
+      icon: stepIcons[step] || "📋"
+    }));
 };
 
 const questionGroups = groupQuestionsByStep();
