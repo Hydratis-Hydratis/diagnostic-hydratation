@@ -219,6 +219,22 @@ export const DiagnosticChat = () => {
     setIsComplete(false);
   };
 
+  const handleRestart = () => {
+    setCurrentGroupIndex(0);
+    setMessages([]);
+    setDiagnosticData({});
+    setIsComplete(false);
+    setIsTyping(true);
+    setShowScreen(false);
+    
+    // Relancer le message de bienvenue après un délai
+    setTimeout(() => {
+      setIsTyping(false);
+      addBotMessage("Bonjour ! Réponds à quelques questions pour que je t'aide à mieux comprendre tes besoins d'hydratation. 💧");
+      setShowScreen(true);
+    }, 1500);
+  };
+
   const currentGroup = questionGroups[currentGroupIndex];
   const totalSteps = questionGroups.length;
   const results = isComplete ? calculateHydration(diagnosticData) : null;
@@ -266,7 +282,7 @@ export const DiagnosticChat = () => {
         {/* Results Display */}
         {isComplete && results && (
           <div className="pt-4">
-            <ResultsDisplay results={results} firstName={diagnosticData.firstName} />
+            <ResultsDisplay results={results} firstName={diagnosticData.firstName} onRestart={handleRestart} />
           </div>
         )}
         

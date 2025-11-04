@@ -3,16 +3,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles } from "lucide-react";
+import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw } from "lucide-react";
 import type { HydrationResult } from "@/lib/hydrationCalculator";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface ResultsDisplayProps {
   results: HydrationResult;
   firstName?: string;
+  onRestart?: () => void;
 }
 
-export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
+export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplayProps) => {
   const totalPastilles = results.nb_pastilles_basal + results.nb_pastilles_exercice + results.nb_pastilles_post_exercice;
   
   const getStatusColor = (statut: string) => {
@@ -485,6 +486,21 @@ export const ResultsDisplay = ({ results, firstName }: ResultsDisplayProps) => {
           </p>
         </CardContent>
       </Card>
+
+      {/* Bouton Refaire le diagnostic */}
+      {onRestart && (
+        <div className="flex justify-center pt-6 pb-2">
+          <Button 
+            variant="outline" 
+            size="lg"
+            onClick={onRestart}
+            className="gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refaire le diagnostic
+          </Button>
+        </div>
+      )}
 
     </div>
   );
