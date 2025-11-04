@@ -56,7 +56,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 2 - ENVIRONNEMENT =====
   {
     id: "temperature_ext",
-    text: "🩺 **Étape 2 - Santé & Conditions**\n\nQuelle est la température extérieure habituelle ?\n\nLa température influence vos besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
+    text: "🩺 **Étape 3 - Santé & Conditions**\n\nQuelle est la température extérieure habituelle ?\n\nLa température influence vos besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
     type: "temperatureSelector",
     step: "Santé & Conditions",
   },
@@ -64,7 +64,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 3 - ACTIVITÉ PHYSIQUE =====
   {
     id: "sport_pratique",
-    text: "🏃 **Étape 3 - Activité physique**\n\nPratiques-tu une activité sportive ?",
+    text: "🏃 **Étape 2 - Activité physique**\n\nPratiques-tu une activité sportive ?",
     type: "options",
     options: ["Oui", "Non"],
     step: "Activité physique",
