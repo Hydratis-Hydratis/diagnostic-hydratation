@@ -56,9 +56,9 @@ export const questions: Question[] = [
   // ===== ÉTAPE 2 - ENVIRONNEMENT =====
   {
     id: "temperature_ext",
-    text: "🌡️ **Étape 2 - Environnement**\n\nQuelle est la température extérieure habituelle ?\n\nLa température influence vos besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
+    text: "🩺 **Étape 2 - Santé & Conditions**\n\nQuelle est la température extérieure habituelle ?\n\nLa température influence vos besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
     type: "temperatureSelector",
-    step: "Environnement",
+    step: "Santé & Conditions",
   },
   
   // ===== ÉTAPE 3 - ACTIVITÉ PHYSIQUE =====
@@ -126,29 +126,29 @@ export const questions: Question[] = [
   // ===== ÉTAPE 4 - SIGNAUX CLINIQUES =====
   {
     id: "crampes",
-    text: "🩺 **Étape 4 - Signaux cliniques**\n\nSouffres-tu régulièrement de crampes ?",
+    text: "Souffres-tu régulièrement de crampes ?",
     type: "options",
     options: ["Oui", "Non"],
-    step: "Signaux cliniques",
+    step: "Santé & Conditions",
   },
   {
     id: "courbatures",
     text: "As-tu souvent des courbatures ?",
     type: "options",
     options: ["Oui", "Non"],
-    step: "Signaux cliniques",
+    step: "Santé & Conditions",
   },
   {
     id: "urine_couleur",
     text: "Quelle est la couleur habituelle de ton urine ?",
     type: "colorScale",
-    step: "Signaux cliniques",
+    step: "Santé & Conditions",
   },
   
   // ===== ÉTAPE 5 - HABITUDES =====
   {
     id: "boissons_journalieres",
-    text: "☕ **Étape 5 - Habitudes de consommation**\n\nIndique combien de verres/portions de chaque boisson tu consommes en moyenne tous les jours.",
+    text: "☕ **Étape 4 - Habitudes de consommation**\n\nIndique combien de verres/portions de chaque boisson tu consommes en moyenne tous les jours.",
     type: "beverageSelector",
     step: "Habitudes",
   },
