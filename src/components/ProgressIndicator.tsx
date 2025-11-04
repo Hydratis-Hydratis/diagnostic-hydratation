@@ -14,11 +14,35 @@ export const ProgressIndicator = ({ current, total, steps }: ProgressIndicatorPr
 
   useEffect(() => {
     if (percentage === 100) {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+      // Configuration pour des gouttes d'eau
+      const defaults = {
+        origin: { y: 0 },
+        colors: ['#3b82f6', '#0ea5e9', '#06b6d4', '#60a5fa'],
+        gravity: 1.2,
+        scalar: 1.2,
+        drift: 0,
+        ticks: 200,
+      };
+
+      // Fonction pour créer l'effet de pluie
+      function createWaterDrop(angle: number, velocity: number) {
+        confetti({
+          ...defaults,
+          particleCount: 3,
+          angle,
+          spread: 15,
+          startVelocity: velocity,
+          shapes: ['circle'],
+        });
+      }
+
+      // Lancer plusieurs vagues de gouttes
+      createWaterDrop(90, 15);
+      setTimeout(() => createWaterDrop(80, 18), 100);
+      setTimeout(() => createWaterDrop(100, 18), 100);
+      setTimeout(() => createWaterDrop(90, 20), 200);
+      setTimeout(() => createWaterDrop(85, 16), 300);
+      setTimeout(() => createWaterDrop(95, 16), 300);
     }
   }, [percentage]);
 
