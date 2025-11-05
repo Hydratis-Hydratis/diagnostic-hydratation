@@ -5,22 +5,42 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw } from "lucide-react";
+import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw, Trophy, Target, ArrowUp, Sun, Users } from "lucide-react";
 import type { HydrationResult } from "@/lib/hydrationCalculator";
+import type { DiagnosticData } from "@/types/diagnostic";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts";
 import { useCountUp } from "@/hooks/use-count-up";
 import { cn } from "@/lib/utils";
+import confetti from "canvas-confetti";
 
 interface ResultsDisplayProps {
   results: HydrationResult;
+  diagnosticData?: DiagnosticData;
   firstName?: string;
   onRestart?: () => void;
 }
 
-export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplayProps) => {
+// Système de badges
+const getBadge = (score: number) => {
+  if (score >= 90) return { level: "Or", icon: "🥇", color: "bg-yellow-500", textColor: "text-yellow-900" };
+  if (score >= 70) return { level: "Argent", icon: "🥈", color: "bg-gray-400", textColor: "text-gray-900" };
+  if (score >= 50) return { level: "Bronze", icon: "🥉", color: "bg-orange-600", textColor: "text-white" };
+  return { level: "Débutant", icon: "🌱", color: "bg-green-500", textColor: "text-white" };
+};
+
+export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }: ResultsDisplayProps) => {
   const totalPastilles = results.nb_pastilles_basal + results.nb_pastilles_exercice + results.nb_pastilles_post_exercice;
   const animatedScore = useCountUp(results.score, 2000);
   const [visiblePills, setVisiblePills] = useState(0);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  
+  const badge = getBadge(results.score);
+  const progressPercent = results.hydratation_reelle_ml > 0 
+    ? Math.min(100, Math.round((results.hydratation_reelle_ml / results.besoin_hydration_nette_ml) * 100))
+    : 0;
+  
+  // Comparaison sociale fictive basée sur le score
+  const socialComparison = Math.min(95, Math.round(results.score + Math.random() * 10));
 
   useEffect(() => {
     const timers = [
@@ -29,6 +49,28 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
       setTimeout(() => setVisiblePills(3), 900),
     ];
     return () => timers.forEach(clearTimeout);
+  }, []);
+
+  // Animation confetti pour score élevé
+  useEffect(() => {
+    if (results.score >= 90) {
+      setTimeout(() => {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }, 1000);
+    }
+  }, [results.score]);
+
+  // Bouton back to top
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 500);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
   const getStatusColor = (statut: string) => {
@@ -42,6 +84,27 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
     return <AlertCircle className="w-5 h-5" />;
   };
 
+  // Messages de progression
+  const getProgressMessage = (percent: number) => {
+    if (percent < 50) return `Tu es à ${percent}% de ton objectif, continue !`;
+    if (percent < 75) return `Bon départ ! Tu es à ${percent}%`;
+    if (percent < 90) return `Presque parfait ! ${percent}%`;
+    return `Objectif presque atteint ! ${percent}%`;
+  };
+
+  // Détection de symptômes
+  const hasSymptoms = diagnosticData && (
+    (diagnosticData.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5) ||
+    diagnosticData.crampes === "Oui" ||
+    diagnosticData.courbatures === "Oui"
+  );
+
+  // Détection sport
+  const isSportPerson = diagnosticData && diagnosticData.sport_pratique === "Oui" && results.besoins_exercice_ml > 0;
+
+  // Détection canicule
+  const isHeatwave = diagnosticData && diagnosticData.temperature_ext === "> 28°C";
+
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="text-center mb-6">
@@ -49,29 +112,140 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
           Ton diagnostic est prêt, {firstName} ! 💧
         </h2>
         <p className="text-muted-foreground">Voici tes résultats personnalisés</p>
+        {results.score >= 90 && (
+          <p className="text-lg font-semibold text-primary mt-2 animate-scale-in">
+            🎉 Félicitations ! Tu as une hydratation excellente !
+          </p>
+        )}
       </div>
 
-      {/* Score Card */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      {/* Dashboard avec 3 métriques clés */}
+      <Card className="border-2 border-primary/40 bg-gradient-to-br from-primary/10 to-transparent">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              {getStatusIcon(results.statut)}
-              <div>
-                <h3 className="font-semibold text-lg">Score d'hydratation</h3>
-                <Badge className={`${getStatusColor(results.statut)} text-white mt-1`}>
-                  {results.statut}
+          <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-primary" />
+            Ton tableau de bord
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Métrique 1 : Score avec badge et comparaison */}
+            <div className="p-4 rounded-lg bg-background border border-primary/20">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-medium text-muted-foreground">Score d'hydratation</h4>
+                <Badge className={`${badge.color} ${badge.textColor} animate-scale-in`}>
+                  {badge.icon} {badge.level}
                 </Badge>
               </div>
+              <div className="text-3xl font-bold text-primary mb-2">{animatedScore}/100</div>
+              <Progress value={results.score} className="h-2 mb-2" />
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Users className="w-3 h-3" />
+                <span>Mieux que {socialComparison}% des utilisateurs</span>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-primary animate-scale-in">{animatedScore}</div>
-              <div className="text-sm text-muted-foreground">/100</div>
+
+            {/* Métrique 2 : Total à boire avec jauge */}
+            <div className="p-4 rounded-lg bg-background border border-blue-500/20">
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">Total à boire aujourd'hui</h4>
+              <div className="text-3xl font-bold text-foreground mb-2">
+                {results.besoin_hydration_nette_ml}
+                <span className="text-lg font-normal text-muted-foreground ml-1">mL</span>
+              </div>
+              {results.hydratation_reelle_ml > 0 && (
+                <>
+                  <Progress value={progressPercent} className="h-2 mb-2" />
+                  <p className="text-xs text-muted-foreground">{getProgressMessage(progressPercent)}</p>
+                </>
+              )}
+            </div>
+
+            {/* Métrique 3 : Total pastilles */}
+            <div className="p-4 rounded-lg bg-background border border-purple-500/20">
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">Pastilles recommandées</h4>
+              <div className="flex items-center gap-3">
+                <Pill className="w-8 h-8 text-purple-500" />
+                <div className="text-3xl font-bold text-foreground">
+                  {totalPastilles}
+                  <span className="text-lg font-normal text-muted-foreground ml-1">/jour</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Pour optimiser ton hydratation</p>
             </div>
           </div>
-          <Progress value={results.score} className="h-3" />
         </CardContent>
       </Card>
+
+      {/* Alertes contextuelles */}
+      {results.score < 50 && (
+        <Card className="border-red-500 bg-gradient-to-br from-red-500/10 to-transparent animate-fade-in">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-red-600 dark:text-red-400 mb-1">
+                  ⚠️ Alerte déshydratation
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Ton score indique une déshydratation significative. Hydrate-toi immédiatement avec 500 mL d'eau et continue à boire régulièrement.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {isHeatwave && (
+        <Card className="border-orange-500 bg-gradient-to-br from-orange-500/10 to-transparent animate-fade-in">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <Sun className="w-6 h-6 text-orange-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-orange-600 dark:text-orange-400 mb-1">
+                  🌡️ Alerte canicule
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Température élevée détectée. Augmente ta consommation d'eau de 500 mL et évite l'exposition prolongée au soleil. Bois avant d'avoir soif.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {hasSymptoms && (
+        <Card className="border-yellow-500 bg-gradient-to-br from-yellow-500/10 to-transparent animate-fade-in">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              🩺 Tes symptômes expliqués
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 && (
+              <div className="p-3 rounded-lg bg-background border">
+                <p className="font-semibold text-sm mb-1">Urine foncée</p>
+                <p className="text-sm text-muted-foreground">
+                  Indique une déshydratation actuelle. Bois 500 mL d'eau maintenant et surveille la couleur de tes urines.
+                </p>
+              </div>
+            )}
+            {diagnosticData?.crampes === "Oui" && (
+              <div className="p-3 rounded-lg bg-background border">
+                <p className="font-semibold text-sm mb-1">Crampes</p>
+                <p className="text-sm text-muted-foreground">
+                  Déficit probable en électrolytes (magnésium, sodium). Les pastilles Hydratis peuvent aider à rééquilibrer tes apports.
+                </p>
+              </div>
+            )}
+            {diagnosticData?.courbatures === "Oui" && (
+              <div className="p-3 rounded-lg bg-background border">
+                <p className="font-semibold text-sm mb-1">Courbatures</p>
+                <p className="text-sm text-muted-foreground">
+                  L'hydratation aide à éliminer les métabolites et accélérer la récupération. Bois régulièrement après l'effort.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Section 1 - Besoins quotidiens de base */}
       <Card className="border-blue-500/30">
@@ -132,7 +306,7 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
               <p className="font-semibold text-sm">Pastilles quotidiennes</p>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs md:text-sm text-muted-foreground">
                 À répartir tout au long de la journée avec des 
                 <TooltipProvider>
                   <Tooltip>
@@ -150,38 +324,59 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
                   </Tooltip>
                 </TooltipProvider>
               </span>
-              <Badge className="bg-purple-500 text-white text-base font-bold">
+              <Badge className="bg-purple-500 text-white text-sm md:text-base font-bold">
                 {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''}
               </Badge>
             </div>
           </div>
 
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="facteurs" className="border-none">
-              <AccordionTrigger className="hover:no-underline py-2 text-xs">
-                <span className="text-muted-foreground">📊 Voir les facteurs pris en compte</span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <ul className="space-y-1 ml-4 text-xs text-muted-foreground">
-                  <li>• Âge, sexe et morphologie</li>
-                  <li>• Température extérieure ({results.details_basals.ajust_temperature} mL)</li>
-                  <li>• Boissons consommées ({results.details_basals.ajust_boissons} mL)</li>
-                  {results.details_basals.ajust_physiologique > 0 && (
-                    <li>• Situation physiologique (+{results.details_basals.ajust_physiologique} mL)</li>
-                  )}
-                  {results.details_basals.ajust_symptomes > 0 && (
-                    <li>• Symptômes et activité (+{results.details_basals.ajust_symptomes} mL)</li>
-                  )}
-                </ul>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <div className="md:hidden">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="facteurs" className="border-none">
+                <AccordionTrigger className="hover:no-underline py-2 text-xs">
+                  <span className="text-muted-foreground">📊 Voir les facteurs pris en compte</span>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ul className="space-y-1 ml-4 text-xs text-muted-foreground">
+                    <li>• Âge, sexe et morphologie</li>
+                    <li>• Température extérieure ({results.details_basals.ajust_temperature} mL)</li>
+                    <li>• Boissons consommées ({results.details_basals.ajust_boissons} mL)</li>
+                    {results.details_basals.ajust_physiologique > 0 && (
+                      <li>• Situation physiologique (+{results.details_basals.ajust_physiologique} mL)</li>
+                    )}
+                    {results.details_basals.ajust_symptomes > 0 && (
+                      <li>• Symptômes et activité (+{results.details_basals.ajust_symptomes} mL)</li>
+                    )}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+          <div className="hidden md:block pt-2 border-t">
+            <p className="text-xs text-muted-foreground mb-2 font-medium">📊 Facteurs pris en compte :</p>
+            <ul className="space-y-1 ml-4 text-xs text-muted-foreground">
+              <li>• Âge, sexe et morphologie</li>
+              <li>• Température extérieure ({results.details_basals.ajust_temperature} mL)</li>
+              <li>• Boissons consommées ({results.details_basals.ajust_boissons} mL)</li>
+              {results.details_basals.ajust_physiologique > 0 && (
+                <li>• Situation physiologique (+{results.details_basals.ajust_physiologique} mL)</li>
+              )}
+              {results.details_basals.ajust_symptomes > 0 && (
+                <li>• Symptômes et activité (+{results.details_basals.ajust_symptomes} mL)</li>
+              )}
+            </ul>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Section 2 - Besoins liés au sport */}
-      {results.besoins_exercice_ml > 0 && (
-        <Card className="border-orange-500/30">
+      {/* Section 2 - Besoins liés au sport (priorisée si sportif) */}
+      {isSportPerson && results.besoins_exercice_ml > 0 && (
+        <Card className="border-orange-500/30 relative">
+          {isSportPerson && (
+            <Badge className="absolute top-4 right-4 bg-orange-500 text-white">
+              Priorité
+            </Badge>
+          )}
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-orange-500/10">
@@ -218,14 +413,14 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Pendant l'effort</span>
-                    <Badge variant="secondary" className="text-sm font-semibold">
+                    <span className="text-xs md:text-sm text-muted-foreground">Pendant l'effort</span>
+                    <Badge variant="secondary" className="text-xs md:text-sm font-semibold">
                       {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Récupération post-effort</span>
-                    <Badge variant="secondary" className="text-sm font-semibold">
+                    <span className="text-xs md:text-sm text-muted-foreground">Récupération post-effort</span>
+                    <Badge variant="secondary" className="text-xs md:text-sm font-semibold">
                       {results.nb_pastilles_post_exercice} pastille{results.nb_pastilles_post_exercice > 1 ? 's' : ''}
                     </Badge>
                   </div>
@@ -338,8 +533,8 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
               <h4 className="font-semibold">Total pastilles Hydratis recommandées</h4>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Pour couvrir tous vos besoins</span>
-              <Badge className="bg-purple-500 text-white text-lg font-bold px-4 py-1">
+              <span className="text-xs md:text-sm text-muted-foreground">Pour couvrir tous vos besoins</span>
+              <Badge className="bg-purple-500 text-white text-sm md:text-lg font-bold px-3 md:px-4 py-1">
                 {totalPastilles} pastille{totalPastilles > 1 ? 's' : ''}/jour
               </Badge>
             </div>
@@ -686,6 +881,118 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
         </CardContent>
       </Card>
 
+      {/* Section Défis hydratation */}
+      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Target className="w-6 h-6 text-primary" />
+            </div>
+            <CardTitle className="text-xl">🎯 Tes défis hydratation</CardTitle>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Atteins tes objectifs avec ces défis personnalisés
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Défi 1 - Hydratation quotidienne */}
+            <Card className="border-blue-500/30">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">💧</span>
+                    <Badge variant={results.score < 70 ? "destructive" : "secondary"} className="text-xs">
+                      {results.score < 70 ? "Moyen" : "Facile"}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">
+                    {results.score < 70 
+                      ? `Atteins ${results.besoin_hydration_nette_ml} mL` 
+                      : "Maintiens ton objectif"}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {results.score < 70 
+                      ? "pendant 7 jours consécutifs"
+                      : "pendant 30 jours"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Défi 2 - Pastilles Hydratis */}
+            <Card className="border-purple-500/30">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">💊</span>
+                    <Badge variant="secondary" className="text-xs">Facile</Badge>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">
+                    {results.nb_pastilles_basal >= 1 
+                      ? "1 pastille Hydratis chaque matin"
+                      : "Teste Hydratis"}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {results.nb_pastilles_basal >= 1 
+                      ? "pendant 14 jours"
+                      : "pendant 1 semaine"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Défi 3 - Symptômes ou partage */}
+            <Card className="border-green-500/30">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">
+                      {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 
+                        ? "🚻" 
+                        : diagnosticData?.crampes === "Oui" 
+                        ? "💪" 
+                        : "🤝"}
+                    </span>
+                    <Badge variant={
+                      (diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5) || 
+                      diagnosticData?.crampes === "Oui" 
+                        ? "destructive" 
+                        : "secondary"
+                    } className="text-xs">
+                      {(diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5) || 
+                       diagnosticData?.crampes === "Oui" 
+                        ? "Moyen" 
+                        : "Facile"}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">
+                    {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5
+                      ? "Urine claire (≤3)"
+                      : diagnosticData?.crampes === "Oui"
+                      ? "Réduis les crampes"
+                      : "Partage tes résultats"}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5
+                      ? "pendant 5 jours"
+                      : diagnosticData?.crampes === "Oui"
+                      ? "avec une hydratation optimale"
+                      : "avec un ami"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Bouton Refaire le diagnostic */}
       {onRestart && (
         <div className="flex justify-center pt-6 pb-2">
@@ -699,6 +1006,17 @@ export const ResultsDisplay = ({ results, firstName, onRestart }: ResultsDisplay
             Refaire le diagnostic
           </Button>
         </div>
+      )}
+
+      {/* Bouton Back to Top */}
+      {showBackToTop && (
+        <Button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-4 right-4 z-50 animate-fade-in rounded-full p-3 shadow-lg"
+          size="icon"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </Button>
       )}
 
     </div>

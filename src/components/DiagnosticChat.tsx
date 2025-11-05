@@ -294,7 +294,12 @@ export const DiagnosticChat = () => {
         {/* Results Display */}
         {isComplete && results && (
           <div className="pt-4">
-            <ResultsDisplay results={results} firstName={diagnosticData.firstName} onRestart={handleRestart} />
+            <ResultsDisplay 
+              results={results} 
+              diagnosticData={diagnosticData}
+              firstName={diagnosticData.firstName} 
+              onRestart={handleRestart} 
+            />
           </div>
         )}
         
