@@ -1,6 +1,12 @@
 import { DiagnosticChat } from "@/components/DiagnosticChat";
+import { useEffect } from "react";
 
 const Index = () => {
+  // Ensure page starts at the top
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}

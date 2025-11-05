@@ -71,8 +71,9 @@ export const DiagnosticChat = () => {
   };
 
   useEffect(() => {
-    // Only scroll to bottom when a new bot message is added and screen is not showing
-    if (messages.length > 0 && messages[messages.length - 1].isBot && !showScreen) {
+    // Only scroll to bottom when there are multiple messages and screen is not showing
+    // Don't scroll on the initial welcome message
+    if (messages.length > 2 && messages[messages.length - 1].isBot && !showScreen) {
       scrollToBottom();
     }
   }, [messages, showScreen]);
