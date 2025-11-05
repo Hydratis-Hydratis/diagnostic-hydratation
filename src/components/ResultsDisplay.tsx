@@ -106,7 +106,8 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
   const isHeatwave = diagnosticData && diagnosticData.temperature_ext === "> 28°C";
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <TooltipProvider>
+      <div className="space-y-4 animate-fade-in">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-foreground mb-2">
           Ton diagnostic est prêt, {firstName} ! 💧
@@ -255,7 +256,26 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
-                <p className="text-sm text-muted-foreground mb-2">Besoin total</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-sm text-muted-foreground">Besoin total</p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <div className="space-y-2 text-sm">
+                        <p className="font-semibold">💧 Répartition hydrique :</p>
+                        <ul className="space-y-1 ml-2">
+                          <li>• <strong>80%</strong> provient de l'eau que tu bois</li>
+                          <li>• <strong>20%</strong> provient de ton alimentation</li>
+                        </ul>
+                        <p className="text-xs text-muted-foreground pt-2 border-t">
+                          Volume apporté par l'alimentation : <strong>{results.apport_alimentation_basal_ml.toLocaleString('fr-FR')} mL</strong>
+                        </p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <div className="text-2xl md:text-3xl font-bold text-foreground">
                   {results.besoins_basals_brut_ml}
                   <span className="text-lg font-normal text-muted-foreground ml-1">mL</span>
@@ -906,5 +926,6 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
       )}
 
     </div>
+    </TooltipProvider>
   );
 };
