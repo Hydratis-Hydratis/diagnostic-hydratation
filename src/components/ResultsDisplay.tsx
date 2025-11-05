@@ -213,7 +213,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
       )}
 
 
-      {/* Ton plan d'hydratation - Fusion complète */}
+      {/* Ton plan d'hydratation - Cartes empilées avec barres de progression */}
       <Card className="border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
@@ -222,226 +222,216 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
             </div>
             <div className="flex-1">
               <CardTitle className="text-2xl">Ton plan d'hydratation</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Plan complet personnalisé pour aujourd'hui</p>
-            </div>
-          </div>
-
-          {/* En-tête : Total général bien visible */}
-          <div className="mt-6 p-6 rounded-lg bg-primary/10 border-2 border-primary/30">
-            <div className="text-center">
-              <p className="text-sm font-medium text-muted-foreground mb-2">Total à boire aujourd'hui</p>
-              <div className="text-5xl font-bold text-primary mb-2">
-                {results.besoin_hydration_nette_ml}
-                <span className="text-2xl font-normal text-muted-foreground ml-2">mL</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Soit environ {Math.round(results.besoin_hydration_nette_ml / 250)} verres d'eau
-              </p>
-              {results.besoins_exercice_ml > 0 && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  {results.besoins_basals_net_ml} mL (quotidien) + {results.besoins_exercice_ml} mL (sport)
-                </p>
-              )}
+              <p className="text-sm text-muted-foreground mt-1">Répartition optimale de tes besoins hydriques</p>
             </div>
           </div>
         </CardHeader>
-
-        <CardContent className="space-y-6">
-          {/* Section 1 : Besoins quotidiens + pastilles quotidiennes */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b-2">
-              <Droplet className="w-5 h-5 text-blue-500" />
-              <h4 className="font-semibold text-lg">1. Besoins quotidiens</h4>
+        
+        <CardContent className="p-6 space-y-4">
+          {/* Carte 1: Besoins quotidiens de base */}
+          <div className="relative overflow-hidden rounded-xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-blue-500/10 p-5 shadow-md">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-blue-500/20 rounded-lg">
+                  <Droplet className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-foreground">Besoins quotidiens</h3>
+                  <p className="text-sm text-muted-foreground">Hors activité physique</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                  {results.besoins_basals_net_ml}
+                  <span className="text-lg text-muted-foreground ml-1">mL</span>
+                </div>
+                <p className="text-xs text-muted-foreground">à boire</p>
+              </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <p className="text-sm text-muted-foreground">Besoin total</p>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      <div className="space-y-2 text-sm">
-                        <p className="font-semibold">💧 Répartition hydrique :</p>
-                        <ul className="space-y-1 ml-2">
-                          <li>• <strong>80%</strong> provient de l'eau que tu bois</li>
-                          <li>• <strong>20%</strong> provient de ton alimentation</li>
-                        </ul>
-                        <p className="text-xs text-muted-foreground pt-2 border-t">
-                          Volume apporté par l'alimentation : <strong>{results.apport_alimentation_basal_ml.toLocaleString('fr-FR')} mL</strong>
-                        </p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <div className="text-2xl md:text-3xl font-bold text-foreground">
-                  {results.besoins_basals_brut_ml}
-                  <span className="text-lg font-normal text-muted-foreground ml-1">mL</span>
-                </div>
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                  Besoin total
+                </span>
+                <span className="font-semibold text-foreground">{results.besoins_basals_brut_ml} mL</span>
               </div>
+              <Progress value={100} className="h-3 bg-blue-500/20" />
               
-              <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
-                <p className="text-sm text-muted-foreground mb-2">À boire</p>
-                <div className="text-2xl md:text-3xl font-bold text-foreground">
-                  {results.besoins_basals_net_ml}
-                  <span className="text-lg font-normal text-muted-foreground ml-1">mL</span>
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="flex items-center justify-between text-xs bg-background/50 rounded-lg p-2.5">
+                  <span className="text-muted-foreground">💧 À boire</span>
+                  <span className="font-bold text-blue-600 dark:text-blue-400">{results.besoins_basals_net_ml} mL</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  🍽️ {results.apport_alimentation_basal_ml} mL via l'alimentation
-                </p>
+                <div className="flex items-center justify-between text-xs bg-background/50 rounded-lg p-2.5">
+                  <span className="text-muted-foreground">🍽️ Alimentation</span>
+                  <span className="font-semibold text-foreground">{results.apport_alimentation_basal_ml} mL</span>
+                </div>
               </div>
             </div>
 
+            {/* Pastilles quotidiennes */}
             <div className={cn(
-              "p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 transition-all duration-500",
+              "mt-4 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 transition-all duration-500",
               visiblePills >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             )}>
-              <div className="flex items-center gap-2 mb-3">
-                <Pill className="w-4 h-4 text-purple-500" />
-                <p className="font-semibold text-sm">Pastilles quotidiennes</p>
-              </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs md:text-sm text-muted-foreground">
-                  À répartir tout au long de la journée avec des 
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="underline decoration-dotted cursor-help mx-1">électrolytes</span>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <p className="text-sm font-semibold mb-1">Qu'est-ce qu'un électrolyte ?</p>
-                        <p className="text-sm">
-                          Les électrolytes (sodium, potassium, magnésium) sont des minéraux 
-                          essentiels perdus dans la sueur. Ils régulent l'équilibre hydrique, 
-                          la fonction musculaire et nerveuse.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </span>
-                <Badge className="bg-purple-500 text-white text-sm md:text-base font-bold">
+                <div className="flex items-center gap-2">
+                  <Pill className="w-4 h-4 text-purple-500" />
+                  <span className="text-sm font-semibold text-foreground">Pastilles quotidiennes</span>
+                </div>
+                <Badge className="bg-purple-500 text-white font-bold">
                   {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''}
                 </Badge>
               </div>
             </div>
           </div>
 
-          {/* Section 2 : Besoins sport (si applicable) + pastilles sport */}
+          {/* Carte 2: Besoins sport (si applicable) */}
           {isSportPerson && results.besoins_exercice_ml > 0 && (
-            <>
-              <div className="border-t-2 border-dashed border-muted" />
-              
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b-2">
-                  <Activity className="w-5 h-5 text-orange-500" />
-                  <h4 className="font-semibold text-lg">2. Besoins sport</h4>
-                  <Badge className="ml-auto bg-orange-500 text-white">
-                    Priorité
-                  </Badge>
+            <div className="relative overflow-hidden rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-orange-500/10 p-5 shadow-md">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-orange-500/20 rounded-lg">
+                    <Activity className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-foreground">Besoins sport</h3>
+                    <p className="text-sm text-muted-foreground">Pendant et après l'effort</p>
+                  </div>
                 </div>
-
-                <div className="p-4 rounded-lg bg-orange-500/5 border border-orange-500/20">
-                  <p className="text-sm text-muted-foreground mb-2">Volume pour cette séance</p>
-                  <div className="text-2xl md:text-3xl font-bold text-foreground">
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
                     {results.besoins_exercice_ml}
-                    <span className="text-lg font-normal text-muted-foreground ml-1">mL</span>
+                    <span className="text-lg text-muted-foreground ml-1">mL</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Soit environ {Math.round(results.besoins_exercice_ml / results.details_exercice.duree_heures)} mL/heure d'effort
-                  </p>
+                  <p className="text-xs text-muted-foreground">par séance</p>
                 </div>
-
-                <div className={cn(
-                  "p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 transition-all duration-500",
-                  visiblePills >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                )}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Zap className="w-4 h-4 text-purple-500" />
-                    <p className="font-semibold text-sm">Pastilles sport</p>
+              </div>
+              
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-orange-500"></span>
+                    Volume total
+                  </span>
+                  <span className="font-semibold text-foreground">{results.besoins_exercice_ml} mL</span>
+                </div>
+                <Progress value={100} className="h-3 bg-orange-500/20 [&>div]:bg-orange-500" />
+                
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="flex items-center justify-between text-xs bg-background/50 rounded-lg p-2.5">
+                    <span className="text-muted-foreground">⏱️ Par heure</span>
+                    <span className="font-bold text-orange-600 dark:text-orange-400">
+                      {Math.round(results.besoins_exercice_ml / results.details_exercice.duree_heures)} mL/h
+                    </span>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs md:text-sm text-muted-foreground">Pendant l'effort</span>
-                      <Badge variant="secondary" className="text-xs md:text-sm font-semibold">
-                        {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''}
-                      </Badge>
+                  <div className="flex items-center justify-between text-xs bg-background/50 rounded-lg p-2.5">
+                    <span className="text-muted-foreground">🕐 Durée</span>
+                    <span className="font-semibold text-foreground">{results.details_exercice.duree_heures}h</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pastilles sport */}
+              <div className={cn(
+                "mt-4 space-y-2 transition-all duration-500",
+                visiblePills >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              )}>
+                <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-purple-500" />
+                      <span className="text-sm font-semibold text-foreground">Pendant l'effort</span>
                     </div>
+                    <Badge variant="secondary" className="font-semibold">
+                      {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''}
+                    </Badge>
+                  </div>
+                </div>
+                
+                {results.nb_pastilles_post_exercice > 0 && (
+                  <div className={cn(
+                    "p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 transition-all duration-500",
+                    visiblePills >= 3 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                  )}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs md:text-sm text-muted-foreground">Récupération post-effort</span>
-                      <Badge variant="secondary" className="text-xs md:text-sm font-semibold">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-purple-500" />
+                        <span className="text-sm font-semibold text-foreground">Après l'effort</span>
+                      </div>
+                      <Badge variant="secondary" className="font-semibold">
                         {results.nb_pastilles_post_exercice} pastille{results.nb_pastilles_post_exercice > 1 ? 's' : ''}
                       </Badge>
                     </div>
                   </div>
-                </div>
-
-                <div className="text-xs text-muted-foreground space-y-1 p-3 bg-background rounded-lg border">
-                  <p className="font-medium">Détails de la séance :</p>
-                  <ul className="space-y-0.5 ml-4">
-                    <li>• Pertes par transpiration : {results.details_exercice.pertes_transpiration} mL/kg/h</li>
-                    <li>• Facteur sport : {results.details_exercice.facteur_sport}</li>
-                    <li>• Durée : {results.details_exercice.duree_heures}h</li>
-                    {results.details_exercice.ajust_temperature > 0 && (
-                      <li>• Ajustement température : +{results.details_exercice.ajust_temperature} mL/h</li>
-                    )}
-                  </ul>
-                </div>
+                )}
               </div>
-            </>
+            </div>
           )}
 
-          {/* Séparateur */}
-          <div className="border-t-2 border-dashed border-muted" />
-
-          {/* Section 3 : Bilan comparatif (hydratation actuelle vs objectif) */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b-2">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              <h4 className="font-semibold text-lg">{isSportPerson && results.besoins_exercice_ml > 0 ? '3' : '2'}. Bilan comparatif</h4>
-            </div>
-
-            {/* Comparison with Current Hydration */}
-            {results.hydratation_reelle_ml > 0 && (
-              <div className="space-y-3 p-4 rounded-lg bg-background border-2">
-                <h4 className="font-semibold text-sm">Ton hydratation actuelle vs objectif</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Tu bois actuellement</span>
-                    <span className="font-semibold">{results.hydratation_reelle_ml} mL/jour</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Objectif recommandé</span>
-                    <span className="font-semibold text-primary">{results.besoin_hydration_nette_ml} mL/jour</span>
-                  </div>
-                  <Progress value={progressPercent} className="h-2" />
-                  {results.ecart_hydratation_ml > 0 ? (
-                    <div className="flex justify-between items-center text-sm text-yellow-600 dark:text-yellow-500 pt-2 border-t">
-                      <span className="font-medium">À ajouter</span>
-                      <span className="font-bold">+{results.ecart_hydratation_ml} mL</span>
-                    </div>
-                  ) : (
-                    <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-500 pt-2 border-t">
-                      <span className="font-medium">🎉 Objectif atteint !</span>
-                      <CheckCircle className="w-5 h-5" />
-                    </div>
-                  )}
+          {/* Carte 3: Comparaison avec consommation actuelle */}
+          <div className="relative overflow-hidden rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-5 shadow-md">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-primary/20 rounded-lg">
+                  <TrendingUp className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-foreground">Comparaison</h3>
+                  <p className="text-sm text-muted-foreground">Objectif vs. Consommation actuelle</p>
                 </div>
               </div>
-            )}
-
-            {/* Total Pastilles Summary */}
-            <div className="p-4 rounded-lg bg-purple-500/10 border-2 border-purple-500/30">
-              <div className="flex items-center gap-2 mb-3">
-                <Pill className="w-5 h-5 text-purple-500" />
-                <h4 className="font-semibold">Total pastilles Hydratis</h4>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Objectif total */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-primary"></span>
+                    Objectif total
+                  </span>
+                  <span className="font-bold text-primary text-lg">{results.besoin_hydration_nette_ml} mL</span>
+                </div>
+                <Progress value={100} className="h-3 bg-primary/20" />
+                <p className="text-xs text-muted-foreground text-right">
+                  ≈ {Math.round(results.besoin_hydration_nette_ml / 250)} verres de 250mL
+                </p>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs md:text-sm text-muted-foreground">Pour couvrir tous tes besoins</span>
-                <Badge className="bg-purple-500 text-white text-sm md:text-lg font-bold px-3 md:px-4 py-1">
-                  {totalPastilles} pastille{totalPastilles > 1 ? 's' : ''}/jour
-                </Badge>
+
+              {/* Consommation actuelle */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-foreground/40"></span>
+                    Consommation actuelle
+                  </span>
+                  <span className="font-semibold text-foreground">{results.hydratation_reelle_ml} mL</span>
+                </div>
+                <Progress 
+                  value={Math.min((results.hydratation_reelle_ml / results.besoin_hydration_nette_ml) * 100, 100)} 
+                  className="h-3 bg-muted [&>div]:bg-foreground/40" 
+                />
+              </div>
+
+              {/* Écart */}
+              <div className={`p-3 rounded-lg ${
+                results.ecart_hydratation_ml <= 0 
+                  ? 'bg-green-500/10 border border-green-500/20' 
+                  : 'bg-amber-500/10 border border-amber-500/20'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground">
+                    {results.ecart_hydratation_ml <= 0 ? '✅ Objectif atteint' : '⚠️ À combler'}
+                  </span>
+                  <span className={`text-lg font-bold ${
+                    results.ecart_hydratation_ml <= 0 ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'
+                  }`}>
+                    {results.ecart_hydratation_ml <= 0 ? '0' : results.ecart_hydratation_ml} mL
+                  </span>
+                </div>
               </div>
             </div>
           </div>
