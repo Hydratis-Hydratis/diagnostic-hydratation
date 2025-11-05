@@ -211,41 +211,6 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
         </Card>
       )}
 
-      {hasSymptoms && (
-        <Card className="border-yellow-500 bg-gradient-to-br from-yellow-500/10 to-transparent animate-fade-in">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              🩺 Tes symptômes expliqués
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 && (
-              <div className="p-3 rounded-lg bg-background border">
-                <p className="font-semibold text-sm mb-1">Urine foncée</p>
-                <p className="text-sm text-muted-foreground">
-                  Indique une déshydratation actuelle. Bois 500 mL d'eau maintenant et surveille la couleur de tes urines.
-                </p>
-              </div>
-            )}
-            {diagnosticData?.crampes === "Oui" && (
-              <div className="p-3 rounded-lg bg-background border">
-                <p className="font-semibold text-sm mb-1">Crampes</p>
-                <p className="text-sm text-muted-foreground">
-                  Déficit probable en électrolytes (magnésium, sodium). Les pastilles Hydratis peuvent aider à rééquilibrer tes apports.
-                </p>
-              </div>
-            )}
-            {diagnosticData?.courbatures === "Oui" && (
-              <div className="p-3 rounded-lg bg-background border">
-                <p className="font-semibold text-sm mb-1">Courbatures</p>
-                <p className="text-sm text-muted-foreground">
-                  L'hydratation aide à éliminer les métabolites et accélérer la récupération. Bois régulièrement après l'effort.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
 
       {/* Section 1 - Besoins quotidiens de base */}
       <Card className="border-blue-500/30">
@@ -329,54 +294,15 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               </Badge>
             </div>
           </div>
-
-          <div className="md:hidden">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="facteurs" className="border-none">
-                <AccordionTrigger className="hover:no-underline py-2 text-xs">
-                  <span className="text-muted-foreground">📊 Voir les facteurs pris en compte</span>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <ul className="space-y-1 ml-4 text-xs text-muted-foreground">
-                    <li>• Âge, sexe et morphologie</li>
-                    <li>• Température extérieure ({results.details_basals.ajust_temperature} mL)</li>
-                    <li>• Boissons consommées ({results.details_basals.ajust_boissons} mL)</li>
-                    {results.details_basals.ajust_physiologique > 0 && (
-                      <li>• Situation physiologique (+{results.details_basals.ajust_physiologique} mL)</li>
-                    )}
-                    {results.details_basals.ajust_symptomes > 0 && (
-                      <li>• Symptômes et activité (+{results.details_basals.ajust_symptomes} mL)</li>
-                    )}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-          <div className="hidden md:block pt-2 border-t">
-            <p className="text-xs text-muted-foreground mb-2 font-medium">📊 Facteurs pris en compte :</p>
-            <ul className="space-y-1 ml-4 text-xs text-muted-foreground">
-              <li>• Âge, sexe et morphologie</li>
-              <li>• Température extérieure ({results.details_basals.ajust_temperature} mL)</li>
-              <li>• Boissons consommées ({results.details_basals.ajust_boissons} mL)</li>
-              {results.details_basals.ajust_physiologique > 0 && (
-                <li>• Situation physiologique (+{results.details_basals.ajust_physiologique} mL)</li>
-              )}
-              {results.details_basals.ajust_symptomes > 0 && (
-                <li>• Symptômes et activité (+{results.details_basals.ajust_symptomes} mL)</li>
-              )}
-            </ul>
-          </div>
         </CardContent>
       </Card>
 
-      {/* Section 2 - Besoins liés au sport (priorisée si sportif) */}
+      {/* Besoins liés au sport - Priorité si sportif */}
       {isSportPerson && results.besoins_exercice_ml > 0 && (
         <Card className="border-orange-500/30 relative">
-          {isSportPerson && (
-            <Badge className="absolute top-4 right-4 bg-orange-500 text-white">
-              Priorité
-            </Badge>
-          )}
+          <Badge className="absolute top-4 right-4 bg-orange-500 text-white">
+            Priorité
+          </Badge>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-orange-500/10">
@@ -443,7 +369,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
         </Card>
       )}
 
-      {/* Section 3 - Total et bilan */}
+      {/* Ton bilan d'hydratation - Fusion quotidien + total */}
       <Card className="border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
@@ -451,13 +377,97 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               <TrendingUp className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-xl">Total et bilan</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Vue d'ensemble de vos besoins hydriques</p>
+              <CardTitle className="text-xl">Ton bilan d'hydratation</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Vue d'ensemble complète de tes besoins</p>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
+        <CardContent className="space-y-6">
+          {/* Section besoins quotidiens de base */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b">
+              <Droplet className="w-5 h-5 text-blue-500" />
+              <h4 className="font-semibold text-base">Besoins quotidiens de base</h4>
+            </div>
+            
+            <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
+              <p className="text-sm text-muted-foreground mb-2">Besoin hydrique total</p>
+              <div className="text-3xl font-bold text-foreground">
+                {results.besoins_basals_brut_ml}
+                <span className="text-lg font-normal text-muted-foreground ml-1">mL</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-green-500/5 border border-green-500/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">🍽️</span>
+                  <p className="text-xs font-medium text-muted-foreground">Via l'alimentation</p>
+                </div>
+                <div className="text-xl font-bold text-foreground">
+                  {results.apport_alimentation_basal_ml}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">mL</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">20%</p>
+              </div>
+              
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">💧</span>
+                  <p className="text-xs font-medium text-muted-foreground">À boire</p>
+                </div>
+                <div className="text-xl font-bold text-foreground">
+                  {results.besoins_basals_net_ml}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">mL</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">80% • {Math.round(results.besoins_basals_net_ml / 250)} verres</p>
+              </div>
+            </div>
+
+            <div className={cn(
+              "p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 transition-all duration-500",
+              visiblePills >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            )}>
+              <div className="flex items-center gap-2 mb-3">
+                <Pill className="w-4 h-4 text-purple-500" />
+                <p className="font-semibold text-sm">Pastilles quotidiennes</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs md:text-sm text-muted-foreground">
+                  À répartir tout au long de la journée avec des 
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="underline decoration-dotted cursor-help mx-1">électrolytes</span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p className="text-sm font-semibold mb-1">Qu'est-ce qu'un électrolyte ?</p>
+                        <p className="text-sm">
+                          Les électrolytes (sodium, potassium, magnésium) sont des minéraux 
+                          essentiels perdus dans la sueur. Ils régulent l'équilibre hydrique, 
+                          la fonction musculaire et nerveuse.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </span>
+                <Badge className="bg-purple-500 text-white text-sm md:text-base font-bold">
+                  {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''}
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          {/* Séparateur */}
+          <div className="border-t-2 border-dashed border-muted" />
+
+          {/* Section Total et récapitulatif */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              <h4 className="font-semibold text-base">Récapitulatif total</h4>
+            </div>
+
             <div className="p-4 rounded-lg bg-primary/10 border-2 border-primary/30">
               <p className="text-sm font-medium text-muted-foreground mb-2">Besoin hydrique total</p>
               <div className="text-3xl font-bold text-primary">
@@ -496,47 +506,47 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                 <p className="text-xs text-muted-foreground mt-0.5">80% + sport</p>
               </div>
             </div>
-          </div>
 
-          {/* Comparison with Current Hydration */}
-          {results.hydratation_reelle_ml > 0 && (
-            <div className="space-y-3 p-4 rounded-lg bg-background border">
-              <h4 className="font-semibold text-sm">Ton hydratation actuelle</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Tu bois actuellement</span>
-                  <span className="font-semibold">{results.hydratation_reelle_ml} mL/jour</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Objectif recommandé (à boire)</span>
-                  <span className="font-semibold">{results.besoin_hydration_nette_ml} mL/jour</span>
-                </div>
-                {results.ecart_hydratation_ml > 0 ? (
-                  <div className="flex justify-between items-center text-sm text-yellow-600 dark:text-yellow-500 pt-2 border-t">
-                    <span className="font-medium">À ajouter</span>
-                    <span className="font-bold">+{results.ecart_hydratation_ml} mL</span>
+            {/* Comparison with Current Hydration */}
+            {results.hydratation_reelle_ml > 0 && (
+              <div className="space-y-3 p-4 rounded-lg bg-background border">
+                <h4 className="font-semibold text-sm">Ton hydratation actuelle</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Tu bois actuellement</span>
+                    <span className="font-semibold">{results.hydratation_reelle_ml} mL/jour</span>
                   </div>
-                ) : (
-                  <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-500 pt-2 border-t">
-                    <span className="font-medium">Objectif atteint !</span>
-                    <CheckCircle className="w-5 h-5" />
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Objectif recommandé (à boire)</span>
+                    <span className="font-semibold">{results.besoin_hydration_nette_ml} mL/jour</span>
                   </div>
-                )}
+                  {results.ecart_hydratation_ml > 0 ? (
+                    <div className="flex justify-between items-center text-sm text-yellow-600 dark:text-yellow-500 pt-2 border-t">
+                      <span className="font-medium">À ajouter</span>
+                      <span className="font-bold">+{results.ecart_hydratation_ml} mL</span>
+                    </div>
+                  ) : (
+                    <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-500 pt-2 border-t">
+                      <span className="font-medium">Objectif atteint !</span>
+                      <CheckCircle className="w-5 h-5" />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Total Pastilles Summary */}
-          <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
-            <div className="flex items-center gap-2 mb-3">
-              <Pill className="w-5 h-5 text-purple-500" />
-              <h4 className="font-semibold">Total pastilles Hydratis recommandées</h4>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs md:text-sm text-muted-foreground">Pour couvrir tous vos besoins</span>
-              <Badge className="bg-purple-500 text-white text-sm md:text-lg font-bold px-3 md:px-4 py-1">
-                {totalPastilles} pastille{totalPastilles > 1 ? 's' : ''}/jour
-              </Badge>
+            {/* Total Pastilles Summary */}
+            <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+              <div className="flex items-center gap-2 mb-3">
+                <Pill className="w-5 h-5 text-purple-500" />
+                <h4 className="font-semibold">Total pastilles Hydratis recommandées</h4>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs md:text-sm text-muted-foreground">Pour couvrir tous tes besoins</span>
+                <Badge className="bg-purple-500 text-white text-sm md:text-lg font-bold px-3 md:px-4 py-1">
+                  {totalPastilles} pastille{totalPastilles > 1 ? 's' : ''}/jour
+                </Badge>
+              </div>
             </div>
           </div>
         </CardContent>
