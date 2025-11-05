@@ -42,11 +42,6 @@ export const ThematicScreen = ({
   });
   const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
 
-  // Scroll to top when screen mounts
-  useEffect(() => {
-    screenRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
   // Filter questions based on conditionals and previous answers
   const visibleQuestions = questions.filter(q => {
     if (q.conditional) {
