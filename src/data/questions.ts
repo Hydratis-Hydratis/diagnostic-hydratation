@@ -126,14 +126,14 @@ export const questions: Question[] = [
   // ===== ÉTAPE 4 - SIGNAUX CLINIQUES =====
   {
     id: "crampes",
-    text: "Souffres-tu régulièrement de crampes ?",
+    text: "Souffres-tu régulièrement de crampes ?\n\n💡 Les crampes surviennent généralement pendant l'effort.",
     type: "options",
     options: ["Oui", "Non"],
     step: "Santé & Conditions",
   },
   {
     id: "courbatures",
-    text: "As-tu souvent des courbatures ?",
+    text: "As-tu souvent des courbatures ?\n\n💡 Les courbatures surviennent généralement après l'effort.",
     type: "options",
     options: ["Oui", "Non"],
     step: "Santé & Conditions",

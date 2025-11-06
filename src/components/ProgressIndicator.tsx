@@ -84,7 +84,7 @@ export const ProgressIndicator = ({ current, total, steps }: ProgressIndicatorPr
                     index < current
                       ? "bg-primary border-primary text-primary-foreground shadow-sm"
                       : index === current
-                      ? "bg-primary/10 border-primary text-primary animate-pulse"
+                      ? "bg-primary/10 border-primary text-primary"
                       : "bg-background border-border text-muted-foreground"
                   )}
                 >
