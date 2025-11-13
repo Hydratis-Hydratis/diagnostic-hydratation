@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw, Trophy, Target, ArrowUp, Sun, Users, Calendar, Clock } from "lucide-react";
+import { Droplet, Droplets, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw, Trophy, Target, ArrowUp, Sun, Users, Calendar, Clock, Thermometer, Heart, Beaker, Shield, BookOpen, AlertTriangle, ShoppingCart, RotateCcw } from "lucide-react";
 import type { HydrationResult } from "@/lib/hydrationCalculator";
 import type { DiagnosticData } from "@/types/diagnostic";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts";
@@ -37,6 +37,22 @@ const getSportIcon = (category: string) => {
     "Gymnastique": "🤸"
   };
   return iconMap[category] || "🏅";
+};
+
+// Fonction helper pour convertir mL en Litres avec affichage intelligent
+const formatVolume = (ml: number): string => {
+  const liters = ml / 1000;
+  if (liters >= 1) {
+    return `${liters.toFixed(1)} L`;
+  } else {
+    return `${liters.toFixed(2)} L`;
+  }
+};
+
+// Pour les débits (mL/h → L/h)
+const formatDebit = (mlPerHour: number): string => {
+  const litersPerHour = mlPerHour / 1000;
+  return `${litersPerHour.toFixed(2)} L/h`;
 };
 
 // Système de badges
@@ -167,8 +183,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
             <div className="p-4 rounded-lg bg-background border border-blue-500/20">
               <h4 className="text-sm font-medium text-muted-foreground mb-2">Total à boire aujourd'hui</h4>
               <div className="text-3xl font-bold text-foreground mb-2">
-                {results.besoin_hydration_nette_ml}
-                <span className="text-lg font-normal text-muted-foreground ml-1">mL</span>
+                {formatVolume(results.besoin_hydration_nette_ml)}
               </div>
               {results.hydratation_reelle_ml > 0 && (
                 <>
@@ -194,656 +209,430 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
         </CardContent>
       </Card>
 
-      {/* Alertes contextuelles */}
-      {results.score < 50 && (
-        <Card className="border-red-500 bg-gradient-to-br from-red-500/10 to-transparent animate-fade-in">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-red-600 dark:text-red-400 mb-1">
-                  ⚠️ Alerte déshydratation
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Ton score indique une déshydratation significative. Hydrate-toi immédiatement avec 500 mL d'eau et continue à boire régulièrement.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {isHeatwave && (
-        <Card className="border-orange-500 bg-gradient-to-br from-orange-500/10 to-transparent animate-fade-in">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Sun className="w-6 h-6 text-orange-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-orange-600 dark:text-orange-400 mb-1">
-                  🌡️ Alerte canicule
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Température élevée détectée. Augmente ta consommation d'eau de 500 mL et évite l'exposition prolongée au soleil. Bois avant d'avoir soif.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-
-      {/* Ton plan d'hydratation - Cartes empilées avec barres de progression */}
-      <Card className="border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Droplet className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <CardTitle className="text-2xl">Ton plan d'hydratation</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Répartition optimale de tes besoins hydriques</p>
-            </div>
-          </div>
+      {/* Carte unifiée : Plan d'hydratation quotidien */}
+      <Card className="overflow-hidden border-2">
+        <CardHeader className="bg-gradient-to-r from-blue-500/10 to-orange-500/10">
+          <CardTitle className="flex items-center gap-2">
+            <Droplets className="w-5 h-5 text-blue-500" />
+            Ton plan d'hydratation quotidien
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Voici tes besoins personnalisés pour rester bien hydraté
+          </p>
         </CardHeader>
         
-        <CardContent className="p-6 space-y-4">
-          {/* Carte 1: Besoins quotidiens de base */}
-          <div className="relative overflow-hidden rounded-xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-blue-500/10 p-5 shadow-md">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-blue-500/20 rounded-lg">
-                  <Droplet className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg text-foreground">Besoins quotidiens</h3>
-                  <p className="text-sm text-muted-foreground">Hors activité physique</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                  {results.besoins_basals_net_ml}
-                  <span className="text-lg text-muted-foreground ml-1">mL</span>
-                </div>
-                <p className="text-xs text-muted-foreground">à boire</p>
-              </div>
-            </div>
+        <CardContent className="p-6">
+          <div className="grid md:grid-cols-2 gap-6">
             
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                  Besoin total
-                </span>
-                <span className="font-semibold text-foreground">{results.besoins_basals_brut_ml} mL</span>
-              </div>
-              <Progress value={100} className="h-3 bg-blue-500/20" />
-              
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="flex items-center justify-between text-xs bg-background/50 rounded-lg p-2.5">
-                  <span className="text-muted-foreground">💧 À boire</span>
-                  <span className="font-bold text-blue-600 dark:text-blue-400">{results.besoins_basals_net_ml} mL</span>
-                </div>
-                <div className="flex items-center justify-between text-xs bg-background/50 rounded-lg p-2.5">
-                  <span className="text-muted-foreground">🍽️ Alimentation</span>
-                  <span className="font-semibold text-foreground">{results.apport_alimentation_basal_ml} mL</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Pastilles quotidiennes */}
-            <div className={cn(
-              "mt-4 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 transition-all duration-500",
-              visiblePills >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            )}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Pill className="w-4 h-4 text-purple-500" />
-                  <span className="text-sm font-semibold text-foreground">Pastilles quotidiennes</span>
-                </div>
-                <Badge className="bg-purple-500 text-white font-bold">
-                  {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''}
-                </Badge>
-              </div>
-            </div>
-          </div>
-
-          {/* Carte 2: Besoins sport (si applicable) */}
-          {isSportPerson && results.besoins_exercice_ml > 0 && (
-            <div className="relative overflow-hidden rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-orange-500/10 p-5 shadow-md">
+            {/* COLONNE 1 : Besoins quotidiens */}
+            <div className="relative p-5 rounded-xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-blue-500/10">
               <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-orange-500/20 rounded-lg">
-                    <Activity className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-foreground">Besoins sport</h3>
-                    <p className="text-sm text-muted-foreground">Les jours d'entraînement</p>
-                  </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1">
+                    💧 Tous les jours
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Besoins de base
+                  </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
-                    {results.besoins_exercice_ml}
-                    <span className="text-lg text-muted-foreground ml-1">mL</span>
+                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                    {formatVolume(results.besoins_basals_net_ml)}
                   </div>
-                  <p className="text-xs text-muted-foreground">par séance</p>
+                  <p className="text-xs text-muted-foreground">à boire</p>
                 </div>
               </div>
 
-              {/* Sports pratiqués */}
-              {diagnosticData?.sports_selectionnes && diagnosticData.sports_selectionnes.length > 0 && (
-                <div className="mb-4 p-3 bg-background/50 rounded-lg border border-orange-500/20">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Trophy className="w-4 h-4 text-orange-500" />
-                    <span className="text-sm font-semibold text-foreground">Ton sport</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {diagnosticData.sports_selectionnes.map((sport, idx) => (
-                      <Badge key={idx} variant="outline" className="bg-orange-500/10 border-orange-500/30">
-                        {getSportIcon(sport.category)} {sport.name}
-                      </Badge>
-                    ))}
-                  </div>
-                  
-                  {/* Détails de pratique */}
-                  <div className="grid grid-cols-3 gap-2 mt-3">
-                    {diagnosticData.frequence && (
-                      <div className="flex flex-col items-center p-2 bg-background rounded">
-                        <Calendar className="w-3.5 h-3.5 text-muted-foreground mb-1" />
-                        <span className="text-xs text-muted-foreground text-center">
-                          {diagnosticData.frequence}
-                        </span>
-                      </div>
-                    )}
-                    {diagnosticData.duree_minutes && (
-                      <div className="flex flex-col items-center p-2 bg-background rounded">
-                        <Clock className="w-3.5 h-3.5 text-muted-foreground mb-1" />
-                        <span className="text-xs text-muted-foreground text-center">
-                          {diagnosticData.duree_minutes}
-                        </span>
-                      </div>
-                    )}
-                    {diagnosticData.transpiration && (
-                      <div className="flex flex-col items-center p-2 bg-background rounded">
-                        <Droplet className="w-3.5 h-3.5 text-muted-foreground mb-1" />
-                        <span className="text-xs text-muted-foreground text-center">
-                          {diagnosticData.transpiration}/10
-                        </span>
-                      </div>
-                    )}
-                  </div>
+              {/* Pastilles basales */}
+              {results.nb_pastilles_basal > 0 && (
+                <div className="mb-4">
+                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30">
+                    {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''} / jour
+                  </Badge>
                 </div>
               )}
-              
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-orange-500"></span>
-                    Volume total
-                  </span>
-                  <span className="font-semibold text-foreground">{results.besoins_exercice_ml} mL</span>
-                </div>
-                <Progress value={100} className="h-3 bg-orange-500/20 [&>div]:bg-orange-500" />
-                
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <div className="flex items-center justify-between text-xs bg-background/50 rounded-lg p-2.5">
-                    <span className="text-muted-foreground">⏱️ Par heure</span>
-                    <span className="font-bold text-orange-600 dark:text-orange-400">
-                      {Math.round(results.besoins_exercice_ml / results.details_exercice.duree_heures)} mL/h
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs bg-background/50 rounded-lg p-2.5">
-                    <span className="text-muted-foreground">🕐 Durée</span>
-                    <span className="font-semibold text-foreground">{results.details_exercice.duree_heures}h</span>
-                  </div>
-                </div>
-              </div>
 
-              {/* Pastilles sport */}
-              {results.nb_pastilles_exercice > 0 && results.jours_entrainement_par_semaine > 0 && (
-                <div className={cn(
-                  "mt-4 transition-all duration-500",
-                  visiblePills >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                )}>
-                  <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border-2 border-purple-500/30">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 bg-purple-500/20 rounded-lg">
-                          <Zap className="w-5 h-5 text-purple-500" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-foreground">Pastilles sport</h4>
-                          <p className="text-xs text-muted-foreground">Les jours d'entraînement</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                          {results.nb_pastilles_exercice}
-                        </div>
-                        <p className="text-xs text-muted-foreground">pastille{results.nb_pastilles_exercice > 1 ? 's' : ''}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 p-2 bg-background/50 rounded">
-                      <Calendar className="w-3.5 h-3.5 text-purple-500" />
-                      <span className="text-xs text-foreground">
-                        {results.jours_entrainement_par_semaine} jour{results.jours_entrainement_par_semaine > 1 ? 's' : ''} par semaine
-                      </span>
-                    </div>
-                    
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      💡 À prendre avant/pendant tes séances pour une hydratation optimale
-                    </div>
-                  </div>
+              {/* Timing de prise */}
+              <div className="space-y-2 mt-4">
+                <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
+                  <span className="text-muted-foreground">⏰ Quand prendre ?</span>
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* Carte 3: Comparaison avec consommation actuelle */}
-          <div className="relative overflow-hidden rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-5 shadow-md">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-primary/20 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg text-foreground">Comparaison</h3>
-                  <p className="text-sm text-muted-foreground">Objectif vs. Consommation actuelle</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              {/* Objectif total */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-primary"></span>
-                    Objectif total
-                  </span>
-                  <span className="font-bold text-primary text-lg">{results.besoin_hydration_nette_ml} mL</span>
-                </div>
-                <Progress value={100} className="h-3 bg-primary/20" />
-                <p className="text-xs text-muted-foreground text-right">
-                  ≈ {Math.round(results.besoin_hydration_nette_ml / 250)} verres de 250mL
-                </p>
-              </div>
-
-              {/* Consommation actuelle */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-foreground/40"></span>
-                    Consommation actuelle
-                  </span>
-                  <span className="font-semibold text-foreground">{results.hydratation_reelle_ml} mL</span>
-                </div>
-                <Progress 
-                  value={Math.min((results.hydratation_reelle_ml / results.besoin_hydration_nette_ml) * 100, 100)} 
-                  className="h-3 bg-muted [&>div]:bg-foreground/40" 
-                />
-              </div>
-
-              {/* Écart */}
-              <div className={`p-3 rounded-lg ${
-                results.ecart_hydratation_ml <= 0 
-                  ? 'bg-green-500/10 border border-green-500/20' 
-                  : 'bg-amber-500/10 border border-amber-500/20'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">
-                    {results.ecart_hydratation_ml <= 0 ? '✅ Objectif atteint' : '⚠️ À combler'}
-                  </span>
-                  <span className={`text-lg font-bold ${
-                    results.ecart_hydratation_ml <= 0 ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'
-                  }`}>
-                    {results.ecart_hydratation_ml <= 0 ? '0' : results.ecart_hydratation_ml} mL
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-
-      {/* Sources d'hydratation - Accordion */}
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="sources" className="border rounded-lg px-4 border-green-500/30 bg-gradient-to-br from-green-500/5 to-transparent">
-          <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-2">
-              <Info className="w-5 h-5 text-green-500" />
-              <span className="font-semibold">💡 D'où vient ton hydratation ? (Alimentation vs Boissons)</span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4 pt-2">
-              <div className="p-4 rounded-lg bg-background border">
-                <p className="text-sm text-muted-foreground mb-3">
-                  📚 <strong>Bon à savoir :</strong> L'hydratation provient de deux sources principales
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-500 font-bold">💧 80%</span>
-                    <span>de l'eau que tu bois (boissons)</span>
+                <ul className="text-xs space-y-1.5 ml-2">
+                  <li className="flex items-center gap-2">
+                    <span>🌅</span>
+                    <span>Le matin au réveil</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 font-bold">🍽️ 20%</span>
-                    <span>de ton alimentation (fruits, légumes, soupes, etc.)</span>
-                  </li>
+                  {results.nb_pastilles_basal > 1 && (
+                    <li className="flex items-center gap-2">
+                      <span>🌆</span>
+                      <span>Le soir avant de dormir</span>
+                    </li>
+                  )}
                 </ul>
               </div>
-              
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'À boire (80%)', value: results.besoins_basals_net_ml },
-                      { name: 'Alimentation (20%)', value: results.apport_alimentation_basal_ml }
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value} mL`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    <Cell fill="hsl(210, 100%, 50%)" />
-                    <Cell fill="hsl(120, 60%, 50%)" />
-                  </Pie>
-                  <RechartsTooltip 
-                    formatter={(value: number) => `${value} mL`}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-              
-              <div className="p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
-                <p className="text-xs text-muted-foreground">
-                  ⚡ Les besoins affichés tiennent compte de ces deux apports. L'objectif "à boire" correspond aux 80% que tu dois consommer en boissons.
-                </p>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
 
-      {/* Explication Hydratis */}
-      <Card className="border-purple-500/30 bg-gradient-to-br from-purple-500/5 to-transparent">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-purple-500/10">
-              <Sparkles className="w-6 h-6 text-purple-500" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">Pourquoi les pastilles Hydratis ?</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Une hydratation optimale et efficace</p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="space-y-3">
-            <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
-              <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
-                <Droplet className="w-4 h-4 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-sm mb-1">Hydratation accélérée</h4>
-                <p className="text-xs text-muted-foreground">
-                  Les pastilles Hydratis contiennent un mélange optimal d'électrolytes (sodium, potassium, magnésium) qui accélèrent l'absorption de l'eau par l'organisme.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
-              <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
-                <Info className="w-4 h-4 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-sm mb-1">Comment utiliser ?</h4>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Dissous une pastille dans 200-250 mL d'eau. Pour le sport, prends {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''} les jours où tu t'entraînes pour optimiser ton hydratation et ta récupération.
-                </p>
-                <div className="text-xs text-primary font-medium">
-                  💡 Astuce : Commence ta journée avec une pastille pour bien t'hydrater dès le réveil !
+              {/* Détails */}
+              <div className="border-t border-blue-500/20 mt-4 pt-3 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Besoin total</span>
+                  <span className="font-semibold">{formatVolume(results.besoins_basals_brut_ml)}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">💧 À boire</span>
+                  <span className="font-bold text-blue-600 dark:text-blue-400">{formatVolume(results.besoins_basals_net_ml)}</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="details" className="border-none">
-              <AccordionTrigger className="hover:no-underline py-2 text-xs">
-                <span className="text-muted-foreground">ℹ️ En savoir plus sur les bénéfices</span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
-                    <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
-                      <Zap className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-sm mb-1">Compensation des pertes</h4>
-                      <p className="text-xs text-muted-foreground">
-                        Lors d'un effort physique, de la chaleur ou de la déshydratation, tu perds non seulement de l'eau mais aussi des minéraux essentiels. Hydratis compense ces pertes pour maintenir ton équilibre hydrique.
-                      </p>
-                    </div>
+            {/* COLONNE 2 : Besoins sport (si applicable) */}
+            {isSportPerson && results.besoins_exercice_ml > 0 && (
+              <div className="relative p-5 rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-orange-500/10">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-1">
+                      💪 Jours d'entraînement
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Besoins additionnels
+                    </p>
                   </div>
-
-                  <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
-                    <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
-                      <Activity className="w-4 h-4 text-primary" />
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                      {formatVolume(results.besoins_exercice_ml)}
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-sm mb-1">Performance et récupération</h4>
-                      <p className="text-xs text-muted-foreground">
-                        Une hydratation optimale améliore tes performances sportives, réduit la fatigue et accélère la récupération musculaire après l'effort.
-                      </p>
-                    </div>
+                    <p className="text-xs text-muted-foreground">en plus</p>
                   </div>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </CardContent>
-      </Card>
 
-      {/* CTA Marketing - Découvrez nos produits */}
-      <Card className="border-primary/40 bg-gradient-to-br from-primary/10 to-purple-500/5">
-        <CardContent className="p-6 text-center space-y-4">
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold text-foreground">
-              Nos pastilles d'hydratation s'adaptent à vos besoins et vos préférences gustatives. 🍋
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Découvrez la solution la plus adaptée à votre profil
-            </p>
-          </div>
-          <Button 
-            size="lg" 
-            className="w-full sm:w-auto font-semibold text-lg px-8 py-6"
-            asChild
-          >
-            <a 
-              href="https://hydratis.co" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              Découvrir les produits Hydratis 💧
-            </a>
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Livraison rapide • Satisfait ou remboursé
-          </p>
-        </CardContent>
-      </Card>
+                {/* Sports pratiqués avec icônes */}
+                {diagnosticData?.sports_selectionnes && diagnosticData.sports_selectionnes.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Trophy className="w-3.5 h-3.5 text-orange-500" />
+                      <span className="text-xs font-semibold">Ton sport</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {diagnosticData.sports_selectionnes.map((sport, idx) => (
+                        <Badge key={idx} variant="outline" className="bg-orange-500/10 border-orange-500/30 text-xs">
+                          {getSportIcon(sport.category)} {sport.name}
+                        </Badge>
+                      ))}
+                    </div>
+                    
+                    {/* Détails de pratique */}
+                    <div className="grid grid-cols-3 gap-2 mt-3">
+                      {diagnosticData.frequence && (
+                        <div className="flex flex-col items-center p-2 bg-background rounded">
+                          <Calendar className="w-3 h-3 text-muted-foreground mb-1" />
+                          <span className="text-[10px] text-muted-foreground text-center leading-tight">
+                            {diagnosticData.frequence}
+                          </span>
+                        </div>
+                      )}
+                      {diagnosticData.duree_minutes && (
+                        <div className="flex flex-col items-center p-2 bg-background rounded">
+                          <Clock className="w-3 h-3 text-muted-foreground mb-1" />
+                          <span className="text-[10px] text-muted-foreground text-center leading-tight">
+                            {diagnosticData.duree_minutes} min
+                          </span>
+                        </div>
+                      )}
+                      {diagnosticData.transpiration && (
+                        <div className="flex flex-col items-center p-2 bg-background rounded">
+                          <Droplets className="w-3 h-3 text-muted-foreground mb-1" />
+                          <span className="text-[10px] text-muted-foreground text-center leading-tight">
+                            {diagnosticData.transpiration}/10
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-      {/* Section éducative - Pourquoi l'hydratation ? */}
-      <Card className="border-indigo-500/30 bg-gradient-to-br from-indigo-500/5 to-transparent">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-indigo-500/10">
-              <Sparkles className="w-6 h-6 text-indigo-500" />
-            </div>
-            <CardTitle className="text-xl">💡 Pourquoi l'hydratation est-elle si importante ?</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            {/* Article 1 - Bienfaits */}
-            <AccordionItem value="bienfaits" className="border-b">
-              <AccordionTrigger className="text-left hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span className="font-semibold">Les bienfaits d'une bonne hydratation</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-3 pt-2">
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>Performance physique optimale</strong> : Maintient l'endurance et la force musculaire</span>
+                {/* Pastilles sport */}
+                {results.nb_pastilles_exercice > 0 && (
+                  <div className="mb-4">
+                    <Badge variant="secondary" className="bg-orange-500/20 text-orange-700 dark:text-orange-300 border-orange-500/30">
+                      {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''} / séance
+                    </Badge>
+                  </div>
+                )}
+
+                {/* Timing de prise */}
+                <div className="space-y-2 mt-4">
+                  <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
+                    <span className="text-muted-foreground">⏰ Quand prendre ?</span>
+                  </div>
+                  <ul className="text-xs space-y-1.5 ml-2">
+                    <li className="flex items-center gap-2">
+                      <span>⚡</span>
+                      <span>Avant/pendant l'effort</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>Concentration mentale</strong> : Améliore la clarté d'esprit et la prise de décision</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>Régulation de la température</strong> : Évite les coups de chaleur et l'hyperthermie</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>Récupération accélérée</strong> : Élimine les toxines et réduit les courbatures</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>Santé de la peau</strong> : Maintient l'élasticité et l'éclat cutané</span>
+                    <li className="flex items-center gap-2">
+                      <span>📅</span>
+                      <span>{results.jours_entrainement_par_semaine}x par semaine</span>
                     </li>
                   </ul>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
 
-            {/* Article 2 - Risques de déshydratation */}
-            <AccordionItem value="risques" className="border-b">
-              <AccordionTrigger className="text-left hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-red-500" />
-                  <span className="font-semibold">Les risques de la déshydratation</span>
+                {/* Détails */}
+                <div className="border-t border-orange-500/20 mt-4 pt-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Volume total</span>
+                    <span className="font-semibold">{formatVolume(results.besoins_exercice_ml)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">⏱️ Par heure</span>
+                    <span className="font-bold text-orange-600 dark:text-orange-400">
+                      {formatDebit(Math.round(results.besoins_exercice_ml / results.details_exercice.duree_heures))}
+                    </span>
+                  </div>
                 </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-3 pt-2">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Une déshydratation même légère (perte de 2% du poids corporel) peut avoir des conséquences :
+              </div>
+            )}
+          </div>
+
+          {/* Alertes conditionnelles SOUS la carte unifiée */}
+          <div className="mt-4 space-y-3">
+            {/* Alerte déshydratation */}
+            {results.score < 50 && (
+              <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-red-500/30 bg-red-500/5">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">Déshydratation détectée</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Ton score indique une déshydratation significative. Hydrate-toi immédiatement avec {formatVolume(500)} et continue à boire régulièrement.
                   </p>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                </div>
+              </div>
+            )}
+
+            {/* Alerte canicule */}
+            {isHeatwave && (
+              <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-orange-500/30 bg-orange-500/5">
+                <Thermometer className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">Alerte canicule</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Température élevée détectée. Augmente ta consommation d'eau de {formatVolume(500)} et évite l'exposition prolongée au soleil.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Alerte symptômes */}
+            {hasSymptoms && (
+              <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-red-500/30 bg-red-500/5">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">Symptômes détectés</h4>
+                  <p className="text-xs text-muted-foreground">
+                    {diagnosticData?.crampes === "Oui" && "Des crampes ont été signalées. "}
+                    {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 && "Couleur d'urine foncée détectée. "}
+                    Augmente ton hydratation dès maintenant.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+
+
+      {/* BLOC 3 : Pour en savoir plus */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+          <Info className="w-6 h-6 text-primary" />
+          Pour en savoir plus
+        </h2>
+        
+        <Accordion type="multiple" className="space-y-3">
+          
+          {/* Accordéon 1 : Pourquoi Hydratis */}
+          <AccordionItem value="hydratis" className="border rounded-lg px-4">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold">Pourquoi les pastilles Hydratis ?</h3>
+                  <p className="text-xs text-muted-foreground">Composition et avantages</p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 pb-2">
+              <div className="space-y-4">
+                {/* Composition */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    <Beaker className="w-4 h-4" />
+                    Composition scientifique
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="p-3 bg-muted rounded-lg">
+                      <div className="font-semibold mb-1">Électrolytes</div>
+                      <ul className="space-y-1 text-muted-foreground">
+                        <li>• Sodium</li>
+                        <li>• Potassium</li>
+                        <li>• Magnésium</li>
+                      </ul>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <div className="font-semibold mb-1">Minéraux</div>
+                      <ul className="space-y-1 text-muted-foreground">
+                        <li>• Zinc</li>
+                        <li>• Manganèse</li>
+                        <li>• Chlorure</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Avantages */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" />
+                    Avantages vs eau simple
+                  </h4>
+                  <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
-                      <span className="text-red-500 font-bold">⚠</span>
-                      <span><strong>Baisse de performance</strong> : -20% d'efficacité physique et mentale</span>
+                      <Zap className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span><strong>Absorption 3x plus rapide</strong> grâce aux électrolytes</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-red-500 font-bold">⚠</span>
-                      <span><strong>Crampes et fatigue musculaire</strong> : Déséquilibre électrolytique</span>
+                      <Shield className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                      <span><strong>Meilleure rétention</strong> de l'eau dans l'organisme</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-red-500 font-bold">⚠</span>
-                      <span><strong>Maux de tête</strong> : Diminution du volume sanguin</span>
+                      <Activity className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                      <span><strong>Performance sportive</strong> optimisée</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-red-500 font-bold">⚠</span>
-                      <span><strong>Troubles digestifs</strong> : Constipation et ballonnements</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500 font-bold">⚠</span>
-                      <span><strong>Risque rénal</strong> : Calculs et infections urinaires</span>
+                      <Heart className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                      <span><strong>Récupération accélérée</strong> après l'effort</span>
                     </li>
                   </ul>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
 
-            {/* Article 3 - Rôle des électrolytes */}
-            <AccordionItem value="electrolytes" className="border-b">
-              <AccordionTrigger className="text-left hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-yellow-500" />
-                  <span className="font-semibold">Le rôle des électrolytes</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-3 pt-2">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Les électrolytes sont des minéraux essentiels pour le bon fonctionnement de l'organisme :
+                {/* Comment utiliser */}
+                <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border">
+                  <h4 className="font-semibold text-sm mb-2">💡 Mode d'emploi</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Dissous une pastille dans {formatVolume(200)}-{formatVolume(250)} d'eau (environ 1 verre). 
+                    {results.nb_pastilles_exercice > 0 && ` Pour le sport, prends ${results.nb_pastilles_exercice} pastille${results.nb_pastilles_exercice > 1 ? 's' : ''} les jours d'entraînement.`}
                   </p>
-                  <div className="space-y-3">
-                    <div className="p-3 rounded-lg bg-background border">
-                      <p className="font-semibold text-sm mb-1">💧 Sodium (Na+)</p>
-                      <p className="text-xs text-muted-foreground">
-                        Régule l'équilibre hydrique et la pression artérielle. Principal électrolyte perdu dans la sueur.
-                      </p>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Accordéon 2 : Tout savoir sur l'hydratation */}
+          <AccordionItem value="education" className="border rounded-lg px-4">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-500/10">
+                  <BookOpen className="w-5 h-5 text-blue-500" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold">Tout savoir sur l'hydratation</h3>
+                  <p className="text-xs text-muted-foreground">Bienfaits, risques et conseils</p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 pb-2">
+              <div className="space-y-4">
+                
+                {/* Sources d'hydratation */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">💧 Sources d'hydratation</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-blue-500/5 rounded-lg border border-blue-500/20">
+                      <div className="text-2xl font-bold text-blue-600 mb-1">80%</div>
+                      <div className="text-xs text-muted-foreground">Boissons</div>
+                      <div className="text-xs mt-1">Eau, thé, infusions...</div>
                     </div>
-                    <div className="p-3 rounded-lg bg-background border">
-                      <p className="font-semibold text-sm mb-1">🔋 Potassium (K+)</p>
-                      <p className="text-xs text-muted-foreground">
-                        Essentiel pour la contraction musculaire et la fonction cardiaque.
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-background border">
-                      <p className="font-semibold text-sm mb-1">💪 Magnésium (Mg2+)</p>
-                      <p className="text-xs text-muted-foreground">
-                        Prévient les crampes, favorise la récupération et réduit la fatigue.
-                      </p>
+                    <div className="p-3 bg-green-500/5 rounded-lg border border-green-500/20">
+                      <div className="text-2xl font-bold text-green-600 mb-1">20%</div>
+                      <div className="text-xs text-muted-foreground">Alimentation</div>
+                      <div className="text-xs mt-1">Fruits, légumes...</div>
                     </div>
                   </div>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
 
-            {/* Article 4 - Articles Hydratis */}
-            <AccordionItem value="blog" className="border-none">
-              <AccordionTrigger className="text-left hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <Info className="w-5 h-5 text-blue-500" />
-                  <span className="font-semibold">En savoir plus sur le blog Hydratis</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-3 pt-2">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Découvrez nos articles scientifiques et conseils pratiques :
-                  </p>
-                  <div className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <a href="https://hydratis.co/blogs/hydratation" target="_blank" rel="noopener noreferrer">
-                        📖 Guide complet de l'hydratation sportive
-                      </a>
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <a href="https://hydratis.co/blogs/sante" target="_blank" rel="noopener noreferrer">
-                        🩺 Hydratation et santé quotidienne
-                      </a>
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <a href="https://hydratis.co/blogs/nutrition" target="_blank" rel="noopener noreferrer">
-                        🥗 Alimentation et hydratation
-                      </a>
-                    </Button>
+                {/* Bienfaits */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-green-500" />
+                    Bienfaits d'une bonne hydratation
+                  </h4>
+                  <div className="grid grid-cols-1 gap-2 text-xs">
+                    <div className="flex items-start gap-2 p-2 bg-muted rounded">
+                      <span>🧠</span>
+                      <span><strong>Concentration</strong> : Améliore les fonctions cognitives</span>
+                    </div>
+                    <div className="flex items-start gap-2 p-2 bg-muted rounded">
+                      <span>💪</span>
+                      <span><strong>Performance</strong> : Optimise les capacités physiques</span>
+                    </div>
+                    <div className="flex items-start gap-2 p-2 bg-muted rounded">
+                      <span>✨</span>
+                      <span><strong>Peau</strong> : Maintient l'élasticité et l'éclat</span>
+                    </div>
+                    <div className="flex items-start gap-2 p-2 bg-muted rounded">
+                      <span>🔥</span>
+                      <span><strong>Métabolisme</strong> : Régule la température corporelle</span>
+                    </div>
                   </div>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </CardContent>
-      </Card>
+
+                {/* Risques déshydratation */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-red-500" />
+                    Risques de la déshydratation
+                  </h4>
+                  <div className="space-y-2 text-xs">
+                    <div className="p-2 bg-red-500/5 border border-red-500/20 rounded">
+                      <strong>Légère (1-2%)</strong> : Soif, fatigue, baisse de concentration
+                    </div>
+                    <div className="p-2 bg-red-500/10 border border-red-500/30 rounded">
+                      <strong>Modérée (3-5%)</strong> : Maux de tête, vertiges, crampes
+                    </div>
+                    <div className="p-2 bg-red-500/15 border border-red-500/40 rounded">
+                      <strong>Sévère (&gt;5%)</strong> : Confusion, risque vital - consulter un médecin
+                    </div>
+                  </div>
+                </div>
+
+                {/* Conseils personnalisés */}
+                {diagnosticData && (
+                  <div className="p-4 bg-gradient-to-br from-blue-500/5 to-blue-500/10 rounded-lg border">
+                    <h4 className="font-semibold text-sm mb-2">🎯 Conseils pour toi</h4>
+                    <ul className="space-y-1.5 text-xs">
+                      {diagnosticData.age && Number(diagnosticData.age) > 60 && (
+                        <li>• Bois régulièrement même sans soif (sensation diminue avec l'âge)</li>
+                      )}
+                      {isSportPerson && (
+                        <li>• Commence à t'hydrater 2h avant l'effort</li>
+                      )}
+                      {diagnosticData.temperature_ext && diagnosticData.temperature_ext.includes(">") && (
+                        <li>• Augmente ta consommation par temps chaud</li>
+                      )}
+                      {diagnosticData.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 && (
+                        <li>• Surveille la couleur de tes urines (jaune pâle = bien hydraté)</li>
+                      )}
+                      <li>• Garde toujours une bouteille d'eau à portée de main</li>
+                      <li>• Bois par petites gorgées régulières plutôt qu'en grande quantité</li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
 
       {/* Section Défis hydratation */}
       <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
@@ -957,20 +746,37 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
         </CardContent>
       </Card>
 
-      {/* Bouton Refaire le diagnostic */}
-      {onRestart && (
-        <div className="flex justify-center pt-6 pb-2">
+      {/* BLOC 4 : Actions finales */}
+      <div className="mt-8 space-y-4">
+        {/* CTA Principal : Commander */}
+        <Card className="border-2 border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardContent className="p-6 text-center">
+            <h3 className="text-xl font-bold mb-2">Prêt à optimiser ton hydratation ?</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Commande tes pastilles Hydratis et profite de ta routine personnalisée
+            </p>
+            <Button size="lg" className="w-full sm:w-auto" asChild>
+              <a href="https://hydratis.co" target="_blank" rel="noopener noreferrer">
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Commander Hydratis
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Bouton recommencer */}
+        {onRestart && (
           <Button 
+            onClick={onRestart} 
             variant="outline" 
             size="lg"
-            onClick={onRestart}
-            className="gap-2"
+            className="w-full gap-2"
           >
-            <RefreshCw className="w-4 h-4" />
-            Refaire le diagnostic
+            <RotateCcw className="w-4 h-4" />
+            Recommencer le diagnostic
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Bouton Back to Top */}
       {showBackToTop && (
