@@ -209,28 +209,6 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
         </CardContent>
       </Card>
 
-      {/* Carte supplémentaire : Besoins sport (si entraînement aujourd'hui) */}
-      {isSportPerson && results.besoins_exercice_ml > 0 && (
-        <Card className="border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Activity className="w-5 h-5 text-orange-500" />
-                  <h3 className="font-semibold text-foreground">+ Sport</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  si tu t'entraînes aujourd'hui
-                </p>
-                <div className="text-4xl font-bold text-orange-600 dark:text-orange-400">
-                  +{formatVolume(results.besoins_exercice_ml)}
-                </div>
-              </div>
-              <div className="text-6xl opacity-20">💪</div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Carte unifiée : Plan d'hydratation quotidien */}
       <Card className="overflow-hidden border-2">
