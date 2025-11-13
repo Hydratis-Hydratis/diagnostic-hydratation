@@ -74,6 +74,10 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
     ? Math.min(100, Math.round((results.hydratation_reelle_ml / results.besoin_hydration_nette_ml) * 100))
     : 0;
   
+  // Calculs pour la jauge d'hydratation
+  const pourcentageHydratation = Math.min(100, Math.round((results.hydratation_reelle_ml / results.besoins_basals_net_ml) * 100));
+  const volumeACombler = Math.max(0, results.besoins_basals_net_ml - results.hydratation_reelle_ml);
+  
   // Comparaison sociale fictive basée sur le score
   const socialComparison = Math.min(95, Math.round(results.score + Math.random() * 10));
 
@@ -179,18 +183,81 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               </div>
             </div>
 
-            {/* Métrique 2 : Total à boire avec jauge */}
+            {/* Métrique 2 : Jauge d'hydratation comparaison */}
             <div className="p-4 rounded-lg bg-background border border-blue-500/20">
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">Total à boire aujourd'hui</h4>
-              <div className="text-3xl font-bold text-foreground mb-2">
-                {formatVolume(results.besoins_basals_net_ml)}
+              <div className="flex items-center gap-2 mb-3">
+                <Droplets className="w-4 h-4 text-blue-500" />
+                <h4 className="text-sm font-medium text-muted-foreground">Ton hydratation actuelle</h4>
               </div>
-              {results.hydratation_reelle_ml > 0 && (
-                <>
-                  <Progress value={progressPercent} className="h-2 mb-2" />
-                  <p className="text-xs text-muted-foreground">{getProgressMessage(progressPercent)}</p>
-                </>
-              )}
+              <p className="text-xs text-muted-foreground mb-4">Objectif vs. Consommation actuelle</p>
+              
+              <div className="space-y-4">
+                {/* Ligne 1 : Objectif idéal */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-foreground">🎯 Objectif idéal</span>
+                    <span className="text-sm font-bold text-blue-600">{formatVolume(results.besoins_basals_net_ml)}</span>
+                  </div>
+                  <div className="relative h-2 bg-blue-500/10 rounded-full border border-blue-500/30">
+                    <div className="absolute inset-0 bg-blue-500 rounded-full" style={{ width: '100%' }} />
+                  </div>
+                </div>
+
+                {/* Ligne 2 : Consommation actuelle */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-foreground">💧 Consommation actuelle</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-foreground">{formatVolume(results.hydratation_reelle_ml)}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {pourcentageHydratation}%
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="relative h-3 bg-gray-200 dark:bg-gray-800 rounded-full border-2 border-blue-500/40 overflow-hidden">
+                    {/* Barre remplie avec animation */}
+                    <div 
+                      className={cn(
+                        "absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out",
+                        "bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-[length:200%_100%]",
+                        "animate-water-flow"
+                      )}
+                      style={{ width: `${pourcentageHydratation}%` }}
+                    >
+                      {/* Gouttes d'eau animées */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Droplets className="w-3 h-3 text-white/80 animate-bounce" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ligne 3 : À combler (si écart > 0) */}
+                {volumeACombler > 0 && (
+                  <div className="p-3 bg-orange-500/5 rounded-lg border border-orange-500/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-orange-500" />
+                        <span className="text-xs font-medium text-foreground">À combler</span>
+                      </div>
+                      <span className="text-lg font-bold text-orange-600">{formatVolume(volumeACombler)}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Bois progressivement tout au long de la journée
+                    </p>
+                  </div>
+                )}
+
+                {/* Message de félicitations si objectif atteint */}
+                {pourcentageHydratation >= 100 && (
+                  <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/30">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                      Objectif atteint ! Continue ainsi 🎉
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Métrique 3 : Total pastilles */}
