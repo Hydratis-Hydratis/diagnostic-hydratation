@@ -372,9 +372,34 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
     }
   }
 
-  // Score d'hydratation : (Hydratation actuelle / Besoin net à boire) * 100
-  let score = Math.round((hydratation_reelle_ml / besoin_total_ml) * 100);
-  score = Math.min(score, 100); // Plafonner à 100/100
+  // Score d'hydratation : (Hydratation actuelle / Besoins basaux nets) * 100
+  let score = Math.round((hydratation_reelle_ml / besoins_basals_net_ml) * 100);
+  
+  // Ajustements du score basés sur les symptômes cliniques
+  let ajustement_symptomes = 0;
+
+  // 1. Couleur de l'urine (indicateur le plus fiable)
+  if (urine_couleur >= 6) {
+    ajustement_symptomes -= 15; // Urines très foncées : déshydratation sévère
+  } else if (urine_couleur >= 4) {
+    ajustement_symptomes -= 10; // Urines moyennement foncées : début de déshydratation
+  } else if (urine_couleur >= 3) {
+    ajustement_symptomes -= 5; // Urines légèrement foncées : hydratation limite
+  }
+  // Si urine_couleur <= 2 : pas d'ajustement (urines claires = bonne hydratation)
+
+  // 2. Crampes musculaires (déséquilibre hydro-électrolytique)
+  if (crampes === "Oui") {
+    ajustement_symptomes -= 8;
+  }
+
+  // 3. Courbatures (mauvaise élimination des toxines)
+  if (courbatures === "Oui") {
+    ajustement_symptomes -= 5;
+  }
+
+  // Appliquer les ajustements et borner le score entre 0 et 100
+  score = Math.max(0, Math.min(100, score + ajustement_symptomes));
 
   // Statut
   const statut = score >= 85 ? "Hydratation optimale"
