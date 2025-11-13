@@ -220,37 +220,106 @@ export const ResultsDisplay = ({
         const gaugeTarget = results.besoins_basals_net_ml;
         const gaugeCurrent = Math.max(0, Math.min(results.hydratation_reelle_ml ?? 0, gaugeTarget));
         const gaugePercent = gaugeTarget > 0 ? Math.min(100, Math.round(gaugeCurrent / gaugeTarget * 100)) : 0;
-        return <Card className="border-2 border-primary/20 bg-accent/5">
+        return <Card className="border-2 border-primary/20 bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-blue-600/10 overflow-hidden">
             <CardContent className="p-6">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Droplets className="w-5 h-5 text-primary animate-pulse-soft" />
-                    <h3 className="font-semibold text-foreground">Jauge d'hydratation</h3>
+                    <Droplets className="w-6 h-6 text-blue-500 animate-pulse-soft" />
+                    <h3 className="font-bold text-lg text-foreground">Jauge d'hydratation</h3>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {formatVolume(gaugeCurrent)} / {formatVolume(gaugeTarget)} (besoins basaux)
+                    {formatVolume(gaugeCurrent)} / {formatVolume(gaugeTarget)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-primary">{gaugePercent}%</div>
+                  <div className="text-4xl font-bold bg-gradient-to-br from-blue-500 to-cyan-600 bg-clip-text text-transparent">
+                    {gaugePercent}%
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">complété</p>
                 </div>
               </div>
 
-              <div className="mt-4">
-                <div className="relative h-6 w-full overflow-hidden rounded-full border bg-background">
-                  <div className="absolute inset-0 bg-muted" />
-                  <div className="relative h-full rounded-full bg-primary animate-pulse-soft" style={{
-                  width: `${gaugePercent}%`
-                }}>
-                    <Droplet className="absolute top-1 left-3 h-4 w-4 text-primary-foreground/60" />
-                    <Droplet className="absolute top-1 left-8 h-4 w-4 text-primary-foreground/40" />
-                    <Droplet className="absolute top-1 left-14 h-4 w-4 text-primary-foreground/50" />
+              <div className="relative">
+                {/* Jauge avec effet liquide */}
+                <div className="relative h-16 w-full overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-b from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/50 shadow-inner">
+                  {/* Fond animé avec vagues */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-100/20 via-cyan-100/20 to-blue-100/20 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20" />
+                  
+                  {/* Eau avec gradient et animation de vague */}
+                  <div 
+                    className="absolute bottom-0 left-0 right-0 transition-all duration-1000 ease-out"
+                    style={{ height: `${gaugePercent}%` }}
+                  >
+                    <div className="relative h-full bg-gradient-to-t from-blue-500 via-blue-400 to-cyan-400 dark:from-blue-600 dark:via-blue-500 dark:to-cyan-500">
+                      {/* Effet de brillance */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse-soft" />
+                      
+                      {/* Vague animée en haut */}
+                      <div className="absolute -top-2 left-0 right-0 h-4 overflow-hidden">
+                        <div className="absolute inset-0 animate-pulse-soft">
+                          <svg className="w-full h-full" viewBox="0 0 1200 40" preserveAspectRatio="none">
+                            <path 
+                              d="M0,20 Q150,0 300,20 T600,20 T900,20 T1200,20 L1200,40 L0,40 Z" 
+                              fill="currentColor" 
+                              className="text-cyan-300/50 dark:text-cyan-400/30"
+                            >
+                              <animate
+                                attributeName="d"
+                                dur="3s"
+                                repeatCount="indefinite"
+                                values="
+                                  M0,20 Q150,0 300,20 T600,20 T900,20 T1200,20 L1200,40 L0,40 Z;
+                                  M0,20 Q150,30 300,20 T600,20 T900,20 T1200,20 L1200,40 L0,40 Z;
+                                  M0,20 Q150,0 300,20 T600,20 T900,20 T1200,20 L1200,40 L0,40 Z
+                                "
+                              />
+                            </path>
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      {/* Gouttelettes flottantes */}
+                      {gaugePercent > 10 && (
+                        <>
+                          <Droplet className="absolute top-2 left-[15%] h-5 w-5 text-white/60 animate-bounce" style={{ animationDelay: '0s', animationDuration: '2s' }} />
+                          <Droplet className="absolute top-4 left-[40%] h-4 w-4 text-white/40 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '2.5s' }} />
+                          <Droplet className="absolute top-3 left-[65%] h-5 w-5 text-white/50 animate-bounce" style={{ animationDelay: '1s', animationDuration: '2.2s' }} />
+                          <Droplet className="absolute top-2 right-[15%] h-4 w-4 text-white/45 animate-bounce" style={{ animationDelay: '1.5s', animationDuration: '2.8s' }} />
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Marques de niveau */}
+                  <div className="absolute inset-y-0 left-0 right-0 flex flex-col justify-between py-2 px-2 pointer-events-none">
+                    {[75, 50, 25].map((mark) => (
+                      <div key={mark} className="flex items-center justify-between">
+                        <div className={cn(
+                          "h-px flex-1",
+                          gaugePercent >= mark ? "bg-white/20" : "bg-blue-500/20"
+                        )} />
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <p className="mt-2 text-sm">
-                  {gaugePercent >= 100 ? "Excellent ! Tu as atteint tes besoins basaux 🎉" : `Encore ${formatVolume(gaugeTarget - gaugeCurrent)} à combler`}
-                </p>
+
+                {/* Message de progression */}
+                <div className="mt-4 text-center">
+                  <p className={cn(
+                    "text-sm font-medium",
+                    gaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
+                  )}>
+                    {gaugePercent >= 100 
+                      ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" 
+                      : (
+                        <>
+                          Encore <span className="font-bold text-primary">{formatVolume(gaugeTarget - gaugeCurrent)}</span> à boire
+                        </>
+                      )
+                    }
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>;
