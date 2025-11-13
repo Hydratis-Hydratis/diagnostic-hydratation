@@ -196,9 +196,7 @@ export const ResultsDisplay = ({
               {results.hydratation_reelle_ml > 0 && <>
                   <Progress value={progressPercent} className="h-2 mb-2" />
                 </>}
-              {getProgressMessage() && (
-                <p className="text-xs text-muted-foreground">{getProgressMessage()}</p>
-              )}
+              {getProgressMessage() && <p className="text-xs text-muted-foreground">{getProgressMessage()}</p>}
             </div>
 
             {/* Métrique 3 : Total pastilles */}
@@ -227,7 +225,7 @@ export const ResultsDisplay = ({
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Droplets className="w-5 h-5 text-blue-500 animate-pulse-soft" />
-                <h3 className="font-bold text-base text-foreground">Jauge d'hydratation</h3>
+                <h3 className="font-bold text-base text-foreground">Comparaison    </h3>
               </div>
 
               <div className="relative w-full">
@@ -242,19 +240,14 @@ export const ResultsDisplay = ({
                   </div>
                   
                   {/* Label "Ton hydratation actuelle" - dynamique selon gaugePercent */}
-                  <div 
-                    className="absolute flex flex-col items-center transition-all duration-1000 ease-out"
-                    style={{ 
-                      left: `${Math.max(15, Math.min(gaugePercent, 100))}%`, 
-                      transform: 'translateX(-50%)' 
-                    }}
-                  >
+                  <div className="absolute flex flex-col items-center transition-all duration-1000 ease-out" style={{
+                  left: `${Math.max(15, Math.min(gaugePercent, 100))}%`,
+                  transform: 'translateX(-50%)'
+                }}>
                     <span className="text-[10px] font-medium text-foreground">Ton hydratation actuelle</span>
                     <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">
                       {formatVolume(gaugeCurrent)}
-                      {gaugePercent > 100 && (
-                        <span className="ml-1 text-[10px]">({gaugePercent}%)</span>
-                      )}
+                      {gaugePercent > 100 && <span className="ml-1 text-[10px]">({gaugePercent}%)</span>}
                     </span>
                   </div>
                 </div>
@@ -475,11 +468,9 @@ export const ResultsDisplay = ({
               <span className="text-muted-foreground">💧 Comment ?</span>
             </div>
             <div className="text-xs ml-2 p-2 bg-orange-500/5 rounded">
-              <span>1 pastille dans 1 verre d'eau avant/pendant l'effort</span>
+              <span>1 pastille dans 1 verre d'eau pendant/après l'effort</span>
             </div>
-            <div className="text-xs ml-2 text-muted-foreground">
-              📅 {results.jours_entrainement_par_semaine}x par semaine
-            </div>
+            
           </div>
 
                 {/* Détails */}
