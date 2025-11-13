@@ -138,7 +138,11 @@ export const DiagnosticChat = () => {
       const sexe = answers.sexe === "Un homme" ? "un homme" : "une femme";
       const age = answers.age;
       const poids = answers.poids_kg;
-      if (age && poids) {
+      const taille = answers.taille_cm;
+      
+      if (age && poids && taille) {
+        return `Je suis ${sexe} de ${age} ans, ${taille} cm, ${poids} kg 👌`;
+      } else if (age && poids) {
         return `Je suis ${sexe} de ${age} ans de ${poids} kg 👌`;
       }
       return `Mes informations de profil sont enregistrées.`;
@@ -148,16 +152,86 @@ export const DiagnosticChat = () => {
       const sportPratique = answers.sport_pratique;
       if (sportPratique === "Oui") {
         const sports = answers.sports_selectionnes;
+        const duree = answers.duree_minutes;
+        const frequence = answers.frequence;
+        const transpiration = answers.transpiration;
+        
         if (sports && Array.isArray(sports)) {
           const sportNames = sports.map((s: any) => s.name).join(" et ");
-          return `Je pratique du ${sportNames} 💪`;
+          let message = `Je pratique du ${sportNames} 💪`;
+          
+          // Ajouter la fréquence
+          if (frequence) {
+            message += ` ${frequence.toLowerCase()}`;
+          }
+          
+          // Ajouter la durée
+          if (duree) {
+            message += `, ${duree} par séance`;
+          }
+          
+          // Ajouter la transpiration
+          if (transpiration) {
+            message += `, transpiration ${transpiration}/10 💦`;
+          }
+          
+          return message;
         }
         return "Mes informations sportives sont enregistrées.";
       }
-      return "Mon niveau d'activité est enregistré.";
+      return "Je ne pratique pas de sport régulièrement.";
     } else if (stepName === "Signaux cliniques") {
+      const couleurUrine = answers.urine_couleur;
+      const crampes = answers.crampes;
+      
+      let message = "Santé : ";
+      const details = [];
+      
+      if (couleurUrine) {
+        details.push(`urine ${couleurUrine.toLowerCase()}`);
+      }
+      
+      if (crampes) {
+        details.push(crampes === "Oui" ? "crampes présentes" : "pas de crampes");
+      }
+      
+      if (details.length > 0) {
+        message += details.join(", ") + " 🩺";
+        return message;
+      }
+      
       return "Mes signaux cliniques sont notés 🩺";
     } else if (stepName === "Habitudes") {
+      const boissons = answers.boissons_journalieres;
+      
+      if (boissons) {
+        // Convertir l'objet en array et filtrer les boissons consommées
+        const boissonsList = [
+          { name: "Eau", quantity: boissons.eau || 0 },
+          { name: "Café", quantity: (boissons.cafe_the || 0) + (boissons.cafe_sucre || 0) },
+          { name: "Soda", quantity: boissons.soda || 0 },
+          { name: "Soda zero", quantity: boissons.soda_zero || 0 },
+          { name: "Jus", quantity: boissons.jus || 0 },
+          { name: "Vin", quantity: boissons.vin || 0 },
+          { name: "Bière", quantity: boissons.biere || 0 },
+          { name: "Boisson sport", quantity: boissons.boisson_sport || 0 },
+          { name: "Boisson énergisante", quantity: boissons.boisson_energisante || 0 },
+          { name: "Hydratis", quantity: boissons.hydratis || 0 },
+        ];
+        
+        // Prendre les 3 boissons les plus consommées
+        const topBoissons = boissonsList
+          .filter(b => b.quantity > 0)
+          .sort((a, b) => b.quantity - a.quantity)
+          .slice(0, 3)
+          .map(b => `${b.quantity} ${b.name}`)
+          .join(", ");
+        
+        if (topBoissons) {
+          return `Consommation quotidienne : ${topBoissons} ☕`;
+        }
+      }
+      
       return "Mes habitudes de consommation sont enregistrées ☕";
     }
     
