@@ -183,7 +183,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
             <div className="p-4 rounded-lg bg-background border border-blue-500/20">
               <h4 className="text-sm font-medium text-muted-foreground mb-2">Total à boire aujourd'hui</h4>
               <div className="text-3xl font-bold text-foreground mb-2">
-                {formatVolume(results.besoin_hydration_nette_ml)}
+                {formatVolume(results.besoins_basals_net_ml)}
               </div>
               {results.hydratation_reelle_ml > 0 && (
                 <>
@@ -208,6 +208,29 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
           </div>
         </CardContent>
       </Card>
+
+      {/* Carte supplémentaire : Besoins sport (si entraînement aujourd'hui) */}
+      {isSportPerson && results.besoins_exercice_ml > 0 && (
+        <Card className="border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Activity className="w-5 h-5 text-orange-500" />
+                  <h3 className="font-semibold text-foreground">+ Sport</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  si tu t'entraînes aujourd'hui
+                </p>
+                <div className="text-4xl font-bold text-orange-600 dark:text-orange-400">
+                  +{formatVolume(results.besoins_exercice_ml)}
+                </div>
+              </div>
+              <div className="text-6xl opacity-20">💪</div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Carte unifiée : Plan d'hydratation quotidien */}
       <Card className="overflow-hidden border-2">
@@ -252,30 +275,25 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                 </div>
               )}
 
-              {/* Timing de prise */}
-              <div className="space-y-2 mt-4">
-                <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
-                  <span className="text-muted-foreground">⏰ Quand prendre ?</span>
-                </div>
-                <ul className="text-xs space-y-1.5 ml-2">
-                  <li className="flex items-center gap-2">
-                    <span>🌅</span>
-                    <span>Le matin au réveil</span>
-                  </li>
-                  {results.nb_pastilles_basal > 1 && (
-                    <li className="flex items-center gap-2">
-                      <span>🌆</span>
-                      <span>Le soir avant de dormir</span>
-                    </li>
-                  )}
-                </ul>
-              </div>
+        {/* Comment prendre */}
+        <div className="space-y-2 mt-4">
+          <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
+            <span className="text-muted-foreground">💧 Comment ?</span>
+          </div>
+          <div className="text-xs ml-2 p-2 bg-blue-500/5 rounded">
+            <span>1 pastille dans 1 verre d'eau {results.nb_pastilles_basal}x par jour</span>
+          </div>
+        </div>
 
               {/* Détails */}
               <div className="border-t border-blue-500/20 mt-4 pt-3 space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Besoin total</span>
                   <span className="font-semibold">{formatVolume(results.besoins_basals_brut_ml)}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">🍽️ Par l'alimentation</span>
+                  <span className="font-semibold">{formatVolume(results.besoins_basals_brut_ml - results.besoins_basals_net_ml)}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">💧 À boire</span>
@@ -358,22 +376,18 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                   </div>
                 )}
 
-                {/* Timing de prise */}
-                <div className="space-y-2 mt-4">
-                  <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
-                    <span className="text-muted-foreground">⏰ Quand prendre ?</span>
-                  </div>
-                  <ul className="text-xs space-y-1.5 ml-2">
-                    <li className="flex items-center gap-2">
-                      <span>⚡</span>
-                      <span>Avant/pendant l'effort</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span>📅</span>
-                      <span>{results.jours_entrainement_par_semaine}x par semaine</span>
-                    </li>
-                  </ul>
-                </div>
+          {/* Comment prendre */}
+          <div className="space-y-2 mt-4">
+            <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
+              <span className="text-muted-foreground">💧 Comment ?</span>
+            </div>
+            <div className="text-xs ml-2 p-2 bg-orange-500/5 rounded">
+              <span>1 pastille dans 1 verre d'eau avant/pendant l'effort</span>
+            </div>
+            <div className="text-xs ml-2 text-muted-foreground">
+              📅 {results.jours_entrainement_par_semaine}x par semaine
+            </div>
+          </div>
 
                 {/* Détails */}
                 <div className="border-t border-orange-500/20 mt-4 pt-3 space-y-2">
@@ -663,7 +677,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                 <div>
                   <h4 className="font-semibold text-sm mb-1">
                     {results.score < 70 
-                      ? `Atteins ${results.besoin_hydration_nette_ml} mL` 
+                      ? `Atteins ${formatVolume(results.besoins_basals_net_ml)}` 
                       : "Maintiens ton objectif"}
                   </h4>
                   <p className="text-xs text-muted-foreground">
