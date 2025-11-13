@@ -240,9 +240,9 @@ export const ResultsDisplay = ({
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="flex items-center gap-6">
                 {/* Jauge avec effet liquide - barre horizontale */}
-                <div className="relative h-16 w-full overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-b from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/50 shadow-inner">
+                <div className="relative h-10 flex-1 overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-b from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/50 shadow-inner">
                   {/* Fond animé avec vagues */}
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-100/20 via-cyan-100/20 to-blue-100/20 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20" />
                   
@@ -304,22 +304,34 @@ export const ResultsDisplay = ({
                   </div>
                 </div>
 
-                {/* Message de progression */}
-                <div className="mt-4 text-center">
-                  <p className={cn(
-                    "text-sm font-medium",
-                    gaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
-                  )}>
-                    {gaugePercent >= 100 
-                      ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" 
-                      : (
-                        <>
-                          Encore <span className="font-bold text-primary">{formatVolume(gaugeTarget - gaugeCurrent)}</span> à boire
-                        </>
-                      )
-                    }
-                  </p>
+                {/* Infos à droite de la jauge */}
+                <div className="flex flex-col gap-2 min-w-[140px]">
+                  <div className="text-xs">
+                    <span className="text-muted-foreground">Ton idéal</span>
+                    <div className="font-semibold text-foreground">{formatVolume(gaugeTarget)}</div>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-muted-foreground">Ton hydratation</span>
+                    <div className="font-semibold text-foreground">{formatVolume(gaugeCurrent)}</div>
+                  </div>
                 </div>
+              </div>
+
+              {/* Message de progression */}
+              <div className="mt-4 text-center">
+                <p className={cn(
+                  "text-sm font-medium",
+                  gaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
+                )}>
+                  {gaugePercent >= 100 
+                    ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" 
+                    : (
+                      <>
+                        Encore <span className="font-bold text-primary">{formatVolume(gaugeTarget - gaugeCurrent)}</span> à boire
+                      </>
+                    )
+                  }
+                </p>
               </div>
             </CardContent>
           </Card>;
