@@ -34,6 +34,7 @@ export interface HydrationResult {
   nb_pastilles_basal: number;
   nb_pastilles_exercice: number;
   nb_pastilles_post_exercice: number;
+  jours_entrainement_par_semaine: number; // Nombre de jours d'entraînement par semaine
   score: number;
   statut: string;
   notes: string[];
@@ -321,26 +322,53 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   if (ageData.median >= 60 && ageData.median < 70) nb_pastilles_basal = Math.min(nb_pastilles_basal, 3);
   if (ageData.median >= 70) nb_pastilles_basal = Math.min(nb_pastilles_basal, 2);
   
-  // Pour l'exercice : 1 pastille / 500 ml
-  let nb_pastilles_exercice = besoins_exercice_ml > 0 ? Math.ceil(besoins_exercice_ml / 500) : 0;
+  // Pour l'exercice : basé sur la durée hebdomadaire et la transpiration
+  let nb_pastilles_exercice = 0;
+  let jours_entrainement_par_semaine = 0;
+  let nb_pastilles_post_exercice = 0; // Supprimé (intégré dans pastilles exercice)
   
-  // Pour la récupération post-exercice : 1 pastille si besoins exercice > 0
-  let nb_pastilles_post_exercice = besoins_exercice_ml > 0 ? 1 : 0;
-
-  // Plafond de 5 pastilles maximum par jour
-  const total_pastilles = nb_pastilles_basal + nb_pastilles_exercice + nb_pastilles_post_exercice;
-  if (total_pastilles > 5) {
-    // Ajuster proportionnellement pour ne pas dépasser 5
-    const ratio = 5 / total_pastilles;
-    nb_pastilles_basal = Math.max(1, Math.round(nb_pastilles_basal * ratio));
-    nb_pastilles_exercice = Math.max(0, Math.round(nb_pastilles_exercice * ratio));
-    nb_pastilles_post_exercice = Math.max(0, Math.round(nb_pastilles_post_exercice * ratio));
+  if (sport_pratique === "Oui" && data.frequence && duree_seance) {
+    // Calculer le nombre de séances par semaine
+    const getFrequenceSeancesParSemaine = (frequence: string): number => {
+      if (frequence === "Jamais") return 0;
+      if (frequence === "1-2 fois/semaine") return 1.5;
+      if (frequence === "3-5 fois/semaine") return 4;
+      if (frequence === "6+ fois/semaine") return 6;
+      return 0;
+    };
     
-    // S'assurer que le total ne dépasse toujours pas 5
-    const new_total = nb_pastilles_basal + nb_pastilles_exercice + nb_pastilles_post_exercice;
-    if (new_total > 5) {
-      // Réduire le nombre de pastilles basales en dernier recours
-      nb_pastilles_basal = Math.max(1, nb_pastilles_basal - (new_total - 5));
+    jours_entrainement_par_semaine = getFrequenceSeancesParSemaine(data.frequence);
+    
+    // Calculer la durée hebdomadaire totale
+    const duree_seance_minutes = parseFloat(data.duree_minutes || "0");
+    const duree_hebdo_heures = (duree_seance_minutes * jours_entrainement_par_semaine) / 60;
+    
+    // Déterminer les pastilles par jour d'entraînement selon la table
+    if (duree_hebdo_heures > 3) {
+      nb_pastilles_exercice = 2;
+    } else if (duree_hebdo_heures >= 1 && duree_hebdo_heures <= 3) {
+      nb_pastilles_exercice = 1;
+    } else {
+      nb_pastilles_exercice = 0;
+    }
+    
+    // Ajustement transpiration forte
+    if (transpiration_echelle > 8) {
+      nb_pastilles_exercice += 1;
+    }
+  }
+
+  // Plafond de 5 pastilles maximum par jour d'entraînement
+  const total_pastilles = nb_pastilles_basal + nb_pastilles_exercice;
+  if (total_pastilles > 5) {
+    // Priorité aux pastilles d'exercice (car les jours d'entraînement)
+    const pastilles_disponibles_pour_exercice = 5 - nb_pastilles_basal;
+    if (pastilles_disponibles_pour_exercice > 0) {
+      nb_pastilles_exercice = Math.min(nb_pastilles_exercice, pastilles_disponibles_pour_exercice);
+    } else {
+      // Si les pastilles basales dépassent déjà 5, réduire
+      nb_pastilles_basal = 5;
+      nb_pastilles_exercice = 0;
     }
   }
 
@@ -475,6 +503,7 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
     nb_pastilles_basal,
     nb_pastilles_exercice,
     nb_pastilles_post_exercice,
+    jours_entrainement_par_semaine,
     score,
     statut,
     notes,

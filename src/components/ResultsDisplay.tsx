@@ -29,7 +29,7 @@ const getBadge = (score: number) => {
 };
 
 export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }: ResultsDisplayProps) => {
-  const totalPastilles = results.nb_pastilles_basal + results.nb_pastilles_exercice + results.nb_pastilles_post_exercice;
+  const totalPastilles = results.nb_pastilles_basal + results.nb_pastilles_exercice;
   const animatedScore = useCountUp(results.score, 2000);
   const [visiblePills, setVisiblePills] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -335,39 +335,29 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               </div>
 
               {/* Pastilles sport */}
-              <div className={cn(
-                "mt-4 space-y-2 transition-all duration-500",
-                visiblePills >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              )}>
-                <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-purple-500" />
-                      <span className="text-sm font-semibold text-foreground">Pendant l'effort</span>
+              {results.nb_pastilles_exercice > 0 && results.jours_entrainement_par_semaine > 0 && (
+                <div className={cn(
+                  "mt-4 space-y-2 transition-all duration-500",
+                  visiblePills >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                )}>
+                  <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Zap className="w-4 h-4 text-purple-500" />
+                          <span className="text-sm font-semibold text-foreground">Jours d'entraînement</span>
+                        </div>
+                        <Badge variant="secondary" className="font-semibold">
+                          {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground ml-6">
+                        Les jours où tu t'entraînes ({results.jours_entrainement_par_semaine}x/semaine)
+                      </p>
                     </div>
-                    <Badge variant="secondary" className="font-semibold">
-                      {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''}
-                    </Badge>
                   </div>
                 </div>
-                
-                {results.nb_pastilles_post_exercice > 0 && (
-                  <div className={cn(
-                    "p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 transition-all duration-500",
-                    visiblePills >= 3 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                  )}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-purple-500" />
-                        <span className="text-sm font-semibold text-foreground">Après l'effort</span>
-                      </div>
-                      <Badge variant="secondary" className="font-semibold">
-                        {results.nb_pastilles_post_exercice} pastille{results.nb_pastilles_post_exercice > 1 ? 's' : ''}
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           )}
 
