@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw, Trophy, Target, ArrowUp, Sun, Users } from "lucide-react";
+import { Droplet, Activity, Pill, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw, Trophy, Target, ArrowUp, Sun, Users, Calendar, Clock } from "lucide-react";
 import type { HydrationResult } from "@/lib/hydrationCalculator";
 import type { DiagnosticData } from "@/types/diagnostic";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts";
@@ -19,6 +19,25 @@ interface ResultsDisplayProps {
   firstName?: string;
   onRestart?: () => void;
 }
+
+// Helper pour icônes de sport
+const getSportIcon = (category: string) => {
+  const iconMap: Record<string, string> = {
+    "Endurance continue": "🏃",
+    "Intermittent/collectif/HIIT": "⚡",
+    "Musculation/Force": "💪",
+    "Natation": "🏊",
+    "Sports collectifs": "⚽",
+    "Sports de raquette": "🎾",
+    "Sports de combat": "🥊",
+    "Sports d'hiver": "⛷️",
+    "Danse": "💃",
+    "Yoga/Pilates": "🧘",
+    "Escalade": "🧗",
+    "Gymnastique": "🤸"
+  };
+  return iconMap[category] || "🏅";
+};
 
 // Système de badges
 const getBadge = (score: number) => {
@@ -298,7 +317,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-foreground">Besoins sport</h3>
-                    <p className="text-sm text-muted-foreground">Pendant et après l'effort</p>
+                    <p className="text-sm text-muted-foreground">Les jours d'entraînement</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -309,6 +328,51 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                   <p className="text-xs text-muted-foreground">par séance</p>
                 </div>
               </div>
+
+              {/* Sports pratiqués */}
+              {diagnosticData?.sports_selectionnes && diagnosticData.sports_selectionnes.length > 0 && (
+                <div className="mb-4 p-3 bg-background/50 rounded-lg border border-orange-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Trophy className="w-4 h-4 text-orange-500" />
+                    <span className="text-sm font-semibold text-foreground">Ton sport</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {diagnosticData.sports_selectionnes.map((sport, idx) => (
+                      <Badge key={idx} variant="outline" className="bg-orange-500/10 border-orange-500/30">
+                        {getSportIcon(sport.category)} {sport.name}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  {/* Détails de pratique */}
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {diagnosticData.frequence && (
+                      <div className="flex flex-col items-center p-2 bg-background rounded">
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground text-center">
+                          {diagnosticData.frequence}
+                        </span>
+                      </div>
+                    )}
+                    {diagnosticData.duree_minutes && (
+                      <div className="flex flex-col items-center p-2 bg-background rounded">
+                        <Clock className="w-3.5 h-3.5 text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground text-center">
+                          {diagnosticData.duree_minutes}
+                        </span>
+                      </div>
+                    )}
+                    {diagnosticData.transpiration && (
+                      <div className="flex flex-col items-center p-2 bg-background rounded">
+                        <Droplet className="w-3.5 h-3.5 text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground text-center">
+                          {diagnosticData.transpiration}/10
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between text-sm">
@@ -337,23 +401,37 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               {/* Pastilles sport */}
               {results.nb_pastilles_exercice > 0 && results.jours_entrainement_par_semaine > 0 && (
                 <div className={cn(
-                  "mt-4 space-y-2 transition-all duration-500",
+                  "mt-4 transition-all duration-500",
                   visiblePills >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                 )}>
-                  <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Zap className="w-4 h-4 text-purple-500" />
-                          <span className="text-sm font-semibold text-foreground">Jours d'entraînement</span>
+                  <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border-2 border-purple-500/30">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-purple-500/20 rounded-lg">
+                          <Zap className="w-5 h-5 text-purple-500" />
                         </div>
-                        <Badge variant="secondary" className="font-semibold">
-                          {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''}
-                        </Badge>
+                        <div>
+                          <h4 className="text-sm font-bold text-foreground">Pastilles sport</h4>
+                          <p className="text-xs text-muted-foreground">Les jours d'entraînement</p>
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground ml-6">
-                        Les jours où tu t'entraînes ({results.jours_entrainement_par_semaine}x/semaine)
-                      </p>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                          {results.nb_pastilles_exercice}
+                        </div>
+                        <p className="text-xs text-muted-foreground">pastille{results.nb_pastilles_exercice > 1 ? 's' : ''}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 p-2 bg-background/50 rounded">
+                      <Calendar className="w-3.5 h-3.5 text-purple-500" />
+                      <span className="text-xs text-foreground">
+                        {results.jours_entrainement_par_semaine} jour{results.jours_entrainement_par_semaine > 1 ? 's' : ''} par semaine
+                      </span>
+                    </div>
+                    
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      💡 À prendre avant/pendant tes séances pour une hydratation optimale
                     </div>
                   </div>
                 </div>
@@ -530,7 +608,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               <div className="flex-1">
                 <h4 className="font-semibold text-sm mb-1">Comment utiliser ?</h4>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Dissous une pastille dans 200-250 mL d'eau. Pour le sport, prends une pastille pendant l'effort et une autre après pour optimiser ta récupération.
+                  Dissous une pastille dans 200-250 mL d'eau. Pour le sport, prends {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''} les jours où tu t'entraînes pour optimiser ton hydratation et ta récupération.
                 </p>
                 <div className="text-xs text-primary font-medium">
                   💡 Astuce : Commence ta journée avec une pastille pour bien t'hydrater dès le réveil !
