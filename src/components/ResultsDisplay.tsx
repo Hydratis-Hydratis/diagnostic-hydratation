@@ -166,7 +166,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
             <Trophy className="w-5 h-5 text-primary" />
             Ton tableau de bord
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Métrique 1 : Score avec badge et comparaison */}
             <div className="p-4 rounded-lg bg-background border border-primary/20">
               <div className="flex items-center justify-between mb-2">
@@ -189,16 +189,8 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                 <Droplet className="w-4 h-4 text-blue-500" />
                 <h4 className="text-sm font-medium text-muted-foreground">À boire au quotidien</h4>
               </div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">
+              <div className="text-3xl font-bold text-blue-600">
                 {formatVolume(results.besoins_basals_net_ml)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Besoins hydriques quotidiens (hors sport)
-              </p>
-              <div className="mt-3 p-2 bg-blue-500/5 rounded-lg border border-blue-500/20">
-                <p className="text-[10px] text-muted-foreground">
-                  💧 Répartis tout au long de la journée
-                </p>
               </div>
             </div>
 
@@ -209,16 +201,8 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                   <Activity className="w-4 h-4 text-orange-500" />
                   <h4 className="text-sm font-medium text-muted-foreground">À boire pendant le sport</h4>
                 </div>
-                <div className="text-3xl font-bold text-orange-600 mb-2">
+                <div className="text-3xl font-bold text-orange-600">
                   {formatVolume(results.besoins_exercice_ml)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Besoins hydriques liés à l'activité physique
-                </p>
-                <div className="mt-3 p-2 bg-orange-500/5 rounded-lg border border-orange-500/20">
-                  <p className="text-[10px] text-muted-foreground">
-                    ⚡ Pendant et après l'effort
-                  </p>
                 </div>
               </div>
             ) : (
@@ -227,12 +211,9 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                   <Activity className="w-4 h-4 text-muted-foreground" />
                   <h4 className="text-sm font-medium text-muted-foreground">À boire pendant le sport</h4>
                 </div>
-                <div className="text-3xl font-bold text-muted-foreground mb-2">
+                <div className="text-3xl font-bold text-muted-foreground">
                   0 L
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Pas d'activité sportive déclarée
-                </p>
               </div>
             )}
 
@@ -245,25 +226,23 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               
               {/* Pastilles basales */}
               <div className="mb-3">
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">Au quotidien</span>
                   <span className="text-2xl font-bold text-purple-600">
                     {results.nb_pastilles_basal}
                   </span>
                 </div>
-                <p className="text-[10px] text-muted-foreground">Besoins de base</p>
               </div>
 
               {/* Pastilles sport (si applicable) */}
               {isSportPerson && results.nb_pastilles_exercice > 0 && (
                 <div className="pt-3 border-t border-purple-500/20">
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">Pendant le sport</span>
                     <span className="text-2xl font-bold text-orange-600">
                       {results.nb_pastilles_exercice}
                     </span>
                   </div>
-                  <p className="text-[10px] text-muted-foreground">Pendant l'activité</p>
                 </div>
               )}
 
@@ -277,35 +256,10 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">Pour optimiser ton hydratation</p>
             </div>
           </div>
         </CardContent>
       </Card>
-
-      {/* Carte supplémentaire : Besoins sport (si entraînement aujourd'hui) */}
-      {isSportPerson && results.besoins_exercice_ml > 0 && (
-        <Card className="border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Activity className="w-5 h-5 text-orange-500" />
-                  <h3 className="font-semibold text-foreground">+ Sport</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  si tu t'entraînes aujourd'hui
-                </p>
-                <div className="text-4xl font-bold text-orange-600 dark:text-orange-400">
-                  +{formatVolume(results.besoins_exercice_ml)}
-                </div>
-              </div>
-              <div className="text-6xl opacity-20">💪</div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
 
       {/* BLOC 3 : Pour en savoir plus */}
       <div className="mt-8">
