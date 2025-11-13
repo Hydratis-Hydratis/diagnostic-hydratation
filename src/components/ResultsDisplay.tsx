@@ -210,6 +210,72 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
       </Card>
 
 
+      {/* Jauge d'hydratation (après dashboard) */}
+      {(() => {
+        const gaugeTarget = results.besoins_basals_net_ml;
+        const gaugeCurrent = Math.max(0, Math.min((results.hydratation_reelle_ml ?? 0), gaugeTarget));
+        const gaugePercent = gaugeTarget > 0 ? Math.min(100, Math.round((gaugeCurrent / gaugeTarget) * 100)) : 0;
+        return (
+          <Card className="border-2 border-primary/20 bg-accent/5">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Droplets className="w-5 h-5 text-primary animate-pulse-soft" />
+                    <h3 className="font-semibold text-foreground">Jauge d'hydratation</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {formatVolume(gaugeCurrent)} / {formatVolume(gaugeTarget)} (besoins basaux)
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-primary">{gaugePercent}%</div>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <div className="relative h-6 w-full overflow-hidden rounded-full border bg-background">
+                  <div className="absolute inset-0 bg-muted" />
+                  <div className="relative h-full rounded-full bg-primary animate-pulse-soft" style={{ width: `${gaugePercent}%` }}>
+                    <Droplet className="absolute top-1 left-3 h-4 w-4 text-primary-foreground/60" />
+                    <Droplet className="absolute top-1 left-8 h-4 w-4 text-primary-foreground/40" />
+                    <Droplet className="absolute top-1 left-14 h-4 w-4 text-primary-foreground/50" />
+                  </div>
+                </div>
+                <p className="mt-2 text-sm">
+                  {gaugePercent >= 100
+                    ? "Excellent ! Tu as atteint tes besoins basaux 🎉"
+                    : `Encore ${formatVolume(gaugeTarget - gaugeCurrent)} à combler`}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
+      {/* Carte supplémentaire : Besoins sport (si entraînement aujourd'hui) */}
+      {isSportPerson && results.besoins_exercice_ml > 0 && (
+        <Card className="border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Activity className="w-5 h-5 text-orange-500" />
+                  <h3 className="font-semibold text-foreground">+ Sport</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  si tu t'entraînes aujourd'hui
+                </p>
+                <div className="text-4xl font-bold text-orange-600 dark:text-orange-400">
+                  +{formatVolume(results.besoins_exercice_ml)}
+                </div>
+              </div>
+              <div className="text-6xl opacity-20">💪</div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Carte unifiée : Plan d'hydratation quotidien */}
       <Card className="overflow-hidden border-2">
         <CardHeader className="bg-gradient-to-r from-blue-500/10 to-orange-500/10">
