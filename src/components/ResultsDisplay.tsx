@@ -92,7 +92,7 @@ export const ResultsDisplay = ({
   const [visiblePills, setVisiblePills] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const badge = getBadge(results.score);
-  const progressPercent = results.hydratation_reelle_ml > 0 ? Math.min(100, Math.round(results.hydratation_reelle_ml / results.besoin_hydration_nette_ml * 100)) : 0;
+  const progressPercent = results.hydratation_reelle_ml > 0 ? Math.min(100, Math.round(results.hydratation_reelle_ml / results.besoins_basals_net_ml * 100)) : 0;
 
   // Comparaison sociale fictive basée sur le score
   const socialComparison = Math.min(95, Math.round(results.score + Math.random() * 10));
@@ -217,7 +217,7 @@ export const ResultsDisplay = ({
 
       {/* Jauge d'hydratation (après dashboard) */}
       {(() => {
-        const gaugeTarget = results.besoin_hydration_nette_ml;
+        const gaugeTarget = results.besoins_basals_net_ml;
         const gaugeCurrent = Math.max(0, results.hydratation_reelle_ml ?? 0);
         const gaugePercent = gaugeTarget > 0 ? Math.round(gaugeCurrent / gaugeTarget * 100) : 0;
         return <Card className="border-2 border-primary/20 bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-blue-600/10 overflow-hidden">
@@ -325,7 +325,7 @@ export const ResultsDisplay = ({
               {/* Message de progression */}
               <div className="mt-3 text-center">
                 <p className={cn("text-sm font-medium", gaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
-                  {gaugePercent >= 100 ? "🎉 Excellent ! Tu as atteint ton objectif d'hydratation !" : <>
+                  {gaugePercent >= 100 ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" : <>
                         Encore <span className="font-bold text-primary">{formatVolume(gaugeTarget - gaugeCurrent)}</span> à boire
                       </>}
                 </p>
