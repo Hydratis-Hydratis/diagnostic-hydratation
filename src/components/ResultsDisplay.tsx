@@ -228,9 +228,7 @@ export const ResultsDisplay = ({
                     <Droplets className="w-6 h-6 text-blue-500 animate-pulse-soft" />
                     <h3 className="font-bold text-lg text-foreground">Jauge d'hydratation</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {formatVolume(gaugeCurrent)} / {formatVolume(gaugeTarget)}
-                  </p>
+                  
                 </div>
                 <div className="text-right">
                   <div className="text-4xl font-bold bg-gradient-to-br from-blue-500 to-cyan-600 bg-clip-text text-transparent">
@@ -247,10 +245,9 @@ export const ResultsDisplay = ({
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-100/20 via-cyan-100/20 to-blue-100/20 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20" />
                   
                   {/* Eau avec gradient - remplissage horizontal de gauche à droite */}
-                  <div 
-                    className="absolute top-0 bottom-0 left-0 h-full transition-all duration-1000 ease-out"
-                    style={{ width: `${gaugePercent}%` }}
-                  >
+                  <div className="absolute top-0 bottom-0 left-0 h-full transition-all duration-1000 ease-out" style={{
+                  width: `${gaugePercent}%`
+                }}>
                     <div className="relative w-full h-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 dark:from-blue-600 dark:via-blue-500 dark:to-cyan-500">
                       {/* Effet de brillance */}
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse-soft" />
@@ -259,48 +256,44 @@ export const ResultsDisplay = ({
                       <div className="absolute top-0 bottom-0 -right-1 w-3 overflow-hidden">
                         <div className="absolute inset-0 animate-pulse-soft">
                           <svg className="w-full h-full" viewBox="0 0 40 1200" preserveAspectRatio="none">
-                            <path 
-                              d="M20,0 Q0,150 20,300 T20,600 T20,900 T20,1200 L40,1200 L40,0 Z" 
-                              fill="currentColor" 
-                              className="text-cyan-300/50 dark:text-cyan-400/30"
-                            >
-                              <animate
-                                attributeName="d"
-                                dur="3s"
-                                repeatCount="indefinite"
-                                values="
+                            <path d="M20,0 Q0,150 20,300 T20,600 T20,900 T20,1200 L40,1200 L40,0 Z" fill="currentColor" className="text-cyan-300/50 dark:text-cyan-400/30">
+                              <animate attributeName="d" dur="3s" repeatCount="indefinite" values="
                                   M20,0 Q0,150 20,300 T20,600 T20,900 T20,1200 L40,1200 L40,0 Z;
                                   M20,0 Q30,150 20,300 T20,600 T20,900 T20,1200 L40,1200 L40,0 Z;
                                   M20,0 Q0,150 20,300 T20,600 T20,900 T20,1200 L40,1200 L40,0 Z
-                                "
-                              />
+                                " />
                             </path>
                           </svg>
                         </div>
                       </div>
                       
                       {/* Gouttelettes flottantes */}
-                      {gaugePercent > 10 && (
-                        <>
-                          <Droplet className="absolute top-1/4 left-[15%] h-4 w-4 text-white/60 animate-bounce" style={{ animationDelay: '0s', animationDuration: '2s' }} />
-                          <Droplet className="absolute top-1/2 left-[40%] h-3 w-3 text-white/40 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '2.5s' }} />
-                          <Droplet className="absolute top-2/3 left-[65%] h-4 w-4 text-white/50 animate-bounce" style={{ animationDelay: '1s', animationDuration: '2.2s' }} />
-                          <Droplet className="absolute top-1/3 left-[80%] h-3 w-3 text-white/45 animate-bounce" style={{ animationDelay: '1.5s', animationDuration: '2.8s' }} />
-                        </>
-                      )}
+                      {gaugePercent > 10 && <>
+                          <Droplet className="absolute top-1/4 left-[15%] h-4 w-4 text-white/60 animate-bounce" style={{
+                        animationDelay: '0s',
+                        animationDuration: '2s'
+                      }} />
+                          <Droplet className="absolute top-1/2 left-[40%] h-3 w-3 text-white/40 animate-bounce" style={{
+                        animationDelay: '0.5s',
+                        animationDuration: '2.5s'
+                      }} />
+                          <Droplet className="absolute top-2/3 left-[65%] h-4 w-4 text-white/50 animate-bounce" style={{
+                        animationDelay: '1s',
+                        animationDuration: '2.2s'
+                      }} />
+                          <Droplet className="absolute top-1/3 left-[80%] h-3 w-3 text-white/45 animate-bounce" style={{
+                        animationDelay: '1.5s',
+                        animationDuration: '2.8s'
+                      }} />
+                        </>}
                     </div>
                   </div>
 
                   {/* Marques de niveau horizontales */}
                   <div className="absolute inset-x-0 top-0 bottom-0 flex flex-row justify-between px-2 pointer-events-none">
-                    {[25, 50, 75].map((mark) => (
-                      <div key={mark} className="flex flex-col items-center justify-center h-full">
-                        <div className={cn(
-                          "w-px h-full",
-                          gaugePercent >= mark ? "bg-white/20" : "bg-blue-500/20"
-                        )} />
-                      </div>
-                    ))}
+                    {[25, 50, 75].map(mark => <div key={mark} className="flex flex-col items-center justify-center h-full">
+                        <div className={cn("w-px h-full", gaugePercent >= mark ? "bg-white/20" : "bg-blue-500/20")} />
+                      </div>)}
                   </div>
                 </div>
 
@@ -319,18 +312,10 @@ export const ResultsDisplay = ({
 
               {/* Message de progression */}
               <div className="mt-4 text-center">
-                <p className={cn(
-                  "text-sm font-medium",
-                  gaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
-                )}>
-                  {gaugePercent >= 100 
-                    ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" 
-                    : (
-                      <>
+                <p className={cn("text-sm font-medium", gaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
+                  {gaugePercent >= 100 ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" : <>
                         Encore <span className="font-bold text-primary">{formatVolume(gaugeTarget - gaugeCurrent)}</span> à boire
-                      </>
-                    )
-                  }
+                      </>}
                 </p>
               </div>
             </CardContent>
