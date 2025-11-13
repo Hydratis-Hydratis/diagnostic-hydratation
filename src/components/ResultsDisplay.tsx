@@ -12,7 +12,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTo
 import { useCountUp } from "@/hooks/use-count-up";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
-
 interface ResultsDisplayProps {
   results: HydrationResult;
   diagnosticData?: DiagnosticData;
@@ -57,32 +56,48 @@ const formatDebit = (mlPerHour: number): string => {
 
 // Système de badges
 const getBadge = (score: number) => {
-  if (score >= 90) return { level: "Or", icon: "🥇", color: "bg-yellow-500", textColor: "text-yellow-900" };
-  if (score >= 70) return { level: "Argent", icon: "🥈", color: "bg-gray-400", textColor: "text-gray-900" };
-  if (score >= 50) return { level: "Bronze", icon: "🥉", color: "bg-orange-600", textColor: "text-white" };
-  return { level: "Débutant", icon: "🌱", color: "bg-green-500", textColor: "text-white" };
+  if (score >= 90) return {
+    level: "Or",
+    icon: "🥇",
+    color: "bg-yellow-500",
+    textColor: "text-yellow-900"
+  };
+  if (score >= 70) return {
+    level: "Argent",
+    icon: "🥈",
+    color: "bg-gray-400",
+    textColor: "text-gray-900"
+  };
+  if (score >= 50) return {
+    level: "Bronze",
+    icon: "🥉",
+    color: "bg-orange-600",
+    textColor: "text-white"
+  };
+  return {
+    level: "Débutant",
+    icon: "🌱",
+    color: "bg-green-500",
+    textColor: "text-white"
+  };
 };
-
-export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }: ResultsDisplayProps) => {
+export const ResultsDisplay = ({
+  results,
+  diagnosticData,
+  firstName,
+  onRestart
+}: ResultsDisplayProps) => {
   const totalPastilles = results.nb_pastilles_basal + results.nb_pastilles_exercice;
   const animatedScore = useCountUp(results.score, 2000);
   const [visiblePills, setVisiblePills] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  
   const badge = getBadge(results.score);
-  const progressPercent = results.hydratation_reelle_ml > 0 
-    ? Math.min(100, Math.round((results.hydratation_reelle_ml / results.besoin_hydration_nette_ml) * 100))
-    : 0;
-  
+  const progressPercent = results.hydratation_reelle_ml > 0 ? Math.min(100, Math.round(results.hydratation_reelle_ml / results.besoin_hydration_nette_ml * 100)) : 0;
+
   // Comparaison sociale fictive basée sur le score
   const socialComparison = Math.min(95, Math.round(results.score + Math.random() * 10));
-
   useEffect(() => {
-    const timers = [
-      setTimeout(() => setVisiblePills(1), 300),
-      setTimeout(() => setVisiblePills(2), 600),
-      setTimeout(() => setVisiblePills(3), 900),
-    ];
+    const timers = [setTimeout(() => setVisiblePills(1), 300), setTimeout(() => setVisiblePills(2), 600), setTimeout(() => setVisiblePills(3), 900)];
     return () => timers.forEach(clearTimeout);
   }, []);
 
@@ -93,7 +108,9 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
         confetti({
           particleCount: 100,
           spread: 70,
-          origin: { y: 0.6 }
+          origin: {
+            y: 0.6
+          }
         });
       }, 1000);
     }
@@ -107,13 +124,11 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
   const getStatusColor = (statut: string) => {
     if (statut.includes("Excellente") || statut.includes("Bonne")) return "bg-green-500";
     if (statut.includes("Modérée") || statut.includes("Attention")) return "bg-yellow-500";
     return "bg-red-500";
   };
-  
   const getStatusIcon = (statut: string) => {
     if (statut.includes("Excellente") || statut.includes("Bonne")) return <CheckCircle className="w-5 h-5" />;
     return <AlertCircle className="w-5 h-5" />;
@@ -128,31 +143,23 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
   };
 
   // Détection de symptômes
-  const hasSymptoms = diagnosticData && (
-    (diagnosticData.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5) ||
-    diagnosticData.crampes === "Oui" ||
-    diagnosticData.courbatures === "Oui"
-  );
+  const hasSymptoms = diagnosticData && (diagnosticData.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 || diagnosticData.crampes === "Oui" || diagnosticData.courbatures === "Oui");
 
   // Détection sport
   const isSportPerson = diagnosticData && diagnosticData.sport_pratique === "Oui" && results.besoins_exercice_ml > 0;
 
   // Détection canicule
   const isHeatwave = diagnosticData && diagnosticData.temperature_ext === "> 28°C";
-
-  return (
-    <TooltipProvider>
+  return <TooltipProvider>
       <div className="space-y-4 animate-fade-in">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-foreground mb-2">
           Ton diagnostic est prêt, {firstName} ! 💧
         </h2>
         <p className="text-muted-foreground">Voici tes résultats personnalisés</p>
-        {results.score >= 90 && (
-          <p className="text-lg font-semibold text-primary mt-2 animate-scale-in">
+        {results.score >= 90 && <p className="text-lg font-semibold text-primary mt-2 animate-scale-in">
             🎉 Félicitations ! Tu as une hydratation excellente !
-          </p>
-        )}
+          </p>}
       </div>
 
       {/* Dashboard avec 3 métriques clés */}
@@ -185,12 +192,10 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               <div className="text-3xl font-bold text-foreground mb-2">
                 {formatVolume(results.besoins_basals_net_ml)}
               </div>
-              {results.hydratation_reelle_ml > 0 && (
-                <>
+              {results.hydratation_reelle_ml > 0 && <>
                   <Progress value={progressPercent} className="h-2 mb-2" />
                   <p className="text-xs text-muted-foreground">{getProgressMessage(progressPercent)}</p>
-                </>
-              )}
+                </>}
             </div>
 
             {/* Métrique 3 : Total pastilles */}
@@ -213,10 +218,9 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
       {/* Jauge d'hydratation (après dashboard) */}
       {(() => {
         const gaugeTarget = results.besoins_basals_net_ml;
-        const gaugeCurrent = Math.max(0, Math.min((results.hydratation_reelle_ml ?? 0), gaugeTarget));
-        const gaugePercent = gaugeTarget > 0 ? Math.min(100, Math.round((gaugeCurrent / gaugeTarget) * 100)) : 0;
-        return (
-          <Card className="border-2 border-primary/20 bg-accent/5">
+        const gaugeCurrent = Math.max(0, Math.min(results.hydratation_reelle_ml ?? 0, gaugeTarget));
+        const gaugePercent = gaugeTarget > 0 ? Math.min(100, Math.round(gaugeCurrent / gaugeTarget * 100)) : 0;
+        return <Card className="border-2 border-primary/20 bg-accent/5">
             <CardContent className="p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -236,45 +240,24 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               <div className="mt-4">
                 <div className="relative h-6 w-full overflow-hidden rounded-full border bg-background">
                   <div className="absolute inset-0 bg-muted" />
-                  <div className="relative h-full rounded-full bg-primary animate-pulse-soft" style={{ width: `${gaugePercent}%` }}>
+                  <div className="relative h-full rounded-full bg-primary animate-pulse-soft" style={{
+                  width: `${gaugePercent}%`
+                }}>
                     <Droplet className="absolute top-1 left-3 h-4 w-4 text-primary-foreground/60" />
                     <Droplet className="absolute top-1 left-8 h-4 w-4 text-primary-foreground/40" />
                     <Droplet className="absolute top-1 left-14 h-4 w-4 text-primary-foreground/50" />
                   </div>
                 </div>
                 <p className="mt-2 text-sm">
-                  {gaugePercent >= 100
-                    ? "Excellent ! Tu as atteint tes besoins basaux 🎉"
-                    : `Encore ${formatVolume(gaugeTarget - gaugeCurrent)} à combler`}
+                  {gaugePercent >= 100 ? "Excellent ! Tu as atteint tes besoins basaux 🎉" : `Encore ${formatVolume(gaugeTarget - gaugeCurrent)} à combler`}
                 </p>
               </div>
             </CardContent>
-          </Card>
-        );
+          </Card>;
       })()}
 
       {/* Carte supplémentaire : Besoins sport (si entraînement aujourd'hui) */}
-      {isSportPerson && results.besoins_exercice_ml > 0 && (
-        <Card className="border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Activity className="w-5 h-5 text-orange-500" />
-                  <h3 className="font-semibold text-foreground">+ Sport</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  si tu t'entraînes aujourd'hui
-                </p>
-                <div className="text-4xl font-bold text-orange-600 dark:text-orange-400">
-                  +{formatVolume(results.besoins_exercice_ml)}
-                </div>
-              </div>
-              <div className="text-6xl opacity-20">💪</div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {isSportPerson && results.besoins_exercice_ml > 0}
 
       {/* Carte unifiée : Plan d'hydratation quotidien */}
       <Card className="overflow-hidden border-2">
@@ -311,13 +294,11 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
               </div>
 
               {/* Pastilles basales */}
-              {results.nb_pastilles_basal > 0 && (
-                <div className="mb-4">
+              {results.nb_pastilles_basal > 0 && <div className="mb-4">
                   <Badge variant="secondary" className="bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30">
                     {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''} / jour
                   </Badge>
-                </div>
-              )}
+                </div>}
 
         {/* Comment prendre */}
         <div className="space-y-2 mt-4">
@@ -347,8 +328,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
             </div>
 
             {/* COLONNE 2 : Besoins sport (si applicable) */}
-            {isSportPerson && results.besoins_exercice_ml > 0 && (
-              <div className="relative p-5 rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-orange-500/10">
+            {isSportPerson && results.besoins_exercice_ml > 0 && <div className="relative p-5 rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-orange-500/10">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-sm font-semibold text-muted-foreground mb-1">
@@ -367,58 +347,46 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                 </div>
 
                 {/* Sports pratiqués avec icônes */}
-                {diagnosticData?.sports_selectionnes && diagnosticData.sports_selectionnes.length > 0 && (
-                  <div className="mb-4">
+                {diagnosticData?.sports_selectionnes && diagnosticData.sports_selectionnes.length > 0 && <div className="mb-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Trophy className="w-3.5 h-3.5 text-orange-500" />
                       <span className="text-xs font-semibold">Ton sport</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {diagnosticData.sports_selectionnes.map((sport, idx) => (
-                        <Badge key={idx} variant="outline" className="bg-orange-500/10 border-orange-500/30 text-xs">
+                      {diagnosticData.sports_selectionnes.map((sport, idx) => <Badge key={idx} variant="outline" className="bg-orange-500/10 border-orange-500/30 text-xs">
                           {getSportIcon(sport.category)} {sport.name}
-                        </Badge>
-                      ))}
+                        </Badge>)}
                     </div>
                     
                     {/* Détails de pratique */}
                     <div className="grid grid-cols-3 gap-2 mt-3">
-                      {diagnosticData.frequence && (
-                        <div className="flex flex-col items-center p-2 bg-background rounded">
+                      {diagnosticData.frequence && <div className="flex flex-col items-center p-2 bg-background rounded">
                           <Calendar className="w-3 h-3 text-muted-foreground mb-1" />
                           <span className="text-[10px] text-muted-foreground text-center leading-tight">
                             {diagnosticData.frequence}
                           </span>
-                        </div>
-                      )}
-                      {diagnosticData.duree_minutes && (
-                        <div className="flex flex-col items-center p-2 bg-background rounded">
+                        </div>}
+                      {diagnosticData.duree_minutes && <div className="flex flex-col items-center p-2 bg-background rounded">
                           <Clock className="w-3 h-3 text-muted-foreground mb-1" />
                           <span className="text-[10px] text-muted-foreground text-center leading-tight">
                             {diagnosticData.duree_minutes} min
                           </span>
-                        </div>
-                      )}
-                      {diagnosticData.transpiration && (
-                        <div className="flex flex-col items-center p-2 bg-background rounded">
+                        </div>}
+                      {diagnosticData.transpiration && <div className="flex flex-col items-center p-2 bg-background rounded">
                           <Droplets className="w-3 h-3 text-muted-foreground mb-1" />
                           <span className="text-[10px] text-muted-foreground text-center leading-tight">
                             {diagnosticData.transpiration}/10
                           </span>
-                        </div>
-                      )}
+                        </div>}
                     </div>
-                  </div>
-                )}
+                  </div>}
 
                 {/* Pastilles sport */}
-                {results.nb_pastilles_exercice > 0 && (
-                  <div className="mb-4">
+                {results.nb_pastilles_exercice > 0 && <div className="mb-4">
                     <Badge variant="secondary" className="bg-orange-500/20 text-orange-700 dark:text-orange-300 border-orange-500/30">
                       {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''} / séance
                     </Badge>
-                  </div>
-                )}
+                  </div>}
 
           {/* Comment prendre */}
           <div className="space-y-2 mt-4">
@@ -446,15 +414,13 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                     </span>
                   </div>
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
 
           {/* Alertes conditionnelles SOUS la carte unifiée */}
           <div className="mt-4 space-y-3">
             {/* Alerte déshydratation */}
-            {results.score < 50 && (
-              <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-red-500/30 bg-red-500/5">
+            {results.score < 50 && <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-red-500/30 bg-red-500/5">
                 <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-semibold text-sm mb-1">Déshydratation détectée</h4>
@@ -462,12 +428,10 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                     Ton score indique une déshydratation significative. Hydrate-toi immédiatement avec {formatVolume(500)} et continue à boire régulièrement.
                   </p>
                 </div>
-              </div>
-            )}
+              </div>}
 
             {/* Alerte canicule */}
-            {isHeatwave && (
-              <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-orange-500/30 bg-orange-500/5">
+            {isHeatwave && <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-orange-500/30 bg-orange-500/5">
                 <Thermometer className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-semibold text-sm mb-1">Alerte canicule</h4>
@@ -475,12 +439,10 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                     Température élevée détectée. Augmente ta consommation d'eau de {formatVolume(500)} et évite l'exposition prolongée au soleil.
                   </p>
                 </div>
-              </div>
-            )}
+              </div>}
 
             {/* Alerte symptômes */}
-            {hasSymptoms && (
-              <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-red-500/30 bg-red-500/5">
+            {hasSymptoms && <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-red-500/30 bg-red-500/5">
                 <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-semibold text-sm mb-1">Symptômes détectés</h4>
@@ -490,8 +452,7 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                     Augmente ton hydratation dès maintenant.
                   </p>
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
         </CardContent>
       </Card>
@@ -665,27 +626,17 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                 </div>
 
                 {/* Conseils personnalisés */}
-                {diagnosticData && (
-                  <div className="p-4 bg-gradient-to-br from-blue-500/5 to-blue-500/10 rounded-lg border">
+                {diagnosticData && <div className="p-4 bg-gradient-to-br from-blue-500/5 to-blue-500/10 rounded-lg border">
                     <h4 className="font-semibold text-sm mb-2">🎯 Conseils pour toi</h4>
                     <ul className="space-y-1.5 text-xs">
-                      {diagnosticData.age && Number(diagnosticData.age) > 60 && (
-                        <li>• Bois régulièrement même sans soif (sensation diminue avec l'âge)</li>
-                      )}
-                      {isSportPerson && (
-                        <li>• Commence à t'hydrater 2h avant l'effort</li>
-                      )}
-                      {diagnosticData.temperature_ext && diagnosticData.temperature_ext.includes(">") && (
-                        <li>• Augmente ta consommation par temps chaud</li>
-                      )}
-                      {diagnosticData.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 && (
-                        <li>• Surveille la couleur de tes urines (jaune pâle = bien hydraté)</li>
-                      )}
+                      {diagnosticData.age && Number(diagnosticData.age) > 60 && <li>• Bois régulièrement même sans soif (sensation diminue avec l'âge)</li>}
+                      {isSportPerson && <li>• Commence à t'hydrater 2h avant l'effort</li>}
+                      {diagnosticData.temperature_ext && diagnosticData.temperature_ext.includes(">") && <li>• Augmente ta consommation par temps chaud</li>}
+                      {diagnosticData.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 && <li>• Surveille la couleur de tes urines (jaune pâle = bien hydraté)</li>}
                       <li>• Garde toujours une bouteille d'eau à portée de main</li>
                       <li>• Bois par petites gorgées régulières plutôt qu'en grande quantité</li>
                     </ul>
-                  </div>
-                )}
+                  </div>}
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -720,14 +671,10 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm mb-1">
-                    {results.score < 70 
-                      ? `Atteins ${formatVolume(results.besoins_basals_net_ml)}` 
-                      : "Maintiens ton objectif"}
+                    {results.score < 70 ? `Atteins ${formatVolume(results.besoins_basals_net_ml)}` : "Maintiens ton objectif"}
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    {results.score < 70 
-                      ? "pendant 7 jours consécutifs"
-                      : "pendant 30 jours"}
+                    {results.score < 70 ? "pendant 7 jours consécutifs" : "pendant 30 jours"}
                   </p>
                 </div>
               </CardContent>
@@ -744,14 +691,10 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm mb-1">
-                    {results.nb_pastilles_basal >= 1 
-                      ? "1 pastille Hydratis chaque matin"
-                      : "Teste Hydratis"}
+                    {results.nb_pastilles_basal >= 1 ? "1 pastille Hydratis chaque matin" : "Teste Hydratis"}
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    {results.nb_pastilles_basal >= 1 
-                      ? "pendant 14 jours"
-                      : "pendant 1 semaine"}
+                    {results.nb_pastilles_basal >= 1 ? "pendant 14 jours" : "pendant 1 semaine"}
                   </p>
                 </div>
               </CardContent>
@@ -763,39 +706,19 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">
-                      {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 
-                        ? "🚻" 
-                        : diagnosticData?.crampes === "Oui" 
-                        ? "💪" 
-                        : "🤝"}
+                      {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 ? "🚻" : diagnosticData?.crampes === "Oui" ? "💪" : "🤝"}
                     </span>
-                    <Badge variant={
-                      (diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5) || 
-                      diagnosticData?.crampes === "Oui" 
-                        ? "destructive" 
-                        : "secondary"
-                    } className="text-xs">
-                      {(diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5) || 
-                       diagnosticData?.crampes === "Oui" 
-                        ? "Moyen" 
-                        : "Facile"}
+                    <Badge variant={diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 || diagnosticData?.crampes === "Oui" ? "destructive" : "secondary"} className="text-xs">
+                      {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 || diagnosticData?.crampes === "Oui" ? "Moyen" : "Facile"}
                     </Badge>
                   </div>
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm mb-1">
-                    {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5
-                      ? "Urine claire (≤3)"
-                      : diagnosticData?.crampes === "Oui"
-                      ? "Réduis les crampes"
-                      : "Partage tes résultats"}
+                    {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 ? "Urine claire (≤3)" : diagnosticData?.crampes === "Oui" ? "Réduis les crampes" : "Partage tes résultats"}
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5
-                      ? "pendant 5 jours"
-                      : diagnosticData?.crampes === "Oui"
-                      ? "avec une hydratation optimale"
-                      : "avec un ami"}
+                    {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 ? "pendant 5 jours" : diagnosticData?.crampes === "Oui" ? "avec une hydratation optimale" : "avec un ami"}
                   </p>
                 </div>
               </CardContent>
@@ -823,31 +746,20 @@ export const ResultsDisplay = ({ results, diagnosticData, firstName, onRestart }
         </Card>
 
         {/* Bouton recommencer */}
-        {onRestart && (
-          <Button 
-            onClick={onRestart} 
-            variant="outline" 
-            size="lg"
-            className="w-full gap-2"
-          >
+        {onRestart && <Button onClick={onRestart} variant="outline" size="lg" className="w-full gap-2">
             <RotateCcw className="w-4 h-4" />
             Recommencer le diagnostic
-          </Button>
-        )}
+          </Button>}
       </div>
 
       {/* Bouton Back to Top */}
-      {showBackToTop && (
-        <Button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-4 right-4 z-50 animate-fade-in rounded-full p-3 shadow-lg"
-          size="icon"
-        >
+      {showBackToTop && <Button onClick={() => window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })} className="fixed bottom-4 right-4 z-50 animate-fade-in rounded-full p-3 shadow-lg" size="icon">
           <ArrowUp className="w-5 h-5" />
-        </Button>
-      )}
+        </Button>}
 
     </div>
-    </TooltipProvider>
-  );
+    </TooltipProvider>;
 };
