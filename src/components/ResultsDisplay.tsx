@@ -242,13 +242,13 @@ export const ResultsDisplay = ({
 
               <div className="relative">
                 {/* Jauge avec effet liquide */}
-                <div className="relative h-16 w-full overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-b from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/50 shadow-inner">
+                <div className="relative h-40 w-full overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-b from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/50 shadow-inner">
                   {/* Fond animé avec vagues */}
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-100/20 via-cyan-100/20 to-blue-100/20 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20" />
                   
-                  {/* Eau avec gradient et animation de vague */}
+                  {/* Eau avec gradient et animation de vague - remplissage vertical de bas en haut */}
                   <div 
-                    className="absolute bottom-0 left-0 right-0 transition-all duration-1000 ease-out"
+                    className="absolute bottom-0 left-0 right-0 w-full transition-all duration-1000 ease-out"
                     style={{ height: `${gaugePercent}%` }}
                   >
                     <div className="relative h-full bg-gradient-to-t from-blue-500 via-blue-400 to-cyan-400 dark:from-blue-600 dark:via-blue-500 dark:to-cyan-500">
