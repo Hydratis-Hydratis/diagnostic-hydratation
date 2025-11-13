@@ -134,12 +134,13 @@ export const ResultsDisplay = ({
     return <AlertCircle className="w-5 h-5" />;
   };
 
-  // Messages de progression
-  const getProgressMessage = (percent: number) => {
-    if (percent < 50) return `Tu es à ${percent}% de ton objectif, continue !`;
-    if (percent < 75) return `Bon départ ! Tu es à ${percent}%`;
-    if (percent < 90) return `Presque parfait ! ${percent}%`;
-    return `Objectif presque atteint ! ${percent}%`;
+  // Messages de progression - Affiche les besoins supplémentaires pour l'entraînement
+  const getProgressMessage = () => {
+    if (results.besoins_exercice_ml > 0) {
+      const litersExercice = formatVolume(results.besoins_exercice_ml);
+      return `Ajouter ${litersExercice} d'eau les jours d'entraînement`;
+    }
+    return "";
   };
 
   // Détection de symptômes
@@ -194,8 +195,10 @@ export const ResultsDisplay = ({
               </div>
               {results.hydratation_reelle_ml > 0 && <>
                   <Progress value={progressPercent} className="h-2 mb-2" />
-                  <p className="text-xs text-muted-foreground">{getProgressMessage(progressPercent)}</p>
                 </>}
+              {getProgressMessage() && (
+                <p className="text-xs text-muted-foreground">{getProgressMessage()}</p>
+              )}
             </div>
 
             {/* Métrique 3 : Total pastilles */}
