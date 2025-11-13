@@ -474,18 +474,7 @@ export const ResultsDisplay = ({
           </div>
 
                 {/* Détails */}
-                <div className="border-t border-orange-500/20 mt-4 pt-3 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Volume total</span>
-                    <span className="font-semibold">{formatVolume(results.besoins_exercice_ml)}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">⏱️ Par heure</span>
-                    <span className="font-bold text-orange-600 dark:text-orange-400">
-                      {formatDebit(Math.round(results.besoins_exercice_ml / results.details_exercice.duree_heures))}
-                    </span>
-                  </div>
-                </div>
+                
               </div>}
           </div>
 
