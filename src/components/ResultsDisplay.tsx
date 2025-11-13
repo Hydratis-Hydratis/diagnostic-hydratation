@@ -238,9 +238,37 @@ export const ResultsDisplay = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-6">
+              <div className="relative w-full">
+                {/* Labels positionnés au-dessus de la jauge */}
+                <div className="relative mb-2 h-12">
+                  {/* Label "Ton idéal" - fixe à droite (100%) */}
+                  <div className="absolute right-0 flex flex-col items-end">
+                    <span className="text-xs font-medium text-muted-foreground">Ton idéal</span>
+                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                      {formatVolume(gaugeTarget)}
+                    </span>
+                  </div>
+                  
+                  {/* Label "Ton hydratation actuelle" - dynamique selon gaugePercent */}
+                  <div 
+                    className="absolute flex flex-col items-center transition-all duration-1000 ease-out"
+                    style={{ 
+                      left: `${Math.max(15, Math.min(gaugePercent, 100))}%`, 
+                      transform: 'translateX(-50%)' 
+                    }}
+                  >
+                    <span className="text-xs font-medium text-foreground">Ton hydratation actuelle</span>
+                    <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">
+                      {formatVolume(gaugeCurrent)}
+                      {gaugePercent > 100 && (
+                        <span className="ml-1 text-xs">({gaugePercent}%)</span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
                 {/* Jauge avec effet liquide - barre horizontale */}
-                <div className="relative h-10 flex-1 overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-b from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/50 shadow-inner">
+                <div className="relative h-10 w-full overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-b from-blue-50/50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/50 shadow-inner">
                   {/* Fond animé avec vagues */}
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-100/20 via-cyan-100/20 to-blue-100/20 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20" />
                   
@@ -294,18 +322,6 @@ export const ResultsDisplay = ({
                     {[25, 50, 75].map(mark => <div key={mark} className="flex flex-col items-center justify-center h-full">
                         <div className={cn("w-px h-full", gaugePercent >= mark ? "bg-white/20" : "bg-blue-500/20")} />
                       </div>)}
-                  </div>
-                </div>
-
-                {/* Infos à droite de la jauge */}
-                <div className="flex flex-col gap-2 min-w-[140px]">
-                  <div className="text-xs">
-                    <span className="text-muted-foreground">Ton idéal</span>
-                    <div className="font-semibold text-foreground">{formatVolume(gaugeTarget)}</div>
-                  </div>
-                  <div className="text-xs">
-                    <span className="text-muted-foreground">Ton hydratation</span>
-                    <div className="font-semibold text-foreground">{formatVolume(gaugeCurrent)}</div>
                   </div>
                 </div>
               </div>
