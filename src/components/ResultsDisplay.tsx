@@ -221,6 +221,7 @@ export const ResultsDisplay = ({
         const gaugeTarget = results.besoins_basals_net_ml;
         const gaugeCurrent = Math.max(0, results.hydratation_reelle_ml ?? 0);
         const gaugePercent = gaugeTarget > 0 ? Math.round(gaugeCurrent / gaugeTarget * 100) : 0;
+        const animatedGaugePercent = useCountUp(gaugePercent, 2000);
         return <Card className="border-4 border-blue-500/50 bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-blue-600/15 overflow-hidden shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -231,8 +232,11 @@ export const ResultsDisplay = ({
               <div className="relative w-full">
                 {/* Labels positionnés au-dessus de la jauge */}
                 <div className="relative mb-2 h-10">
-                  {/* Label "Ton idéal" - fixe à droite (100%) */}
-                  <div className="absolute right-0 flex flex-col items-end">
+                  {/* Label "Ton idéal" - dynamique selon le niveau d'hydratation */}
+                  <div className="absolute flex flex-col items-center transition-all duration-1000 ease-out" style={{
+                    left: animatedGaugePercent > 100 ? '60%' : '100%',
+                    transform: 'translateX(-50%)'
+                  }}>
                     <span className="text-[10px] font-medium text-muted-foreground">Ton idéal</span>
                     <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
                       {formatVolume(gaugeTarget)}
@@ -241,15 +245,15 @@ export const ResultsDisplay = ({
                   
                   {/* Label "Ton hydratation actuelle" - dynamique selon gaugePercent */}
                   <div className="absolute flex flex-col items-center transition-all duration-1000 ease-out" style={{
-                  left: `${Math.max(15, Math.min(gaugePercent > 100 ? 85 : gaugePercent, 100))}%`,
+                  left: `${Math.max(15, Math.min(animatedGaugePercent > 100 ? 95 : animatedGaugePercent, 100))}%`,
                   transform: 'translateX(-50%)'
                 }}>
                     <span className="text-[10px] font-medium text-foreground">
-                      {gaugePercent > 100 ? "Ta consommation" : "Ton hydratation quotidienne actuelle"}
+                      {animatedGaugePercent > 100 ? "Ta consommation" : "Ton hydratation quotidienne actuelle"}
                     </span>
                     <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">
                       {formatVolume(gaugeCurrent)}
-                      {gaugePercent > 100 && <span className="ml-1 text-[10px]">({gaugePercent}%)</span>}
+                      {animatedGaugePercent > 100 && <span className="ml-1 text-[10px]">({animatedGaugePercent}%)</span>}
                     </span>
                   </div>
                 </div>
@@ -261,7 +265,7 @@ export const ResultsDisplay = ({
                   
                   {/* Eau avec gradient - remplissage horizontal de gauche à droite */}
                   <div className="absolute top-0 bottom-0 left-0 h-full transition-all duration-1000 ease-out" style={{
-                  width: `${gaugePercent}%`
+                  width: `${animatedGaugePercent}%`
                 }}>
                     <div className="relative w-full h-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 dark:from-blue-600 dark:via-blue-500 dark:to-cyan-500">
                       {/* Effet de brillance */}
@@ -283,7 +287,7 @@ export const ResultsDisplay = ({
                       </div>
                       
                       {/* Gouttelettes flottantes */}
-                      {gaugePercent > 10 && <>
+                      {animatedGaugePercent > 10 && <>
                           <Droplet className="absolute top-1/4 left-[15%] h-4 w-4 text-white/60 animate-bounce" style={{
                         animationDelay: '0s',
                         animationDuration: '2s'
@@ -307,14 +311,14 @@ export const ResultsDisplay = ({
                   {/* Marques de niveau horizontales */}
                   <div className="absolute inset-x-0 top-0 bottom-0 flex flex-row justify-between px-2 pointer-events-none">
                     {[25, 50, 75].map(mark => <div key={mark} className="flex flex-col items-center justify-center h-full">
-                        <div className={cn("w-px h-full", gaugePercent >= mark ? "bg-white/20" : "bg-blue-500/20")} />
+                        <div className={cn("w-px h-full", animatedGaugePercent >= mark ? "bg-white/20" : "bg-blue-500/20")} />
                       </div>)}
                   </div>
 
                   {/* Pourcentage au centre de la barre */}
                   <div className="absolute inset-0 flex items-center justify-center z-20">
                     <span className="text-2xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
-                      {gaugePercent}%
+                      {animatedGaugePercent}%
                     </span>
                   </div>
                 </div>
@@ -322,8 +326,8 @@ export const ResultsDisplay = ({
 
               {/* Message de progression */}
               <div className="mt-3 text-center">
-                <p className={cn("text-sm font-medium", gaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
-                  {gaugePercent >= 100 ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" : <>
+                <p className={cn("text-sm font-medium", animatedGaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
+                  {animatedGaugePercent >= 100 ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" : <>
                         Encore <span className="font-bold text-primary">{formatVolume(gaugeTarget - gaugeCurrent)}</span> à boire
                       </>}
                 </p>
