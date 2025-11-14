@@ -409,31 +409,82 @@ export const ResultsDisplay = ({
 
             {/* COLONNE 2 : Besoins sport OU Message d'encouragement */}
             {(() => {
-              // Messages d'encouragement variés pour les non-sportifs
-              const encouragementMessages = [
-                {
-                  emoji: "🏃‍♀️",
-                  title: "Le savais-tu ?",
-                  text: "L'ANSES recommande 20 minutes d'activité physique douce tous les jours. C'est bon pour ton hydratation ET ta santé !"
-                },
-                {
-                  emoji: "🚶‍♂️",
-                  title: "Conseil santé",
-                  text: "Une marche quotidienne de 20 minutes augmente légèrement tes besoins en eau et améliore ta santé cardiovasculaire."
-                },
-                {
-                  emoji: "🧘‍♀️",
-                  title: "Astuce bien-être",
-                  text: "Yoga, marche ou vélo : 20 minutes d'activité douce quotidienne optimisent ton hydratation et ton bien-être."
-                },
-                {
-                  emoji: "💪",
-                  title: "Challenge du jour",
-                  text: "Que dirais-tu d'une petite promenade de 20 minutes aujourd'hui ? Ton corps et ton hydratation te remercieront !"
+              // Messages d'encouragement adaptés par âge (basés sur recommandations ANSES)
+              const getEncouragementMessages = (age: string) => {
+                const ageNum = parseInt(age || "30");
+                
+                if (ageNum < 18) {
+                  // Messages pour jeunes (< 18 ans) : Focus croissance et développement
+                  return [
+                    {
+                      emoji: "🏃‍♀️",
+                      title: "Bouge pour grandir !",
+                      text: "L'ANSES recommande 60 minutes d'activité physique par jour pour les jeunes. C'est essentiel pour développer tes os et tes muscles, et te sentir mieux dans ta peau ! 💪"
+                    },
+                    {
+                      emoji: "⚽",
+                      title: "Ton corps a besoin de bouger",
+                      text: "1 heure d'activité par jour renforce ton cœur, améliore ta concentration en classe et booste ton moral. Course, vélo, danse... à toi de choisir ! 🎯"
+                    },
+                    {
+                      emoji: "🎮",
+                      title: "Pause écrans, action !",
+                      text: "60 minutes d'activité quotidienne selon l'ANSES : marche rapide, sport, jeux actifs... Ton corps se développe mieux et tu te sens plus énergique ! ✨"
+                    }
+                  ];
+                } else if (ageNum >= 65) {
+                  // Messages pour seniors (65+ ans) : Focus autonomie et prévention chutes
+                  return [
+                    {
+                      emoji: "🚶‍♀️",
+                      title: "Reste autonome plus longtemps",
+                      text: "L'ANSES recommande 30 minutes d'activité adaptée par jour. Marche, gymnastique douce, tai-chi... Tu préserves ton équilibre, ta mobilité et préviens les chutes. 🌳"
+                    },
+                    {
+                      emoji: "🧘‍♂️",
+                      title: "Bouge pour ton équilibre",
+                      text: "30 minutes quotidiennes d'activité douce renforcent tes muscles, maintiennent ta souplesse et réduisent drastiquement les risques de chute. C'est la clé de ton autonomie ! 💪"
+                    },
+                    {
+                      emoji: "👥",
+                      title: "Activité physique = Bien vieillir",
+                      text: "Selon l'ANSES, 30 min/jour d'activité adaptée : marche avec des amis, aquagym, jardinage... Tu gardes ton indépendance, ton moral et tu crées du lien social. 🌺"
+                    },
+                    {
+                      emoji: "🌸",
+                      title: "Protège ta mobilité",
+                      text: "L'activité physique régulière (30 min/jour) préserve ta masse musculaire, maintient tes articulations souples et améliore ta coordination. Essentiel pour rester actif ! ✨"
+                    }
+                  ];
+                } else {
+                  // Messages pour adultes (18-64 ans) : Focus santé cardio et prévention
+                  return [
+                    {
+                      emoji: "🚶‍♂️",
+                      title: "30 minutes qui changent tout",
+                      text: "L'ANSES recommande 30 minutes d'activité physique modérée par jour. Marche rapide, vélo, jardinage... Ton cœur se renforce et tu réduis les risques de maladies cardiovasculaires. 💚"
+                    },
+                    {
+                      emoji: "💪",
+                      title: "Prévenir plutôt que guérir",
+                      text: "Bouger 30 minutes quotidiennement diminue les risques de diabète, d'hypertension et de certains cancers. C'est aussi un excellent anti-stress naturel ! 🧘‍♀️"
+                    },
+                    {
+                      emoji: "🏃‍♀️",
+                      title: "Investis dans ta santé",
+                      text: "30 minutes par jour selon l'ANSES : renforce tes muscles, protège tes os, améliore ton sommeil et ton moral. Un geste simple pour une vie plus longue et plus saine ! ✨"
+                    },
+                    {
+                      emoji: "🚴‍♂️",
+                      title: "Bouge, ton corps te remerciera",
+                      text: "L'activité physique régulière (30 min/jour) est le meilleur médicament : elle réduit l'anxiété, améliore la qualité du sommeil et booste ton système immunitaire. 🌟"
+                    }
+                  ];
                 }
-              ];
+              };
 
-              const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+              const ageMessages = getEncouragementMessages(diagnosticData?.age || "30");
+              const randomMessage = ageMessages[Math.floor(Math.random() * ageMessages.length)];
 
               return isSportPerson && results.besoins_exercice_ml > 0 ? (
                 // Bloc orange pour les sportifs
