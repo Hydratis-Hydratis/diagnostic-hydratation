@@ -141,98 +141,90 @@ export const DiagnosticChat = () => {
       const taille = answers.taille_cm;
       
       if (age && poids && taille) {
-        return `Je suis ${sexe} de ${age} ans, ${taille} cm, ${poids} kg 👌`;
+        return `Je suis ${sexe} de ${age} ans, je mesure ${taille} cm et pèse ${poids} kg 👌`;
       } else if (age && poids) {
-        return `Je suis ${sexe} de ${age} ans de ${poids} kg 👌`;
+        return `Je suis ${sexe} de ${age} ans et pèse ${poids} kg 👌`;
       }
       return `Mes informations de profil sont enregistrées.`;
     } else if (stepName === "Environnement") {
       return "Température extérieure notée 🌡️";
     } else if (stepName === "Activité physique") {
       const sportPratique = answers.sport_pratique;
+      const metierPhysique = answers.metier_physique;
+      
       if (sportPratique === "Oui") {
         const sports = answers.sports_selectionnes;
-        const duree = answers.duree_minutes;
-        const frequence = answers.frequence;
+        const duree_hebdo = answers.duree_seance; // durée hebdomadaire totale
         const transpiration = answers.transpiration;
         
         if (sports && Array.isArray(sports)) {
           const sportNames = sports.map((s: any) => s.name).join(" et ");
-          let message = `Je pratique du ${sportNames} 💪`;
+          let message = `Je pratique ${sportNames}`;
           
-          // Ajouter la fréquence
-          if (frequence) {
-            message += ` ${frequence.toLowerCase()}`;
+          if (duree_hebdo) {
+            message += ` avec un volume de ${duree_hebdo} par semaine`;
           }
           
-          // Ajouter la durée
-          if (duree) {
-            message += `, ${duree} par séance`;
-          }
-          
-          // Ajouter la transpiration
           if (transpiration) {
-            message += `, transpiration ${transpiration}/10 💦`;
+            message += ` et une transpiration de ${transpiration}/10`;
           }
           
+          if (metierPhysique === "Oui") {
+            message += `. J'ai également un métier physique`;
+          }
+          
+          message += " 💪";
           return message;
         }
         return "Mes informations sportives sont enregistrées.";
       }
-      return "Je ne pratique pas de sport régulièrement.";
-    } else if (stepName === "Signaux cliniques") {
-      const couleurUrine = answers.urine_couleur;
-      const crampes = answers.crampes;
       
-      let message = "Santé : ";
-      const details = [];
+      // Cas sans sport
+      if (metierPhysique === "Oui") {
+        return "Je ne pratique pas de sport mais j'ai un métier physique 💼";
+      }
+      return "Je ne pratique pas de sport régulièrement.";
+    } else if (stepName === "Santé & Conditions") {
+      const couleurUrine = answers.urine_couleur;
+      const temperature = answers.temperature_ext;
+      const crampes = answers.crampes;
+      const courbatures = answers.courbatures;
+      
+      const phrases = [];
+      
+      if (temperature) {
+        phrases.push(`La température extérieure est de ${temperature}`);
+      }
       
       if (couleurUrine) {
-        details.push(`urine ${couleurUrine.toLowerCase()}`);
+        phrases.push(`ma couleur d'urine est au niveau ${couleurUrine}/8`);
       }
       
-      if (crampes) {
-        details.push(crampes === "Oui" ? "crampes présentes" : "pas de crampes");
+      if (crampes === "Oui") {
+        phrases.push("je ressens des crampes");
+      } else if (crampes === "Non") {
+        phrases.push("je ne ressens pas de crampes");
       }
       
-      if (details.length > 0) {
-        message += details.join(", ") + " 🩺";
-        return message;
+      if (courbatures === "Oui") {
+        phrases.push("j'ai des courbatures");
       }
       
-      return "Mes signaux cliniques sont notés 🩺";
-    } else if (stepName === "Habitudes") {
-      const boissons = answers.boissons_journalieres;
-      
-      if (boissons) {
-        // Convertir l'objet en array et filtrer les boissons consommées
-        const boissonsList = [
-          { name: "Eau", quantity: boissons.eau || 0 },
-          { name: "Café", quantity: (boissons.cafe_the || 0) + (boissons.cafe_sucre || 0) },
-          { name: "Soda", quantity: boissons.soda || 0 },
-          { name: "Soda zero", quantity: boissons.soda_zero || 0 },
-          { name: "Jus", quantity: boissons.jus || 0 },
-          { name: "Vin", quantity: boissons.vin || 0 },
-          { name: "Bière", quantity: boissons.biere || 0 },
-          { name: "Boisson sport", quantity: boissons.boisson_sport || 0 },
-          { name: "Boisson énergisante", quantity: boissons.boisson_energisante || 0 },
-          { name: "Hydratis", quantity: boissons.hydratis || 0 },
-        ];
-        
-        // Prendre les 3 boissons les plus consommées
-        const topBoissons = boissonsList
-          .filter(b => b.quantity > 0)
-          .sort((a, b) => b.quantity - a.quantity)
-          .slice(0, 3)
-          .map(b => `${b.quantity} ${b.name}`)
-          .join(", ");
-        
-        if (topBoissons) {
-          return `Consommation quotidienne : ${topBoissons} ☕`;
+      if (phrases.length > 0) {
+        // Construire une phrase avec virgules et "et" avant le dernier élément
+        let message = phrases[0];
+        if (phrases.length > 1) {
+          message = phrases.slice(0, -1).join(", ");
+          message += " et " + phrases[phrases.length - 1];
         }
+        return message + " 🩺";
       }
       
-      return "Mes habitudes de consommation sont enregistrées ☕";
+      return "Mes informations de santé sont enregistrées 🩺";
+    } else if (stepName === "Habitudes") {
+      return "J'ai complété mes boissons quotidiennes habituelles ☕";
+    } else if (stepName === "Informations") {
+      return "J'ai complété mes informations pour recevoir mes résultats 📋";
     }
     
     return `✓ ${stepName} complété`;
@@ -274,7 +266,7 @@ export const DiagnosticChat = () => {
         setTimeout(() => {
           setIsTyping(false);
           const nextGroup = questionGroups[nextGroupIndex];
-          addBotMessage(`${nextGroup.icon} **${nextGroup.step}**\n\nPassons maintenant à la suite.`);
+          addBotMessage(`${nextGroup.icon} ${nextGroup.step}\n\nPassons maintenant à la suite.`);
           setCurrentGroupIndex(nextGroupIndex);
           setShowScreen(true);
         }, 1500);
