@@ -14,13 +14,27 @@ interface SportSelectorProps {
   onSelect: (sports: Sport[]) => void;
 }
 
-const sportsData: Sport[] = [
-  // Endurance continue (11 sports)
+// Sports les plus pratiqués en France (ordre par popularité)
+const popularSports: Sport[] = [
   { name: "Course à pied", category: "Endurance continue", coefficient: 1.0 },
   { name: "Cyclisme", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Natation", category: "Natation", coefficient: 0.8 },
+  { name: "Football", category: "Sports collectifs", coefficient: 0.9 },
+  { name: "Musculation", category: "Musculation/Force", coefficient: 0.6 },
+  { name: "Tennis", category: "Sports de raquette", coefficient: 0.9 },
+  { name: "Randonnée", category: "Endurance continue", coefficient: 1.0 },
+  { name: "Fitness", category: "Musculation/Force", coefficient: 0.6 },
+  { name: "Yoga Vinyasa", category: "Yoga/Pilates/Stretching", coefficient: 0.4 },
+  { name: "Basketball", category: "Sports collectifs", coefficient: 0.9 },
+];
+
+const sportsData: Sport[] = [
+  // Sports populaires (en premier)
+  ...popularSports,
+  
+  // Autres sports d'endurance continue
   { name: "Marche rapide", category: "Endurance continue", coefficient: 1.0 },
   { name: "Marche nordique", category: "Endurance continue", coefficient: 1.0 },
-  { name: "Randonnée", category: "Endurance continue", coefficient: 1.0 },
   { name: "VTT", category: "Endurance continue", coefficient: 1.0 },
   { name: "Vélo d'appartement", category: "Endurance continue", coefficient: 1.0 },
   { name: "Vélo elliptique", category: "Endurance continue", coefficient: 1.0 },
@@ -35,17 +49,14 @@ const sportsData: Sport[] = [
   { name: "Circuit Training", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
   { name: "Boot Camp", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
   
-  // Musculation/Force (7 sports)
-  { name: "Musculation", category: "Musculation/Force", coefficient: 0.6 },
+  // Musculation/Force (5 sports - Musculation et Fitness déjà dans populaires)
   { name: "Haltérophilie", category: "Musculation/Force", coefficient: 0.6 },
   { name: "Powerlifting", category: "Musculation/Force", coefficient: 0.6 },
   { name: "Renforcement musculaire", category: "Musculation/Force", coefficient: 0.6 },
-  { name: "Fitness", category: "Musculation/Force", coefficient: 0.6 },
   { name: "Street Workout", category: "Musculation/Force", coefficient: 0.6 },
   { name: "TRX", category: "Musculation/Force", coefficient: 0.6 },
   
-  // Natation et sports aquatiques (11 sports)
-  { name: "Natation", category: "Natation", coefficient: 0.8 },
+  // Natation et sports aquatiques (10 sports - Natation déjà dans populaires)
   { name: "Aquagym", category: "Natation", coefficient: 0.8 },
   { name: "Aquabike", category: "Natation", coefficient: 0.8 },
   { name: "Water-polo", category: "Natation", coefficient: 0.8 },
@@ -57,9 +68,7 @@ const sportsData: Sport[] = [
   { name: "Planche à voile", category: "Natation", coefficient: 0.8 },
   { name: "Voile", category: "Natation", coefficient: 0.8 },
   
-  // Sports collectifs (9 sports)
-  { name: "Football", category: "Sports collectifs", coefficient: 0.9 },
-  { name: "Basketball", category: "Sports collectifs", coefficient: 0.9 },
+  // Sports collectifs (7 sports - Football et Basketball déjà dans populaires)
   { name: "Handball", category: "Sports collectifs", coefficient: 0.9 },
   { name: "Volleyball", category: "Sports collectifs", coefficient: 0.9 },
   { name: "Rugby", category: "Sports collectifs", coefficient: 0.9 },
@@ -68,8 +77,7 @@ const sportsData: Sport[] = [
   { name: "Softball", category: "Sports collectifs", coefficient: 0.9 },
   { name: "Ultimate Frisbee", category: "Sports collectifs", coefficient: 0.9 },
   
-  // Sports de raquette (7 sports)
-  { name: "Tennis", category: "Sports de raquette", coefficient: 0.9 },
+  // Sports de raquette (6 sports - Tennis déjà dans populaires)
   { name: "Badminton", category: "Sports de raquette", coefficient: 0.9 },
   { name: "Tennis de table", category: "Sports de raquette", coefficient: 0.9 },
   { name: "Squash", category: "Sports de raquette", coefficient: 0.9 },
@@ -110,8 +118,7 @@ const sportsData: Sport[] = [
   { name: "Hip-hop", category: "Danse", coefficient: 0.7 },
   { name: "Zumba", category: "Danse", coefficient: 0.7 },
   
-  // Yoga et bien-être (5 sports)
-  { name: "Yoga Vinyasa", category: "Yoga et bien-être", coefficient: 0.4 },
+  // Yoga et bien-être (4 sports - Yoga Vinyasa déjà dans populaires)
   { name: "Yoga Ashtanga", category: "Yoga et bien-être", coefficient: 0.4 },
   { name: "Yoga Bikram", category: "Yoga et bien-être", coefficient: 0.4 },
   { name: "Pilates", category: "Yoga et bien-être", coefficient: 0.4 },
@@ -207,7 +214,7 @@ export const SportSelector = ({ onSelect }: SportSelectorProps) => {
         </div>
       )}
 
-      <div className="max-h-64 overflow-y-auto border rounded-lg">
+      <div className="max-h-32 overflow-y-auto border rounded-lg shadow-sm">
         {filteredSports.length > 0 ? (
           <div className="divide-y">
             {filteredSports.map((sport) => {
