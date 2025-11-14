@@ -241,10 +241,12 @@ export const ResultsDisplay = ({
                   
                   {/* Label "Ton hydratation actuelle" - dynamique selon gaugePercent */}
                   <div className="absolute flex flex-col items-center transition-all duration-1000 ease-out" style={{
-                  left: `${Math.max(15, Math.min(gaugePercent, 100))}%`,
+                  left: `${Math.max(15, Math.min(gaugePercent > 100 ? 85 : gaugePercent, 100))}%`,
                   transform: 'translateX(-50%)'
                 }}>
-                    <span className="text-[10px] font-medium text-foreground">Ton hydratation quotidienne actuelle</span>
+                    <span className="text-[10px] font-medium text-foreground">
+                      {gaugePercent > 100 ? "Ta consommation" : "Ton hydratation quotidienne actuelle"}
+                    </span>
                     <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">
                       {formatVolume(gaugeCurrent)}
                       {gaugePercent > 100 && <span className="ml-1 text-[10px]">({gaugePercent}%)</span>}
