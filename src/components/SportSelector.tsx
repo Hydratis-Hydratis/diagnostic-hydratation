@@ -214,35 +214,48 @@ export const SportSelector = ({ onSelect }: SportSelectorProps) => {
         </div>
       )}
 
-      <div className="max-h-32 overflow-y-auto border rounded-lg shadow-sm">
-        {filteredSports.length > 0 ? (
-          <div className="divide-y">
-            {filteredSports.map((sport) => {
-              const isSelected = selectedSports.some(s => s.name === sport.name);
-              return (
-                <button
-                  key={sport.name}
-                  type="button"
-                  onClick={() => handleSelectSport(sport)}
-                  className={cn(
-                    "w-full text-left p-3 transition-colors",
-                    "hover:bg-accent/50",
-                    isSelected && "bg-primary/10 border-l-4 border-primary"
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm">{sport.name}</p>
-                    {isSelected && (
-                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+      <div className="relative">
+        <div className="max-h-32 overflow-y-auto border rounded-lg shadow-sm">
+          {filteredSports.length > 0 ? (
+            <div className="divide-y">
+              {filteredSports.map((sport) => {
+                const isSelected = selectedSports.some(s => s.name === sport.name);
+                return (
+                  <button
+                    key={sport.name}
+                    type="button"
+                    onClick={() => handleSelectSport(sport)}
+                    className={cn(
+                      "w-full text-left p-3 transition-colors",
+                      "hover:bg-accent/50",
+                      isSelected && "bg-primary/10 border-l-4 border-primary"
                     )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="p-8 text-center text-muted-foreground text-sm">
-            Aucun sport trouvé
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-sm">{sport.name}</p>
+                      {isSelected && (
+                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-8 text-center text-muted-foreground text-sm">
+              Aucun sport trouvé
+            </div>
+          )}
+        </div>
+        
+        {/* Indicateur de scroll */}
+        {filteredSports.length > 3 && (
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-background/95 via-background/80 to-transparent pointer-events-none rounded-b-lg flex items-end justify-center pb-2">
+            <div className="animate-bounce">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         )}
       </div>
