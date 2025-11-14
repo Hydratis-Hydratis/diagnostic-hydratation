@@ -232,24 +232,24 @@ export const ResultsDisplay = ({
               <div className="relative w-full">
                 {/* Labels positionnés au-dessus de la jauge */}
                 <div className="relative mb-2 h-10">
-                  {/* Label "Ton idéal" - dynamique selon le niveau d'hydratation */}
-                  <div className="absolute flex flex-col items-center transition-all duration-1000 ease-out" style={{
-                    left: animatedGaugePercent > 100 ? '60%' : '100%',
-                    transform: 'translateX(-50%)'
+                  {/* Label "Ton idéal" - positionné à droite, évite le chevauchement */}
+                  <div className="absolute flex flex-col items-end transition-all duration-1000 ease-out" style={{
+                    right: animatedGaugePercent > 100 ? '0' : '0',
+                    top: animatedGaugePercent > 85 ? '0' : '0'
                   }}>
-                    <span className="text-[10px] font-medium text-muted-foreground">Ton idéal</span>
+                    <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">Ton idéal</span>
                     <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
                       {formatVolume(gaugeTarget)}
                     </span>
                   </div>
                   
-                  {/* Label "Ton hydratation actuelle" - dynamique selon gaugePercent */}
+                  {/* Label "Ton hydratation actuelle" - suit le pourcentage mais évite le bord */}
                   <div className="absolute flex flex-col items-center transition-all duration-1000 ease-out" style={{
-                  left: `${Math.max(15, Math.min(animatedGaugePercent > 100 ? 95 : animatedGaugePercent, 100))}%`,
+                  left: `${Math.max(15, Math.min(animatedGaugePercent > 85 ? 70 : animatedGaugePercent, 85))}%`,
                   transform: 'translateX(-50%)'
                 }}>
-                    <span className="text-[10px] font-medium text-foreground">
-                      {animatedGaugePercent > 100 ? "Ta consommation" : "Ton hydratation quotidienne actuelle"}
+                    <span className="text-[10px] font-medium text-foreground whitespace-nowrap">
+                      {animatedGaugePercent > 100 ? "Ta consommation" : "Ton hydratation quotidienne"}
                     </span>
                     <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">
                       {formatVolume(gaugeCurrent)}
