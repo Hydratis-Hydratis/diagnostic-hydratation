@@ -4,7 +4,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 1 - PROFIL =====
   {
     id: "sexe",
-    text: "Bonjour ! Je suis ravie de t'aider avec ton diagnostic d'hydratation.\n\n👤 Étape 1 - Profil\n\nPour commencer, es-tu...",
+    text: "Bonjour ! Je suis ravie de t'aider avec ton diagnostic d'hydratation.\n\n👤 Profil\n\nPour commencer, es-tu...",
     type: "options",
     options: ["Un homme", "Une femme", "Autre"],
     step: "Profil",
@@ -56,7 +56,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 2 - ENVIRONNEMENT =====
   {
     id: "temperature_ext",
-    text: "🩺 Étape 3 - Santé & Conditions\n\nQuelle est la température extérieure habituelle ?\n\nLa température influence vos besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
+    text: "🩺 Santé & Conditions\n\nQuelle est la température extérieure habituelle ?\n\nLa température influence vos besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
     type: "temperatureSelector",
     step: "Santé & Conditions",
   },
@@ -64,7 +64,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 3 - ACTIVITÉ PHYSIQUE =====
   {
     id: "sport_pratique",
-    text: "🏃 Étape 2 - Activité physique\n\nPratiques-tu une activité sportive ?",
+    text: "🏃 Activité physique\n\nPratiques-tu une activité sportive ?",
     type: "options",
     options: ["Oui", "Non"],
     step: "Activité physique",
@@ -148,7 +148,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 5 - HABITUDES =====
   {
     id: "boissons_journalieres",
-    text: "☕ Étape 4 - Habitudes de consommation\n\nIndique combien de verres/portions de chaque boisson tu consommes en moyenne tous les jours.",
+    text: "☕ Habitudes de consommation\n\nIndique combien de verres/portions de chaque boisson tu consommes en moyenne tous les jours.",
     type: "beverageSelector",
     step: "Habitudes",
   },
