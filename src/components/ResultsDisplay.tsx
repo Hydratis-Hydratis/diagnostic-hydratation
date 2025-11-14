@@ -221,7 +221,7 @@ export const ResultsDisplay = ({
         const gaugeTarget = results.besoins_basals_net_ml;
         const gaugeCurrent = Math.max(0, results.hydratation_reelle_ml ?? 0);
         const gaugePercent = gaugeTarget > 0 ? Math.round(gaugeCurrent / gaugeTarget * 100) : 0;
-        return <Card className="border-2 border-primary/20 bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-blue-600/10 overflow-hidden">
+        return <Card className="border-4 border-blue-500/50 bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-blue-600/15 overflow-hidden shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Droplets className="w-5 h-5 text-blue-500 animate-pulse-soft" />
@@ -244,7 +244,7 @@ export const ResultsDisplay = ({
                   left: `${Math.max(15, Math.min(gaugePercent, 100))}%`,
                   transform: 'translateX(-50%)'
                 }}>
-                    <span className="text-[10px] font-medium text-foreground">Ton hydratation actuelle</span>
+                    <span className="text-[10px] font-medium text-foreground">Ton hydratation quotidienne actuelle</span>
                     <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">
                       {formatVolume(gaugeCurrent)}
                       {gaugePercent > 100 && <span className="ml-1 text-[10px]">({gaugePercent}%)</span>}
