@@ -380,61 +380,15 @@ export const ResultsDisplay = ({
                   </Badge>
                 </div>}
 
-        {/* Message d'encouragement pour non-sportifs OU Instructions pour sportifs */}
-        {(() => {
-          // Messages d'encouragement variés pour les non-sportifs
-          const encouragementMessages = [
-            {
-              emoji: "🏃‍♀️",
-              title: "Le savais-tu ?",
-              text: "L'ANSES recommande 20 minutes d'activité physique douce tous les jours. C'est bon pour ton hydratation ET ta santé !"
-            },
-            {
-              emoji: "🚶‍♂️",
-              title: "Conseil santé",
-              text: "Une marche quotidienne de 20 minutes augmente légèrement tes besoins en eau et améliore ta santé cardiovasculaire."
-            },
-            {
-              emoji: "🧘‍♀️",
-              title: "Astuce bien-être",
-              text: "Yoga, marche ou vélo : 20 minutes d'activité douce quotidienne optimisent ton hydratation et ton bien-être."
-            },
-            {
-              emoji: "💪",
-              title: "Challenge du jour",
-              text: "Que dirais-tu d'une petite promenade de 20 minutes aujourd'hui ? Ton corps et ton hydratation te remercieront !"
-            }
-          ];
-
-          const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
-
-          return !isSportPerson ? (
-            // Message d'encouragement activité physique pour non-sportifs
-            <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200/50 dark:border-green-800/50">
-              <div className="flex items-start gap-2">
-                <div className="text-lg">{randomMessage.emoji}</div>
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1">
-                    {randomMessage.title}
-                  </p>
-                  <p className="text-xs text-green-600 dark:text-green-300 leading-relaxed">
-                    {randomMessage.text}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Instructions existantes pour les sportifs
-            <div className="space-y-2 mt-4">
-              <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
-                <span className="text-muted-foreground">💧 Comment ?</span>
-              </div>
-              <div className="text-xs ml-2 p-2 bg-blue-500/5 rounded">
-                <span>1 pastille dans 1 verre d'eau {results.nb_pastilles_basal}x par jour</span>
-              </div>
-            </div>
-          );
-        })()}
+        {/* Comment prendre */}
+        <div className="space-y-2 mt-4">
+          <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
+            <span className="text-muted-foreground">💧 Comment ?</span>
+          </div>
+          <div className="text-xs ml-2 p-2 bg-blue-500/5 rounded">
+            <span>1 pastille dans 1 verre d'eau {results.nb_pastilles_basal}x par jour</span>
+          </div>
+        </div>
 
               {/* Détails */}
               <div className="border-t border-blue-500/20 mt-4 pt-3 space-y-2">
@@ -453,8 +407,37 @@ export const ResultsDisplay = ({
               </div>
             </div>
 
-            {/* COLONNE 2 : Besoins sport (si applicable) */}
-            {isSportPerson && results.besoins_exercice_ml > 0 && <div className="relative p-5 rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-orange-500/10">
+            {/* COLONNE 2 : Besoins sport OU Message d'encouragement */}
+            {(() => {
+              // Messages d'encouragement variés pour les non-sportifs
+              const encouragementMessages = [
+                {
+                  emoji: "🏃‍♀️",
+                  title: "Le savais-tu ?",
+                  text: "L'ANSES recommande 20 minutes d'activité physique douce tous les jours. C'est bon pour ton hydratation ET ta santé !"
+                },
+                {
+                  emoji: "🚶‍♂️",
+                  title: "Conseil santé",
+                  text: "Une marche quotidienne de 20 minutes augmente légèrement tes besoins en eau et améliore ta santé cardiovasculaire."
+                },
+                {
+                  emoji: "🧘‍♀️",
+                  title: "Astuce bien-être",
+                  text: "Yoga, marche ou vélo : 20 minutes d'activité douce quotidienne optimisent ton hydratation et ton bien-être."
+                },
+                {
+                  emoji: "💪",
+                  title: "Challenge du jour",
+                  text: "Que dirais-tu d'une petite promenade de 20 minutes aujourd'hui ? Ton corps et ton hydratation te remercieront !"
+                }
+              ];
+
+              const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+
+              return isSportPerson && results.besoins_exercice_ml > 0 ? (
+                // Bloc orange pour les sportifs
+                <div className="relative p-5 rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-orange-500/10">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-sm font-semibold text-muted-foreground mb-1">
@@ -527,7 +510,29 @@ export const ResultsDisplay = ({
 
                 {/* Détails */}
                 
-              </div>}
+                </div>
+              ) : (
+                // Bloc vert pour les non-sportifs
+                <div className="relative p-5 rounded-xl border-2 border-green-500/30 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">{randomMessage.emoji}</div>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold text-green-700 dark:text-green-400 mb-2">
+                        {randomMessage.title}
+                      </h3>
+                      <p className="text-sm text-green-600 dark:text-green-300 leading-relaxed mb-4">
+                        {randomMessage.text}
+                      </p>
+                      <div className="p-3 bg-white/50 dark:bg-black/20 rounded-lg border border-green-200/50 dark:border-green-800/50">
+                        <p className="text-xs text-green-700 dark:text-green-400 font-medium">
+                          💡 Bouger régulièrement aide aussi à maintenir une bonne hydratation !
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
         </CardContent>
