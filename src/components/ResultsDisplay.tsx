@@ -478,43 +478,6 @@ export const ResultsDisplay = ({
               </div>}
           </div>
 
-          {/* Alertes conditionnelles SOUS la carte unifiée */}
-          <div className="mt-4 space-y-3">
-            {/* Alerte déshydratation */}
-            {results.score < 50 && <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-red-500/30 bg-red-500/5">
-                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Déshydratation détectée</h4>
-                  <p className="text-xs text-muted-foreground">
-                    Ton score indique une déshydratation significative. Hydrate-toi immédiatement avec {formatVolume(500)} et continue à boire régulièrement.
-                  </p>
-                </div>
-              </div>}
-
-            {/* Alerte canicule */}
-            {isHeatwave && <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-orange-500/30 bg-orange-500/5">
-                <Thermometer className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Alerte canicule</h4>
-                  <p className="text-xs text-muted-foreground">
-                    Température élevée détectée. Augmente ta consommation d'eau de {formatVolume(500)} et évite l'exposition prolongée au soleil.
-                  </p>
-                </div>
-              </div>}
-
-            {/* Alerte symptômes */}
-            {hasSymptoms && <div className="flex items-start gap-3 p-4 rounded-lg border-2 border-red-500/30 bg-red-500/5">
-                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Symptômes détectés</h4>
-                  <p className="text-xs text-muted-foreground">
-                    {diagnosticData?.crampes === "Oui" && "Des crampes ont été signalées. "}
-                    {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 && "Couleur d'urine foncée détectée. "}
-                    Augmente ton hydratation dès maintenant.
-                  </p>
-                </div>
-              </div>}
-          </div>
         </CardContent>
       </Card>
 
@@ -550,21 +513,27 @@ export const ResultsDisplay = ({
                     <Beaker className="w-4 h-4" />
                     Composition scientifique
                   </h4>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="grid grid-cols-3 gap-3 text-xs">
                     <div className="p-3 bg-muted rounded-lg">
                       <div className="font-semibold mb-1">Électrolytes</div>
                       <ul className="space-y-1 text-muted-foreground">
                         <li>• Sodium</li>
                         <li>• Potassium</li>
                         <li>• Magnésium</li>
+                        <li>• Chlorure</li>
                       </ul>
                     </div>
                     <div className="p-3 bg-muted rounded-lg">
-                      <div className="font-semibold mb-1">Minéraux</div>
+                      <div className="font-semibold mb-1">Oligo-éléments</div>
                       <ul className="space-y-1 text-muted-foreground">
                         <li>• Zinc</li>
                         <li>• Manganèse</li>
-                        <li>• Chlorure</li>
+                      </ul>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <div className="font-semibold mb-1">Sucre</div>
+                      <ul className="space-y-1 text-muted-foreground">
+                        <li>• Présent</li>
                       </ul>
                     </div>
                   </div>
@@ -579,19 +548,19 @@ export const ResultsDisplay = ({
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
                       <Zap className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span><strong>Absorption 3x plus rapide</strong> grâce aux électrolytes</span>
+                      <span>Absorption plus rapide et plus efficace grâce aux électrolytes</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Shield className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <span><strong>Meilleure rétention</strong> de l'eau dans l'organisme</span>
+                      <span>Meilleure rétention de l'eau dans l'organisme</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Activity className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                      <span><strong>Performance sportive</strong> optimisée</span>
+                      <span>Performance sportive optimisée</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Heart className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <span><strong>Récupération accélérée</strong> après l'effort</span>
+                      <span>Récupération accélérée après l'effort</span>
                     </li>
                   </ul>
                 </div>
@@ -600,8 +569,7 @@ export const ResultsDisplay = ({
                 <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border">
                   <h4 className="font-semibold text-sm mb-2">💡 Mode d'emploi</h4>
                   <p className="text-xs text-muted-foreground">
-                    Dissous une pastille dans {formatVolume(200)}-{formatVolume(250)} d'eau (environ 1 verre). 
-                    {results.nb_pastilles_exercice > 0 && ` Pour le sport, prends ${results.nb_pastilles_exercice} pastille${results.nb_pastilles_exercice > 1 ? 's' : ''} les jours d'entraînement.`}
+                    Dissous une pastille dans 0,25L d'eau (environ 1 verre). Pour le sport, tu peux dissoudre 2 pastilles dans une gourde de 0,5L.
                   </p>
                 </div>
               </div>
@@ -673,6 +641,9 @@ export const ResultsDisplay = ({
                     <AlertTriangle className="w-4 h-4 text-red-500" />
                     Risques de la déshydratation
                   </h4>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    * Les pourcentages représentent la perte en eau en pourcentage de poids corporel
+                  </p>
                   <div className="space-y-2 text-xs">
                     <div className="p-2 bg-red-500/5 border border-red-500/20 rounded">
                       <strong>Légère (1-2%)</strong> : Soif, fatigue, baisse de concentration
