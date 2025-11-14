@@ -315,12 +315,8 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   const ecart_hydratation_ml = besoin_total_ml - hydratation_reelle_ml;
   
   // Pastilles Hydratis
-  // Pour les besoins basals : 2 pastilles / 500 ml
-  let nb_pastilles_basal = Math.ceil(besoins_basals_ml / 500 / 2);
-  if (temperature_ext === "> 28°C") nb_pastilles_basal += 1;
-  nb_pastilles_basal = Math.min(nb_pastilles_basal, 5);
-  if (ageData.median >= 60 && ageData.median < 70) nb_pastilles_basal = Math.min(nb_pastilles_basal, 3);
-  if (ageData.median >= 70) nb_pastilles_basal = Math.min(nb_pastilles_basal, 2);
+  // Sera calculé après le score en fonction de l'hydratation réelle
+  let nb_pastilles_basal = 0;
   
   // Pour l'exercice : basé sur la durée hebdomadaire et la transpiration
   let nb_pastilles_exercice = 0;
@@ -400,6 +396,43 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
 
   // Appliquer les ajustements et borner le score entre 0 et 100
   score = Math.max(0, Math.min(100, score + ajustement_symptomes));
+
+  // ========== CALCUL INTELLIGENT DES PASTILLES BASALES ==========
+  // Basé sur le score d'hydratation et la couleur d'urine
+  
+  // Déterminer la catégorie d'urine
+  let categorie_urine: 'clair' | 'moyen' | 'fonce';
+  if (urine_couleur < 3) {
+    categorie_urine = 'clair';
+  } else if (urine_couleur <= 5) {
+    categorie_urine = 'moyen';
+  } else {
+    categorie_urine = 'fonce';
+  }
+
+  // Appliquer la logique du tableau selon le score et l'urine
+  if (score < 50) {
+    nb_pastilles_basal = categorie_urine === 'clair' ? 2 : 3;
+  } else if (score < 70) {
+    nb_pastilles_basal = categorie_urine === 'clair' ? 1 : 2;
+  } else if (score < 90) {
+    nb_pastilles_basal = categorie_urine === 'fonce' ? 2 : 1;
+  } else { // score >= 90
+    nb_pastilles_basal = categorie_urine === 'clair' ? 0 : 1;
+  }
+
+  // Ajustements pour température extrême si déjà en difficulté
+  if (temperature_ext === "> 28°C" && score < 70) {
+    nb_pastilles_basal += 1;
+  }
+
+  // Limites de sécurité pour les personnes âgées
+  if (ageData.median >= 60 && ageData.median < 70) {
+    nb_pastilles_basal = Math.min(nb_pastilles_basal, 3);
+  }
+  if (ageData.median >= 70) {
+    nb_pastilles_basal = Math.min(nb_pastilles_basal, 2);
+  }
 
   // Statut
   const statut = score >= 85 ? "Hydratation optimale"
