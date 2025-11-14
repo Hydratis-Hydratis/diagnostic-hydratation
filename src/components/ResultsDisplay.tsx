@@ -769,9 +769,9 @@ export const ResultsDisplay = ({
               Commande tes pastilles Hydratis et profite de ta routine personnalisée
             </p>
             <Button size="lg" className="w-full sm:w-auto" asChild>
-              <a href="https://hydratis.co" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.hydratis.co/collections/tous-nos-produits" target="_blank" rel="noopener noreferrer">
                 <ShoppingCart className="w-4 h-4 mr-2" />
-                Commander Hydratis
+                Découvrir nos produits
               </a>
             </Button>
           </CardContent>
