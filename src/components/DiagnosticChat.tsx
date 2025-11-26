@@ -266,7 +266,14 @@ export const DiagnosticChat = () => {
         setTimeout(() => {
           setIsTyping(false);
           const nextGroup = questionGroups[nextGroupIndex];
-          addBotMessage(`${nextGroup.icon} ${nextGroup.step}\n\nPassons maintenant à la suite.`);
+          
+          // Message personnalisé selon l'étape
+          let transitionMessage = `${nextGroup.icon} ${nextGroup.step}\n\nPassons maintenant à la suite.`;
+          if (nextGroup.step === "Activité physique") {
+            transitionMessage = "C'est noté 🙂 Passons maintenant à l'activité physique !";
+          }
+          
+          addBotMessage(transitionMessage);
           setCurrentGroupIndex(nextGroupIndex);
           setShowScreen(true);
         }, 1500);
