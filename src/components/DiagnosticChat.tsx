@@ -183,7 +183,7 @@ export const DiagnosticChat = () => {
       if (metierPhysique === "Oui") {
         return "Je ne pratique pas de sport mais j'ai un métier physique 💼";
       }
-      return "Je ne pratique pas de sport régulièrement.";
+      return "Je ne pratique pas de sport et je n'ai pas de métier physique 🙂";
     } else if (stepName === "Santé & Conditions") {
       const couleurUrine = answers.urine_couleur;
       const temperature = answers.temperature_ext;
