@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Droplet, Droplets, Activity, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw, Trophy, Target, ArrowUp, Sun, Users, Calendar, Clock, Thermometer, Heart, Beaker, Shield, BookOpen, AlertTriangle, ShoppingCart, RotateCcw } from "lucide-react";
+import { Droplet, Droplets, Activity, Disc, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw, Trophy, Target, ArrowUp, Sun, Users, Calendar, Clock, Thermometer, Heart, Beaker, Shield, BookOpen, AlertTriangle, ShoppingCart, RotateCcw } from "lucide-react";
 import type { HydrationResult } from "@/lib/hydrationCalculator";
 import type { DiagnosticData } from "@/types/diagnostic";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts";
 import { useCountUp } from "@/hooks/use-count-up";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
-import hydratisImage from "@/assets/beverages/hydratis.png";
 interface ResultsDisplayProps {
   results: HydrationResult;
   diagnosticData?: DiagnosticData;
@@ -213,11 +212,7 @@ export const ResultsDisplay = ({
             <div className="p-4 rounded-lg bg-background border border-purple-500/20">
               <h4 className="text-sm font-medium text-muted-foreground mb-2">Pastilles recommandées</h4>
               <div className="flex items-center gap-3">
-                <img 
-                  src={hydratisImage} 
-                  alt="Pastille Hydratis" 
-                  className="w-8 h-8 object-contain" 
-                />
+                <Disc className="w-8 h-8 text-purple-500" />
                 <div className="text-3xl font-bold text-foreground">
                   {isSensitivePopulation ? "—" : totalPastilles}
                   {!isSensitivePopulation && <span className="text-lg font-normal text-muted-foreground ml-1">/jour</span>}
