@@ -100,7 +100,7 @@ export const OnboardingScreen = ({ onStart }: OnboardingScreenProps) => {
         <Button
           onClick={onStart}
           size="lg"
-          className="px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all animate-pulse hover:animate-none"
+          className="px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
         >
           🚀 Commencer mon diagnostic
         </Button>
