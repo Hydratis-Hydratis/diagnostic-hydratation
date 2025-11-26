@@ -609,15 +609,21 @@ export const ResultsDisplay = ({
                         </Badge>
                       </div>}
 
-                    {/* Comment prendre */}
-                    <div className="space-y-2 mt-4">
-                      <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
-                        <span className="text-muted-foreground">💧 Comment ?</span>
+                    {/* Comment prendre - affiché seulement si pastilles > 0 */}
+                    {results.nb_pastilles_exercice > 0 && (
+                      <div className="space-y-2 mt-4">
+                        <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
+                          <span className="text-muted-foreground">💧 Comment ?</span>
+                        </div>
+                        <div className="text-xs ml-2 p-2 bg-orange-500/5 rounded">
+                          <span>
+                            {results.nb_pastilles_exercice === 1 
+                              ? "1 pastille dans 1 verre d'eau pendant/après l'effort"
+                              : "2 pastilles dans un bidon ou une flasque pendant/après l'effort"}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-xs ml-2 p-2 bg-orange-500/5 rounded">
-                        <span>1 pastille dans 1 verre d'eau pendant/après l'effort</span>
-                      </div>
-                    </div>
+                    )}
                   </>
                 )}
 
