@@ -609,33 +609,33 @@ export const ResultsDisplay = ({
         
         // Grossesse
         if (diagnosticData?.situation_particuliere?.includes("Enceinte")) {
-          warnings.push("🤰 En période de grossesse, tes besoins en eau augmentent (+300mL/jour recommandées). Consulte ton médecin pour un suivi personnalisé.");
+          warnings.push("🤰 Les besoins hydriques augmentent pendant la grossesse. Évite la déshydratation et fractionne tes prises d'eau au cours de la journée.");
         }
         
         // Allaitement
         if (diagnosticData?.situation_particuliere === "Allaitante") {
-          warnings.push("👶 L'allaitement augmente significativement tes besoins hydriques (+700mL/jour recommandés).");
+          warnings.push("🤱 La production de lait augmente la perte hydrique quotidienne. Une hydratation optimale est essentielle pour maintenir la lactation. Bois régulièrement tout au long de la journée.");
         }
         
         // Personnes âgées
         const age = parseInt(diagnosticData?.age || "0");
         if (age >= 70) {
-          warnings.push("🧓 La sensation de soif diminue avec l'âge. Pense à boire régulièrement même sans ressentir la soif.");
+          warnings.push("🧓 La sensation de soif diminue avec l'âge. Fractionne tes prises d'eau, évite les longues périodes sans boire, et surveille les signes de déshydratation comme la fatigue, la bouche sèche ou la confusion.");
         }
         
         // Enfants
         if (age > 0 && age < 12) {
-          warnings.push("💡 Les enfants ont des besoins hydriques plus élevés par rapport à leur poids. Veille à proposer de l'eau régulièrement.");
+          warnings.push("👧 Les enfants ont des besoins hydriques proportionnellement plus élevés que les adultes. Propose-lui de l'eau régulièrement, surtout pendant les activités physiques et par temps chaud.");
         }
         
         // Crampes
         if (diagnosticData?.crampes === "Oui") {
-          warnings.push("💡 Les crampes peuvent être liées à un déficit en électrolytes. Une bonne hydratation peut aider.");
+          warnings.push("💡 Les crampes répétées peuvent signaler un déséquilibre en électrolytes. Une hydratation enrichie en minéraux peut aider à les prévenir.");
         }
         
         // Chaleur extrême
         if (diagnosticData?.temperature_ext === "> 28°C") {
-          warnings.push("🌡️ Par forte chaleur, tes besoins en eau sont très importants. Bois avant d'avoir soif !");
+          warnings.push("🌡️ Par forte chaleur, tes pertes hydriques sont considérablement augmentées. N'attends pas d'avoir soif pour boire et fractionne tes apports tout au long de la journée.");
         }
         
         return warnings.length > 0 ? (
