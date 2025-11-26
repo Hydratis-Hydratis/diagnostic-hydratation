@@ -72,7 +72,7 @@ export const BeverageSelector = ({ quantities, onChange }: BeverageSelectorProps
 
   return (
     <div className="w-full">
-      <h3 className="text-lg font-medium mb-4">Combien de verres consommez-vous ?</h3>
+      <h3 className="text-lg font-medium mb-4">Combien de verres consommes-tu ?</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {beverages.map((beverage) => (
           <div

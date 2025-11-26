@@ -56,7 +56,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 2 - ENVIRONNEMENT =====
   {
     id: "temperature_ext",
-    text: "Quelle est la température extérieure habituelle ?\n\nLa température influence vos besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
+    text: "Quelle est la température extérieure habituelle ?\n\n💡 La température influence tes besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
     type: "temperatureSelector",
     step: "Santé & Conditions",
   },
@@ -163,7 +163,7 @@ export const questions: Question[] = [
   },
   {
     id: "email",
-    text: "Merci d'avoir répondu à ce questionnaire !\n\nPour recevoir ton diagnostic personnalisé, quelle est ton adresse e-mail ?",
+    text: "Merci d'avoir pris le temps de répondre !\n\nPeux-tu nous indiquer l'adresse e-mail à laquelle envoyer ton diagnostic personnalisé ?",
     type: "input",
     inputType: "email",
     placeholder: "ton.email@exemple.com",
