@@ -21,7 +21,8 @@ export const ColorScaleSelector = ({ onSelect }: ColorScaleSelectorProps) => {
 
   const handleSelect = (index: number, value: string) => {
     setSelectedIndex(index);
-    onSelect(value);
+    // Envoyer l'index + 1 (pour avoir 1-8 au lieu de 0-7)
+    onSelect(String(index + 1));
   };
 
   return (
