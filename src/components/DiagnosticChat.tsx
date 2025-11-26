@@ -4,6 +4,7 @@ import { ThematicScreen } from "./ThematicScreen";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { TypingIndicator } from "./TypingIndicator";
 import { ResultsDisplay } from "./ResultsDisplay";
+import { OnboardingScreen } from "./OnboardingScreen";
 import { questions } from "@/data/questions";
 import { DiagnosticData, Question } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
@@ -70,6 +71,7 @@ export const DiagnosticChat = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [showScreen, setShowScreen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -90,6 +92,9 @@ export const DiagnosticChat = () => {
     const savedStep = localStorage.getItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
     
     if (savedData && savedStep) {
+      // Skip l'onboarding si diagnostic en cours
+      setShowOnboarding(false);
+      
       // Demander si l'utilisateur veut reprendre
       const shouldResume = window.confirm(
         "Tu as un diagnostic en cours. Veux-tu le reprendre ?"
@@ -125,10 +130,8 @@ export const DiagnosticChat = () => {
         localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
         startFreshDiagnostic();
       }
-    } else {
-      // Aucune donnée sauvegardée, démarrer normalement
-      startFreshDiagnostic();
     }
+    // Si pas de données sauvegardées, l'onboarding s'affichera par défaut
   }, []);
   
   const startFreshDiagnostic = () => {
@@ -380,15 +383,21 @@ export const DiagnosticChat = () => {
     setMessages([]);
     setDiagnosticData({});
     setIsComplete(false);
-    setIsTyping(true);
+    setIsTyping(false);
     setShowScreen(false);
-    
-    // Relancer le message de bienvenue après un délai
+    setShowOnboarding(true);
+  };
+
+  const handleStartDiagnostic = () => {
+    setShowOnboarding(false);
     setTimeout(() => {
-      setIsTyping(false);
-      addBotMessage("Bonjour ! Réponds à quelques questions pour que je t'aide à mieux comprendre tes besoins d'hydratation. 💧");
-      setShowScreen(true);
-    }, 1500);
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+        addBotMessage("Bonjour ! Réponds à quelques questions pour que je t'aide à mieux comprendre tes besoins d'hydratation. 💧");
+        setShowScreen(true);
+      }, 2000);
+    }, 800);
   };
 
   const currentGroup = questionGroups[currentGroupIndex];
@@ -398,8 +407,15 @@ export const DiagnosticChat = () => {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Onboarding Screen */}
+      {showOnboarding && (
+        <div className="flex-1 overflow-y-auto px-4 py-6">
+          <OnboardingScreen onStart={handleStartDiagnostic} />
+        </div>
+      )}
+
       {/* Progress Indicator */}
-      {!isComplete && messages.length > 0 && (
+      {!showOnboarding && !isComplete && messages.length > 0 && (
         <ProgressIndicator 
           current={currentGroupIndex} 
           total={totalSteps}
@@ -408,7 +424,8 @@ export const DiagnosticChat = () => {
       )}
       
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+      {!showOnboarding && (
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
         {messages.map((message, index) => (
           <div key={index} className="space-y-2">
             <ChatMessage
@@ -460,7 +477,8 @@ export const DiagnosticChat = () => {
         )}
         
         <div ref={messagesEndRef} />
-      </div>
+        </div>
+      )}
     </div>
   );
 };
