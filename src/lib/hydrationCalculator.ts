@@ -145,7 +145,7 @@ const getAjustBoissons = (boissons: any): { total: number; notes: string[] } => 
   const cafeThe = boissons.cafe_the || 0;
   if (cafeThe > 3) {
     total += 150;
-    notes.push("Plus de 3 cafés/thés par jour : pensez à augmenter votre consommation d'eau.");
+    notes.push("Plus de 3 cafés/thés par jour : pense à augmenter ta consommation d'eau.");
   }
   
   // Café/thé sucré
@@ -289,11 +289,11 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   let alerte_plafond = "";
   
   if (besoin_total_brut_ml >= 4500 && besoin_total_brut_ml < 5000) {
-    alerte_plafond = "💧 Vos besoins hydriques sont élevés. Pensez à vous hydrater régulièrement tout au long de la journée.";
+    alerte_plafond = "💧 Tes besoins hydriques sont élevés. Pense à t'hydrater régulièrement tout au long de la journée.";
   } else if (besoin_total_brut_ml >= 5000 && besoin_total_brut_ml < PLAFOND_MAX) {
-    alerte_plafond = "⚠️ Vos besoins hydriques sont exceptionnellement élevés en raison de la combinaison de plusieurs facteurs (chaleur, activité physique intense, etc.). Fractionnez bien votre hydratation et consultez un professionnel de santé si nécessaire.";
+    alerte_plafond = "⚠️ Tes besoins hydriques sont exceptionnellement élevés en raison de la combinaison de plusieurs facteurs (chaleur, activité physique intense, etc.). Fractionne bien ton hydratation et consulte un professionnel de santé si nécessaire.";
   } else if (besoin_total_brut_ml >= PLAFOND_MAX) {
-    alerte_plafond = `⚠️ Vos besoins calculés dépassent ${PLAFOND_MAX / 1000}L (${besoin_total_original} mL), ce qui concerne les athlètes de haut niveau en conditions extrêmes. La valeur a été plafonnée à ${PLAFOND_MAX / 1000}L. Un suivi médical sportif est fortement recommandé pour une hydratation personnalisée.`;
+    alerte_plafond = `⚠️ Tes besoins calculés dépassent ${PLAFOND_MAX / 1000}L (${besoin_total_original} mL), ce qui concerne les athlètes de haut niveau en conditions extrêmes. La valeur a été plafonnée à ${PLAFOND_MAX / 1000}L. Un suivi médical sportif est fortement recommandé pour une hydratation personnalisée.`;
     besoin_total_brut_ml = PLAFOND_MAX;
     // Recalculer les valeurs nettes avec le plafond
     const ratio = PLAFOND_MAX / besoin_total_original;
@@ -454,28 +454,28 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
     const manque_ml = Math.max(0, besoin_total_ml - hydratation_reelle_ml);
     
     if (pourcentage_besoins >= 90) {
-      notes.push(`💧 Vous êtes sur la bonne voie avec ${hydratation_reelle_ml} mL d'eau par jour, continuez à boire régulièrement tout au long de la journée.`);
+      notes.push(`💧 Tu es sur la bonne voie avec ${hydratation_reelle_ml} mL d'eau par jour, continue à boire régulièrement tout au long de la journée.`);
     } else if (pourcentage_besoins >= 70) {
-      notes.push(`💧 Votre apport en eau représente environ ${pourcentage_besoins}% de vos besoins journaliers. Essayez d'ajouter environ ${manque_ml} mL d'eau pour atteindre votre objectif d'hydratation.`);
+      notes.push(`💧 Ton apport en eau représente environ ${pourcentage_besoins}% de tes besoins journaliers. Essaie d'ajouter environ ${manque_ml} mL d'eau pour atteindre ton objectif d'hydratation.`);
     } else {
-      notes.push(`💧 Vous avez bu ${hydratation_reelle_ml} mL d'eau pure aujourd'hui. Essayez d'ajouter environ ${manque_ml} mL d'eau pour atteindre votre objectif. L'eau reste votre meilleur allié : c'est la seule boisson 100% hydratante.`);
+      notes.push(`💧 Tu as bu ${hydratation_reelle_ml} mL d'eau pure aujourd'hui. Essaie d'ajouter environ ${manque_ml} mL d'eau pour atteindre ton objectif. L'eau reste ton meilleur allié : c'est la seule boisson 100% hydratante.`);
     }
   }
   
   // 🚻 2. Couleur de l'urine (indicateur uniquement)
   if (urine_couleur <= 3) {
-    notes.push("🚻 La couleur claire de vos urines indique une bonne hydratation actuelle.");
+    notes.push("🚻 La couleur claire de tes urines indique une bonne hydratation actuelle.");
   } else if (urine_couleur <= 5) {
-    notes.push("🚻 ⚠️ Vos urines sont légèrement foncées : cela indique que vous êtes actuellement en début de déshydratation. Buvez de l'eau dès maintenant pour corriger cet état.");
+    notes.push("🚻 ⚠️ Tes urines sont légèrement foncées : cela indique que tu es actuellement en début de déshydratation. Bois de l'eau dès maintenant pour corriger cet état.");
   } else if (urine_couleur <= 7) {
-    notes.push("🚻 ⚠️ La couleur foncée de vos urines indique que vous êtes actuellement déshydraté(e). Augmentez votre consommation d'eau dès maintenant pour retrouver une hydratation optimale.");
+    notes.push("🚻 ⚠️ La couleur foncée de tes urines indique que tu es actuellement déshydraté(e). Augmente ta consommation d'eau dès maintenant pour retrouver une hydratation optimale.");
   } else {
-    notes.push("🚻 ⚠️ Vos urines très foncées signalent une déshydratation importante. Buvez de l'eau immédiatement (500-750 mL dans l'heure). Si cette couleur persiste malgré une bonne hydratation, consultez un professionnel de santé.");
+    notes.push("🚻 ⚠️ Tes urines très foncées signalent une déshydratation importante. Bois de l'eau immédiatement (500-750 mL dans l'heure). Si cette couleur persiste malgré une bonne hydratation, consulte un professionnel de santé.");
   }
   
   // 💪 3. Crampes et courbatures
   if (crampes === "Non" && courbatures === "Non") {
-    notes.push("💪 Aucun signe musculaire notable : vos apports hydriques et électrolytiques sont bien adaptés.");
+    notes.push("💪 Aucun signe musculaire notable : tes apports hydriques et électrolytiques sont bien adaptés.");
   } else if (crampes === "Oui" && courbatures === "Non") {
     notes.push("💪 De légères crampes peuvent indiquer un petit déficit en magnésium ou sodium. Buvez 250 mL supplémentaires et veillez à consommer des aliments riches en électrolytes.");
   } else if (crampes === "Non" && courbatures === "Oui") {
@@ -486,7 +486,7 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   
   // 🏃 4. Activité physique
   if (sport_pratique === "Oui" && besoins_exercice_ml > 0) {
-    notes.push(`🏃 L'effort augmente vos pertes hydriques : prévoyez une hydratation adaptée avant, pendant et après l'exercice. Pour cette séance, vos pertes estimées sont d'environ ${besoins_exercice_ml} mL.`);
+    notes.push(`🏃 L'effort augmente tes pertes hydriques : prévois une hydratation adaptée avant, pendant et après l'exercice. Pour cette séance, tes pertes estimées sont d'environ ${besoins_exercice_ml} mL.`);
     
     if (duree_heures > 0) {
       const ml_par_heure = Math.round(besoins_exercice_ml / duree_heures);
@@ -494,27 +494,27 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
     }
     
     if (transpiration_echelle >= 7) {
-      notes.push("🏃 Votre transpiration est importante : pensez à intégrer une boisson contenant sodium et magnésium. Pour un effort de cette intensité, la consommation d'une solution hypotonique comme Hydratis peut aider à mieux retenir l'eau.");
+      notes.push("🏃 Ta transpiration est importante : pense à intégrer une boisson contenant sodium et magnésium. Pour un effort de cette intensité, la consommation d'une solution hypotonique comme Hydratis peut aider à mieux retenir l'eau.");
     }
   }
   
   // 🌡️ 5. Température extérieure
   if (temperature_ext === "> 28°C") {
-    notes.push(`🌡️ Par temps chaud, ajoutez ${getAjustTemperatureBasal(temperature_ext)} mL d'eau supplémentaires. Au-delà de 30°C, la transpiration augmente fortement : buvez plus souvent, même sans soif. En cas de chaleur ou d'humidité élevée, privilégiez des solutions hydratantes riches en électrolytes.`);
+    notes.push(`🌡️ Par temps chaud, ajoute ${getAjustTemperatureBasal(temperature_ext)} mL d'eau supplémentaires. Au-delà de 30°C, la transpiration augmente fortement : bois plus souvent, même sans soif. En cas de chaleur ou d'humidité élevée, privilégie des solutions hydratantes riches en électrolytes.`);
   } else if (temperature_ext === "18-28°C") {
-    notes.push("🌡️ La température ambiante influence directement vos besoins hydriques. Gardez le réflexe de boire régulièrement tout au long de la journée.");
+    notes.push("🌡️ La température ambiante influence directement tes besoins hydriques. Garde le réflexe de boire régulièrement tout au long de la journée.");
   } else if (temperature_ext === "< 10°C" || temperature_ext === "10-18°C") {
-    notes.push("🌡️ Sous 20°C, vos besoins restent proches de la moyenne, mais gardez le réflexe de boire régulièrement.");
+    notes.push("🌡️ Sous 20°C, tes besoins restent proches de la moyenne, mais garde le réflexe de boire régulièrement.");
   }
   
   // 💦 6. Transpiration / sensation d'effort
   if (sport_pratique === "Oui") {
     if (transpiration_echelle >= 7) {
-      notes.push("💦 Votre transpiration a été intense : vos besoins dépassent probablement 1 L d'eau pour cette séance. N'oubliez pas d'apporter aussi des électrolytes pour reconstituer les pertes en sodium et potassium. La soif est un signal tardif de déshydratation : buvez avant de la ressentir.");
+      notes.push("💦 Ta transpiration a été intense : tes besoins dépassent probablement 1 L d'eau pour cette séance. N'oublie pas d'apporter aussi des électrolytes pour reconstituer les pertes en sodium et potassium. La soif est un signal tardif de déshydratation : bois avant de la ressentir.");
     } else if (transpiration_echelle >= 4) {
-      notes.push(`💦 Votre sensation de transpiration correspond à une perte modérée : pensez à boire environ ${besoins_exercice_ml} mL pendant et après l'effort.`);
+      notes.push(`💦 Ta sensation de transpiration correspond à une perte modérée : pense à boire environ ${besoins_exercice_ml} mL pendant et après l'effort.`);
     } else {
-      notes.push("💦 Même si vous transpirez peu, l'eau reste essentielle pour réguler la température corporelle.");
+      notes.push("💦 Même si tu transpires peu, l'eau reste essentielle pour réguler la température corporelle.");
     }
   }
   
@@ -524,11 +524,11 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   }
   
   if (situation_particuliere === "Allaitante") {
-    notes.push("🤱 Allaitement : vos besoins en eau sont augmentés d'environ 700 mL/jour.");
+    notes.push("🤱 Allaitement : tes besoins en eau sont augmentés d'environ 700 mL/jour.");
   }
   
   if (metier_physique === "Oui") {
-    notes.push("💼 Métier physique : pensez à vous hydrater régulièrement au cours de la journée, même sans sensation de soif.");
+    notes.push("💼 Métier physique : pense à t'hydrater régulièrement au cours de la journée, même sans sensation de soif.");
   }
 
   return {
