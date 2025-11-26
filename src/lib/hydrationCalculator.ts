@@ -46,7 +46,7 @@ const getAgeData = (ageInput: string): { median: number; mlPerKg: number; facteu
   
   // Si l'âge n'est pas valide, utiliser la valeur par défaut adulte
   if (isNaN(age) || age < 1) {
-    return { median: 33, mlPerKg: 32.5, facteurMetabo: 1.0 };
+    return { median: 33, mlPerKg: 35, facteurMetabo: 1.0 };
   }
   
   // Déterminer la tranche d'âge et retourner les paramètres correspondants
@@ -55,26 +55,24 @@ const getAgeData = (ageInput: string): { median: number; mlPerKg: number; facteu
   } else if (age >= 11 && age <= 17) {
     return { median: age, mlPerKg: 45, facteurMetabo: 1.1 };
   } else if (age >= 18 && age <= 49) {
-    return { median: age, mlPerKg: 32.5, facteurMetabo: 1.0 };
+    return { median: age, mlPerKg: 35, facteurMetabo: 1.0 };
   } else if (age >= 50 && age <= 60) {
     return { median: age, mlPerKg: 30, facteurMetabo: 0.9 };
   } else if (age >= 61 && age <= 69) {
     return { median: age, mlPerKg: 30, facteurMetabo: 0.9 };
   } else if (age >= 70) {
-    return { median: age, mlPerKg: 25, facteurMetabo: 0.8 };
+    return { median: age, mlPerKg: 28, facteurMetabo: 0.8 };
   } else {
     // Pour les enfants < 3 ans, utiliser les paramètres des 3-10 ans
     return { median: 3, mlPerKg: 55, facteurMetabo: 1.3 };
   }
 };
 
-// Facteur selon le sexe
+// Facteur uniforme pour tous, seuls les bonus physiologiques varient
 const getFacteurSexe = (sexe: string, situation: string): { facteur: number; bonus: number } => {
-  if (situation === "Allaitante") return { facteur: 0.9, bonus: 700 };
-  if (situation?.startsWith("Enceinte")) return { facteur: 0.9, bonus: 300 };
-  if (sexe === "Une femme") return { facteur: 0.9, bonus: 0 };
-  if (sexe === "Un homme") return { facteur: 1.0, bonus: 0 };
-  return { facteur: 0.95, bonus: 0 }; // Autre
+  if (situation === "Allaitante") return { facteur: 1.0, bonus: 700 };
+  if (situation?.startsWith("Enceinte")) return { facteur: 1.0, bonus: 300 };
+  return { facteur: 1.0, bonus: 0 };
 };
 
 // Calcul IMC
