@@ -4,7 +4,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 1 - PROFIL =====
   {
     id: "sexe",
-    text: "Bonjour ! Je suis ravie de t'aider avec ton diagnostic d'hydratation.\n\nPour commencer, es-tu...",
+    text: "Pour commencer, es-tu...",
     type: "options",
     options: ["Un homme", "Une femme", "Autre"],
     step: "Profil",
