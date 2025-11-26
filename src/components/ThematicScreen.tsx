@@ -11,6 +11,20 @@ import { TemperatureSelector } from "./TemperatureSelector";
 import { SportSelector, Sport } from "./SportSelector";
 import { User, Baby } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const parseQuestionText = (text: string) => {
+  const hintMatch = text.match(/\n\n(💡.+)$/s);
+  
+  if (hintMatch) {
+    return {
+      mainText: text.replace(/\n\n💡.+$/s, ''),
+      hint: hintMatch[1]
+    };
+  }
+  
+  return { mainText: text, hint: null };
+};
+
 interface ThematicScreenProps {
   questions: Question[];
   stepName: string;
@@ -119,13 +133,22 @@ export const ThematicScreen = ({
   const renderQuestion = (question: Question) => {
     const cleanText = question.text.replace(/\*\*.*?\*\*\n\n/g, '') // Remove headers like "👤 **Étape 1 - Profil**\n\n"
     .replace(/^.*?Pour commencer, es-tu\.\.\.$/m, 'Es-tu...'); // Clean first question
+    
+    const { mainText, hint } = parseQuestionText(cleanText);
 
     switch (question.type) {
       case "options":
         return <div key={question.id} className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">
-              {cleanText}
-            </Label>
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-foreground">
+                {mainText}
+              </Label>
+              {hint && (
+                <p className="text-xs text-muted-foreground italic">
+                  {hint}
+                </p>
+              )}
+            </div>
             <RadioGroup value={answers[question.id] as string || ""} onValueChange={value => setAnswers(prev => ({
             ...prev,
             [question.id]: value
@@ -144,9 +167,16 @@ export const ThematicScreen = ({
           </div>;
       case "input":
         return <div key={question.id} className="space-y-2">
-            <Label htmlFor={question.id} className="text-sm font-medium text-foreground">
-              {cleanText}
-            </Label>
+            <div className="space-y-1">
+              <Label htmlFor={question.id} className="text-sm font-medium text-foreground">
+                {mainText}
+              </Label>
+              {hint && (
+                <p className="text-xs text-muted-foreground italic">
+                  {hint}
+                </p>
+              )}
+            </div>
             <Input id={question.id} type={question.inputType || "text"} placeholder={question.placeholder} value={answers[question.id] as string || ""} onChange={e => setAnswers(prev => ({
             ...prev,
             [question.id]: e.target.value
@@ -154,9 +184,16 @@ export const ThematicScreen = ({
           </div>;
       case "colorScale":
         return <div key={question.id} className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">
-              {cleanText}
-            </Label>
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-foreground">
+                {mainText}
+              </Label>
+              {hint && (
+                <p className="text-xs text-muted-foreground italic">
+                  {hint}
+                </p>
+              )}
+            </div>
             <ColorScaleSelector onSelect={value => setAnswers(prev => ({
             ...prev,
             [question.id]: value
@@ -164,9 +201,16 @@ export const ThematicScreen = ({
           </div>;
       case "transpirationScale":
         return <div key={question.id} className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">
-              {cleanText}
-            </Label>
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-foreground">
+                {mainText}
+              </Label>
+              {hint && (
+                <p className="text-xs text-muted-foreground italic">
+                  {hint}
+                </p>
+              )}
+            </div>
             <TranspirationScale onSelect={value => setAnswers(prev => ({
             ...prev,
             [question.id]: value
@@ -174,16 +218,30 @@ export const ThematicScreen = ({
           </div>;
       case "beverageSelector":
         return <div key={question.id} className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">
-              {cleanText}
-            </Label>
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-foreground">
+                {mainText}
+              </Label>
+              {hint && (
+                <p className="text-xs text-muted-foreground italic">
+                  {hint}
+                </p>
+              )}
+            </div>
             <BeverageSelector quantities={beverageQuantities} onChange={setBeverageQuantities} />
           </div>;
       case "temperatureSelector":
         return <div key={question.id} className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">
-              {cleanText}
-            </Label>
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-foreground">
+                {mainText}
+              </Label>
+              {hint && (
+                <p className="text-xs text-muted-foreground italic">
+                  {hint}
+                </p>
+              )}
+            </div>
             <TemperatureSelector onSelect={value => setAnswers(prev => ({
             ...prev,
             [question.id]: value
@@ -191,9 +249,16 @@ export const ThematicScreen = ({
           </div>;
       case "sportSelector":
         return <div key={question.id} className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">
-              {cleanText}
-            </Label>
+            <div className="space-y-1">
+              <Label className="text-sm font-medium text-foreground">
+                {mainText}
+              </Label>
+              {hint && (
+                <p className="text-xs text-muted-foreground italic">
+                  {hint}
+                </p>
+              )}
+            </div>
             <SportSelector onSelect={sports => setSelectedSports(sports)} />
           </div>;
       default:
