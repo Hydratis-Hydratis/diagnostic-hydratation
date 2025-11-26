@@ -408,14 +408,16 @@ export const ResultsDisplay = ({
                     </div>}
 
                   {/* Comment prendre */}
-                  <div className="space-y-2 mt-4">
-                    <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
-                      <span className="text-muted-foreground">💧 Comment ?</span>
+                  {results.nb_pastilles_basal > 0 && (
+                    <div className="space-y-2 mt-4">
+                      <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
+                        <span className="text-muted-foreground">💧 Comment ?</span>
+                      </div>
+                      <div className="text-xs ml-2 p-2 bg-blue-500/5 rounded">
+                        <span>1 pastille dans 1 verre d'eau {results.nb_pastilles_basal}x par jour</span>
+                      </div>
                     </div>
-                    <div className="text-xs ml-2 p-2 bg-blue-500/5 rounded">
-                      <span>1 pastille dans 1 verre d'eau {results.nb_pastilles_basal}x par jour</span>
-                    </div>
-                  </div>
+                  )}
                 </>
               )}
 
