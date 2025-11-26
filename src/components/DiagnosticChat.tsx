@@ -10,6 +10,12 @@ import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
 import { toast } from "@/hooks/use-toast";
 import { calculateHydration } from "@/lib/hydrationCalculator";
 
+// Clés localStorage
+const STORAGE_KEYS = {
+  DIAGNOSTIC_DATA: 'hydratis_diagnostic_data',
+  DIAGNOSTIC_STEP: 'hydratis_diagnostic_step',
+};
+
 // Group questions by step
 const groupQuestionsByStep = (): { step: string; questions: Question[]; icon: string }[] => {
   const groups: { [key: string]: Question[] } = {};
@@ -79,7 +85,53 @@ export const DiagnosticChat = () => {
   }, [messages, showScreen]);
 
   useEffect(() => {
-    // Display welcome message and first screen
+    // Vérifier si des données sauvegardées existent
+    const savedData = localStorage.getItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
+    const savedStep = localStorage.getItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
+    
+    if (savedData && savedStep) {
+      // Demander si l'utilisateur veut reprendre
+      const shouldResume = window.confirm(
+        "Tu as un diagnostic en cours. Veux-tu le reprendre ?"
+      );
+      
+      if (shouldResume) {
+        // Restaurer les données
+        try {
+          const parsedData = JSON.parse(savedData);
+          const parsedStep = parseInt(savedStep);
+          
+          setDiagnosticData(parsedData);
+          setCurrentGroupIndex(parsedStep);
+          
+          // Afficher message de reprise
+          setTimeout(() => {
+            setIsTyping(true);
+            setTimeout(() => {
+              setIsTyping(false);
+              addBotMessage("Bon retour ! Reprenons là où tu t'étais arrêté. 💧");
+              setShowScreen(true);
+            }, 1500);
+          }, 500);
+        } catch (error) {
+          console.error("Erreur lors de la restauration des données:", error);
+          localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
+          localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
+          startFreshDiagnostic();
+        }
+      } else {
+        // Nettoyer localStorage et démarrer un nouveau diagnostic
+        localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
+        localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
+        startFreshDiagnostic();
+      }
+    } else {
+      // Aucune donnée sauvegardée, démarrer normalement
+      startFreshDiagnostic();
+    }
+  }, []);
+  
+  const startFreshDiagnostic = () => {
     if (currentGroupIndex === 0) {
       setTimeout(() => {
         setIsTyping(true);
@@ -90,7 +142,7 @@ export const DiagnosticChat = () => {
         }, 2000);
       }, 800);
     }
-  }, []);
+  };
 
   // Calculate realistic typing delay based on message length
   const getTypingDelay = (message: string): number => {
@@ -241,6 +293,11 @@ export const DiagnosticChat = () => {
     };
     setDiagnosticData(updatedData);
     
+    // Sauvegarder dans localStorage
+    const nextGroupIndex = currentGroupIndex + 1;
+    localStorage.setItem(STORAGE_KEYS.DIAGNOSTIC_DATA, JSON.stringify(updatedData));
+    localStorage.setItem(STORAGE_KEYS.DIAGNOSTIC_STEP, nextGroupIndex.toString());
+    
     // Create personalized summary message
     const summary = createPersonalizedSummary(answers, currentGroupIndex);
     
@@ -260,12 +317,12 @@ export const DiagnosticChat = () => {
     setTimeout(() => {
       setIsTyping(true);
       
-      const nextGroupIndex = currentGroupIndex + 1;
+      const nextIndex = currentGroupIndex + 1;
       
-      if (nextGroupIndex < questionGroups.length) {
+      if (nextIndex < questionGroups.length) {
         setTimeout(() => {
           setIsTyping(false);
-          const nextGroup = questionGroups[nextGroupIndex];
+          const nextGroup = questionGroups[nextIndex];
           
           // Messages de transition personnalisés selon l'étape suivante
           const transitionMessages: { [key: string]: string } = {
@@ -279,12 +336,16 @@ export const DiagnosticChat = () => {
             || `${nextGroup.icon} ${nextGroup.step}\n\nPassons maintenant à la suite.`;
           
           addBotMessage(transitionMessage);
-          setCurrentGroupIndex(nextGroupIndex);
+          setCurrentGroupIndex(nextIndex);
           setShowScreen(true);
         }, 1500);
       } else {
         // Complete - calculate results
         const results = calculateHydration(updatedData);
+        
+        // Nettoyer localStorage une fois le diagnostic terminé
+        localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
+        localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
         
         setTimeout(() => {
           setIsTyping(false);
@@ -311,6 +372,10 @@ export const DiagnosticChat = () => {
   };
 
   const handleRestart = () => {
+    // Nettoyer localStorage
+    localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
+    localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
+    
     setCurrentGroupIndex(0);
     setMessages([]);
     setDiagnosticData({});
