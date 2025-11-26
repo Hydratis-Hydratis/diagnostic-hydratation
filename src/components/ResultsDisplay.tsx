@@ -352,7 +352,7 @@ export const ResultsDisplay = ({
         </CardHeader>
         
         <CardContent className="p-6">
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 relative">
             
             {/* COLONNE 1 : Besoins quotidiens */}
             <div className="relative p-5 rounded-xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-blue-500/10">
@@ -404,6 +404,20 @@ export const ResultsDisplay = ({
                   <span className="text-muted-foreground">💧 À boire</span>
                   <span className="font-bold text-blue-600 dark:text-blue-400">{formatVolume(results.besoins_basals_net_ml)}</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Cercle "+" pour MOBILE - visible uniquement sur mobile */}
+            <div className="flex md:hidden justify-center -my-3">
+              <div className="w-10 h-10 rounded-full bg-orange-50 border-2 border-orange-500/30 shadow-sm flex items-center justify-center">
+                <span className="text-xl font-bold text-orange-600">+</span>
+              </div>
+            </div>
+
+            {/* Cercle "+" pour DESKTOP - positionné au centre en absolu */}
+            <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <div className="w-10 h-10 rounded-full bg-orange-50 border-2 border-orange-500/30 shadow-sm flex items-center justify-center">
+                <span className="text-xl font-bold text-orange-600">+</span>
               </div>
             </div>
 
