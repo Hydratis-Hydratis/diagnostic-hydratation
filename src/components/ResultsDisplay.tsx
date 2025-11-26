@@ -87,6 +87,15 @@ export const ResultsDisplay = ({
   firstName,
   onRestart
 }: ResultsDisplayProps) => {
+  // Détection des populations sensibles (pas de recommandation de pastilles)
+  const isSensitivePopulation = (() => {
+    const age = parseInt(diagnosticData?.age || "0");
+    const isPregnant = diagnosticData?.situation_particuliere?.includes("Enceinte");
+    const isBreastfeeding = diagnosticData?.situation_particuliere === "Allaitante";
+    const isElderly = age >= 70;
+    return isPregnant || isBreastfeeding || isElderly;
+  })();
+
   const totalPastilles = results.nb_pastilles_basal + results.nb_pastilles_exercice;
   const animatedScore = useCountUp(results.score, 2000);
   const [visiblePills, setVisiblePills] = useState(0);
@@ -205,11 +214,13 @@ export const ResultsDisplay = ({
               <div className="flex items-center gap-3">
                 <Pill className="w-8 h-8 text-purple-500" />
                 <div className="text-3xl font-bold text-foreground">
-                  {totalPastilles}
-                  <span className="text-lg font-normal text-muted-foreground ml-1">/jour</span>
+                  {isSensitivePopulation ? "—" : totalPastilles}
+                  {!isSensitivePopulation && <span className="text-lg font-normal text-muted-foreground ml-1">/jour</span>}
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">Pour optimiser ton hydratation</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {isSensitivePopulation ? "Consulte un professionnel" : "Pour optimiser ton hydratation"}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -373,22 +384,40 @@ export const ResultsDisplay = ({
                 </div>
               </div>
 
-              {/* Pastilles basales */}
-              {results.nb_pastilles_basal > 0 && <div className="mb-4">
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30">
-                    {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''} / jour
-                  </Badge>
-                </div>}
+              {/* Pastilles basales ou Disclaimer */}
+              {isSensitivePopulation ? (
+                <div className="mb-4 p-4 rounded-lg border-2 border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/30">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">⚕️</span>
+                    <div>
+                      <h4 className="font-semibold text-sm text-blue-900 dark:text-blue-200 mb-2">
+                        Demande l'avis d'un professionnel de santé
+                      </h4>
+                      <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                        En raison de ta situation particulière, nous te recommandons de consulter un médecin ou un pharmacien avant de prendre des pastilles Hydratis.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {results.nb_pastilles_basal > 0 && <div className="mb-4">
+                      <Badge variant="secondary" className="bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30">
+                        {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''} / jour
+                      </Badge>
+                    </div>}
 
-        {/* Comment prendre */}
-        <div className="space-y-2 mt-4">
-          <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
-            <span className="text-muted-foreground">💧 Comment ?</span>
-          </div>
-          <div className="text-xs ml-2 p-2 bg-blue-500/5 rounded">
-            <span>1 pastille dans 1 verre d'eau {results.nb_pastilles_basal}x par jour</span>
-          </div>
-        </div>
+                  {/* Comment prendre */}
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
+                      <span className="text-muted-foreground">💧 Comment ?</span>
+                    </div>
+                    <div className="text-xs ml-2 p-2 bg-blue-500/5 rounded">
+                      <span>1 pastille dans 1 verre d'eau {results.nb_pastilles_basal}x par jour</span>
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Détails */}
               <div className="border-t border-blue-500/20 mt-4 pt-3 space-y-2">
@@ -555,23 +584,40 @@ export const ResultsDisplay = ({
                     </div>
                   </div>}
 
-                {/* Pastilles sport */}
-                {results.nb_pastilles_exercice > 0 && <div className="mb-4">
-                    <Badge variant="secondary" className="bg-orange-500/20 text-orange-700 dark:text-orange-300 border-orange-500/30">
-                      {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''} / séance
-                    </Badge>
-                  </div>}
+                {/* Pastilles sport ou Disclaimer */}
+                {isSensitivePopulation ? (
+                  <div className="mb-4 p-4 rounded-lg border-2 border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/30">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">⚕️</span>
+                      <div>
+                        <h4 className="font-semibold text-sm text-orange-900 dark:text-orange-200 mb-2">
+                          Demande l'avis d'un professionnel de santé
+                        </h4>
+                        <p className="text-xs text-orange-800 dark:text-orange-300 leading-relaxed">
+                          En raison de ta situation particulière, nous te recommandons de consulter un médecin ou un pharmacien avant de prendre des pastilles Hydratis.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {results.nb_pastilles_exercice > 0 && <div className="mb-4">
+                        <Badge variant="secondary" className="bg-orange-500/20 text-orange-700 dark:text-orange-300 border-orange-500/30">
+                          {results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''} / séance
+                        </Badge>
+                      </div>}
 
-          {/* Comment prendre */}
-          <div className="space-y-2 mt-4">
-            <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
-              <span className="text-muted-foreground">💧 Comment ?</span>
-            </div>
-            <div className="text-xs ml-2 p-2 bg-orange-500/5 rounded">
-              <span>1 pastille dans 1 verre d'eau pendant/après l'effort</span>
-            </div>
-            
-          </div>
+                    {/* Comment prendre */}
+                    <div className="space-y-2 mt-4">
+                      <div className="flex items-center gap-2 text-xs p-2 bg-background/50 rounded">
+                        <span className="text-muted-foreground">💧 Comment ?</span>
+                      </div>
+                      <div className="text-xs ml-2 p-2 bg-orange-500/5 rounded">
+                        <span>1 pastille dans 1 verre d'eau pendant/après l'effort</span>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 {/* Détails */}
                 
@@ -883,21 +929,29 @@ export const ResultsDisplay = ({
               </CardContent>
             </Card>
 
-            {/* Défi 2 - Pastilles Hydratis */}
+            {/* Défi 2 - Pastilles Hydratis (ou alternative si population sensible) */}
             <Card className="border-purple-500/30">
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">💊</span>
+                    <span className="text-2xl">{isSensitivePopulation ? "⚕️" : "💊"}</span>
                     <Badge variant="secondary" className="text-xs">Facile</Badge>
                   </div>
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm mb-1">
-                    {results.nb_pastilles_basal >= 1 ? "1 pastille Hydratis chaque matin" : "Teste Hydratis"}
+                    {isSensitivePopulation 
+                      ? "Consulte ton médecin" 
+                      : results.nb_pastilles_basal >= 1 
+                        ? "1 pastille Hydratis chaque matin" 
+                        : "Teste Hydratis"}
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    {results.nb_pastilles_basal >= 1 ? "pendant 14 jours" : "pendant 1 semaine"}
+                    {isSensitivePopulation 
+                      ? "avant de prendre des compléments" 
+                      : results.nb_pastilles_basal >= 1 
+                        ? "pendant 14 jours" 
+                        : "pendant 1 semaine"}
                   </p>
                 </div>
               </CardContent>
@@ -939,6 +993,18 @@ export const ResultsDisplay = ({
             <p className="text-sm text-muted-foreground mb-4">
               Commande tes pastilles Hydratis et profite de ta routine personnalisée
             </p>
+            
+            {isSensitivePopulation && (
+              <div className="mb-4 p-3 rounded-lg border-2 border-amber-500/50 bg-amber-50 dark:bg-amber-950/30 text-left">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">⚕️</span>
+                  <p className="text-xs text-amber-800 dark:text-amber-200">
+                    <strong>Important :</strong> En raison de ta situation, demande l'avis de ton médecin ou pharmacien avant de consommer des pastilles Hydratis.
+                  </p>
+                </div>
+              </div>
+            )}
+            
             <Button size="lg" className="w-full sm:w-auto" asChild>
               <a href="https://www.hydratis.co/collections/tous-nos-produits" target="_blank" rel="noopener noreferrer">
                 <ShoppingCart className="w-4 h-4 mr-2" />
