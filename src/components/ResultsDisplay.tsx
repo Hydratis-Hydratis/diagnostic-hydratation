@@ -589,7 +589,56 @@ export const ResultsDisplay = ({
         </CardContent>
       </Card>
 
-
+      {/* Messages d'avertissement contextuels */}
+      {(() => {
+        const warnings: string[] = [];
+        
+        // Grossesse
+        if (diagnosticData?.situation_particuliere?.includes("Enceinte")) {
+          warnings.push("🤰 En période de grossesse, tes besoins en eau augmentent (+300mL/jour recommandées). Consulte ton médecin pour un suivi personnalisé.");
+        }
+        
+        // Allaitement
+        if (diagnosticData?.situation_particuliere === "Allaitante") {
+          warnings.push("👶 L'allaitement augmente significativement tes besoins hydriques (+700mL/jour recommandés).");
+        }
+        
+        // Personnes âgées
+        const age = parseInt(diagnosticData?.age || "0");
+        if (age >= 70) {
+          warnings.push("🧓 La sensation de soif diminue avec l'âge. Pense à boire régulièrement même sans ressentir la soif.");
+        }
+        
+        // Enfants
+        if (age > 0 && age < 12) {
+          warnings.push("💡 Les enfants ont des besoins hydriques plus élevés par rapport à leur poids. Veille à proposer de l'eau régulièrement.");
+        }
+        
+        // Crampes
+        if (diagnosticData?.crampes === "Oui") {
+          warnings.push("💡 Les crampes peuvent être liées à un déficit en électrolytes. Une bonne hydratation peut aider.");
+        }
+        
+        // Chaleur extrême
+        if (diagnosticData?.temperature_ext === "> 28°C") {
+          warnings.push("🌡️ Par forte chaleur, tes besoins en eau sont très importants. Bois avant d'avoir soif !");
+        }
+        
+        return warnings.length > 0 ? (
+          <div className="mt-6 space-y-3">
+            {warnings.map((warning, index) => (
+              <div 
+                key={index}
+                className="p-4 rounded-lg border-2 border-amber-400/50 bg-amber-50 dark:bg-amber-950/30"
+              >
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  {warning}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : null;
+      })()}
 
       {/* BLOC 3 : Pour en savoir plus */}
       <div className="mt-8">
