@@ -267,11 +267,16 @@ export const DiagnosticChat = () => {
           setIsTyping(false);
           const nextGroup = questionGroups[nextGroupIndex];
           
-          // Message personnalisé selon l'étape
-          let transitionMessage = `${nextGroup.icon} ${nextGroup.step}\n\nPassons maintenant à la suite.`;
-          if (nextGroup.step === "Activité physique") {
-            transitionMessage = "C'est noté 🙂 Passons maintenant à l'activité physique !";
-          }
+          // Messages de transition personnalisés selon l'étape suivante
+          const transitionMessages: { [key: string]: string } = {
+            "Activité physique": "C'est noté 🙂 Passons maintenant à l'activité physique !",
+            "Santé & Conditions": "Super, c'est noté ! 💪 Parlons maintenant de ta santé.",
+            "Habitudes": "Parfait ! ☕ Passons à tes habitudes quotidiennes.",
+            "Informations": "On y est presque ! 📋 Plus que quelques informations."
+          };
+          
+          const transitionMessage = transitionMessages[nextGroup.step] 
+            || `${nextGroup.icon} ${nextGroup.step}\n\nPassons maintenant à la suite.`;
           
           addBotMessage(transitionMessage);
           setCurrentGroupIndex(nextGroupIndex);
