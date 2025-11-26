@@ -416,7 +416,7 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
   } else if (score < 90) {
     nb_pastilles_basal = categorie_urine === 'fonce' ? 2 : 1;
   } else { // score >= 90
-    nb_pastilles_basal = categorie_urine === 'clair' ? 0 : 1;
+    nb_pastilles_basal = 0; // Bien hydraté = pas besoin de pastilles en basal
   }
 
   // Ajustements pour température extrême si déjà en difficulté
