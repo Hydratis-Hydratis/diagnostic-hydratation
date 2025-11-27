@@ -156,4 +156,39 @@ All colors MUST be HSL.
   .touch-manipulation {
     touch-action: manipulation;
   }
+
+  /* Smooth scroll for chat containers */
+  .scroll-smooth-chat {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Message animation delays */
+  .message-delay-1 { animation-delay: 0ms; }
+  .message-delay-2 { animation-delay: 50ms; }
+  .message-delay-3 { animation-delay: 100ms; }
+
+  /* GPU acceleration for animations */
+  .will-change-transform {
+    will-change: transform, opacity;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile-specific animation optimizations */
+@media (max-width: 640px) {
+  .animate-message-in,
+  .animate-message-in-right {
+    animation-duration: 0.2s;
+  }
 }

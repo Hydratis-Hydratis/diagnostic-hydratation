@@ -5,15 +5,28 @@ interface ChatMessageProps {
   isBot: boolean;
   avatar?: string;
   timestamp?: string;
+  animationDelay?: number;
 }
 
-export const ChatMessage = ({ message, isBot, avatar, timestamp }: ChatMessageProps) => {
+export const ChatMessage = ({ 
+  message, 
+  isBot, 
+  avatar, 
+  timestamp,
+  animationDelay = 0 
+}: ChatMessageProps) => {
   return (
     <div
       className={cn(
-        "flex items-end gap-2 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
-        isBot ? "justify-start" : "justify-end"
+        "flex items-end gap-2 mb-4 will-change-transform",
+        isBot 
+          ? "justify-start animate-message-in" 
+          : "justify-end animate-message-in-right"
       )}
+      style={{ 
+        animationDelay: `${animationDelay}ms`,
+        opacity: 0 // Start invisible for animation
+      }}
     >
       {isBot && avatar && (
         <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">

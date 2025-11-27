@@ -301,7 +301,7 @@ export const ThematicScreen = ({
     }
   };
   return (
-    <div ref={screenRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 sm:pb-6">
+    <div ref={screenRef} className="animate-screen-enter pb-24 sm:pb-6 will-change-transform">
       <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
         <div className="mb-4 sm:mb-6">
           <h3 className="text-base sm:text-lg font-semibold text-primary mb-1">{stepName}</h3>

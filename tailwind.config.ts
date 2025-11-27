@@ -65,20 +65,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
         "scale-in": {
           "0%": { transform: "scale(0.9)", opacity: "0" },
@@ -95,6 +87,30 @@ export default {
         "tap-feedback": {
           "0%, 100%": { transform: "scale(1)" },
           "50%": { transform: "scale(0.95)" }
+        },
+        "message-in": {
+          "0%": { opacity: "0", transform: "translateY(8px) scale(0.98)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" }
+        },
+        "message-in-right": {
+          "0%": { opacity: "0", transform: "translateX(8px) scale(0.98)" },
+          "100%": { opacity: "1", transform: "translateX(0) scale(1)" }
+        },
+        "pulse-avatar": {
+          "0%, 100%": { transform: "scale(1)", opacity: "1" },
+          "50%": { transform: "scale(1.05)", opacity: "0.9" }
+        },
+        "dot-bounce": {
+          "0%, 80%, 100%": { transform: "translateY(0)" },
+          "40%": { transform: "translateY(-6px)" }
+        },
+        "screen-enter": {
+          "0%": { opacity: "0", transform: "translateY(12px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" }
+        },
+        "screen-exit": {
+          "0%": { opacity: "1", transform: "translateY(0)" },
+          "100%": { opacity: "0", transform: "translateY(-8px)" }
         }
       },
       animation: {
@@ -103,7 +119,13 @@ export default {
         "scale-in": "scale-in 0.5s ease-out",
         "slide-up": "slide-up 0.6s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
-        "tap": "tap-feedback 150ms ease-out"
+        "tap": "tap-feedback 150ms ease-out",
+        "message-in": "message-in 0.3s ease-out forwards",
+        "message-in-right": "message-in-right 0.25s ease-out forwards",
+        "pulse-avatar": "pulse-avatar 1.5s ease-in-out infinite",
+        "dot-bounce": "dot-bounce 1.2s ease-in-out infinite",
+        "screen-enter": "screen-enter 0.4s ease-out",
+        "screen-exit": "screen-exit 0.2s ease-out"
       },
     },
   },
