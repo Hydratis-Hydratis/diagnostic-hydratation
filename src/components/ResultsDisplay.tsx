@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Droplet, Droplets, Activity, Disc, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw, Trophy, Target, ArrowUp, Sun, Users, Calendar, Clock, Thermometer, Heart, Beaker, Shield, BookOpen, AlertTriangle, ShoppingCart, RotateCcw } from "lucide-react";
 import type { HydrationResult } from "@/lib/hydrationCalculator";
 import type { DiagnosticData } from "@/types/diagnostic";
@@ -175,8 +175,7 @@ export const ResultsDisplay = ({
 
   // Détection canicule
   const isHeatwave = diagnosticData && diagnosticData.temperature_ext === "> 28°C";
-  return <TooltipProvider>
-      <div className="space-y-4 animate-fade-in">
+  return <div className="space-y-4 animate-fade-in">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-foreground mb-2">
           Ton diagnostic est prêt, {firstName} ! 💧
@@ -417,20 +416,18 @@ export const ResultsDisplay = ({
                     <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                       {formatVolume(results.besoins_basals_net_ml)}
                     </div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button className="text-muted-foreground hover:text-blue-500 transition-colors">
-                            <Info className="w-4 h-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="left" className="max-w-[220px] text-xs">
-                          <p className="font-semibold mb-1">💡 Le savais-tu ?</p>
-                          <p>En moyenne, les femmes ont besoin d'environ <strong>1,6 L/jour</strong> et les hommes <strong>2 L/jour</strong>.</p>
-                          <p className="mt-1 text-muted-foreground">Ces valeurs varient selon ton âge, ton poids et ton activité !</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="text-muted-foreground hover:text-blue-500 transition-colors p-1">
+                          <Info className="w-4 h-4" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="left" className="w-[240px] text-sm">
+                        <p className="font-semibold mb-1">💡 Le savais-tu ?</p>
+                        <p>En moyenne, les femmes ont besoin d'environ <strong>1,6 L/jour</strong> et les hommes <strong>2 L/jour</strong>.</p>
+                        <p className="mt-1 text-muted-foreground text-xs">Ces valeurs varient selon ton âge, ton poids et ton activité !</p>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <p className="text-xs text-muted-foreground">à boire</p>
                 </div>
@@ -1066,6 +1063,5 @@ export const ResultsDisplay = ({
           <ArrowUp className="w-5 h-5" />
         </Button>}
 
-    </div>
-    </TooltipProvider>;
+    </div>;
 };
