@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ChatMessage } from "./ChatMessage";
 import { ThematicScreen } from "./ThematicScreen";
 import { TypingIndicator } from "./TypingIndicator";
@@ -9,11 +9,24 @@ import { DiagnosticData, Question } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
 import { toast } from "@/hooks/use-toast";
 import { calculateHydration } from "@/lib/hydrationCalculator";
+import { ChevronDown } from "lucide-react";
 
 // Clés localStorage
 const STORAGE_KEYS = {
   DIAGNOSTIC_DATA: 'hydratis_diagnostic_data',
   DIAGNOSTIC_STEP: 'hydratis_diagnostic_step',
+};
+
+// Haptic feedback utility
+const triggerHaptic = (style: 'light' | 'medium' | 'success' = 'light') => {
+  if ('vibrate' in navigator) {
+    const patterns = {
+      light: [10],
+      medium: [15],
+      success: [10, 50, 10]
+    };
+    navigator.vibrate(patterns[style]);
+  }
 };
 
 // Group questions by step
@@ -87,19 +100,64 @@ export const DiagnosticChat = ({
   const [isTyping, setIsTyping] = useState(false);
   const [showScreen, setShowScreen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
+  
+  const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-  };
+  // Smart scroll detection
+  const checkIfAtBottom = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return true;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    return scrollHeight - scrollTop - clientHeight < 100;
+  }, []);
 
-  useEffect(() => {
-    // Only scroll to bottom when there are multiple messages and screen is not showing
-    // Don't scroll on the initial welcome message
-    if (messages.length > 2 && messages[messages.length - 1].isBot && !showScreen) {
-      scrollToBottom();
+  // Smooth scroll to bottom
+  const scrollToBottom = useCallback((smooth = true, force = false) => {
+    if (!force && !isAtBottom) {
+      setHasNewMessages(true);
+      return;
     }
-  }, [messages, showScreen]);
+    messagesEndRef.current?.scrollIntoView({ 
+      behavior: smooth ? "smooth" : "auto",
+      block: "end"
+    });
+    setHasNewMessages(false);
+  }, [isAtBottom]);
+
+  // Handle scroll events
+  const handleScroll = useCallback(() => {
+    const atBottom = checkIfAtBottom();
+    setIsAtBottom(atBottom);
+    if (atBottom) setHasNewMessages(false);
+  }, [checkIfAtBottom]);
+
+  // Setup scroll listener
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  // Auto-scroll on new messages
+  useEffect(() => {
+    if (messages.length > 0) {
+      // Small delay to let animation start
+      const timer = setTimeout(() => scrollToBottom(true, false), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length, scrollToBottom]);
+
+  // Auto-scroll when typing indicator appears
+  useEffect(() => {
+    if (isTyping) {
+      const timer = setTimeout(() => scrollToBottom(true, true), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isTyping, scrollToBottom]);
 
   useEffect(() => {
     // Vérifier si des données sauvegardées existent
@@ -162,15 +220,15 @@ export const DiagnosticChat = ({
     }
   };
 
-  // Calculate realistic typing delay based on message length
+  // Calculate realistic typing delay based on message length (optimized for UX)
   const getTypingDelay = (message: string): number => {
-    const baseDelay = 1000; // 1 second minimum
-    const wordsPerMinute = 60;
+    const baseDelay = 800; // 800ms minimum
+    const wordsPerMinute = 120; // Faster typing simulation
     const words = message.split(' ').length;
     const typingTime = (words / wordsPerMinute) * 60 * 1000;
-    // Random variation ±20%
-    const variation = 0.8 + Math.random() * 0.4;
-    return Math.min(baseDelay + (typingTime * variation), 4000); // Max 4 seconds
+    // Random variation ±15%
+    const variation = 0.85 + Math.random() * 0.3;
+    return Math.min(Math.max(baseDelay, baseDelay + (typingTime * variation)), 2500); // Max 2.5 seconds
   };
 
   const getCurrentTime = () => {
@@ -187,6 +245,19 @@ export const DiagnosticChat = ({
         timestamp: getCurrentTime(),
       },
     ]);
+  };
+
+  // Get transition message for next step
+  const getTransitionMessage = (nextIndex: number): string => {
+    if (nextIndex >= questionGroups.length) return "";
+    const nextGroup = questionGroups[nextIndex];
+    const transitionMessages: { [key: string]: string } = {
+      "Activité physique": "C'est noté 🙂 Passons maintenant à l'activité physique !",
+      "Santé & Conditions": "Super, c'est noté ! 💪 Parlons maintenant de ta santé.",
+      "Habitudes": "Parfait ! ☕ Passons à tes habitudes quotidiennes.",
+      "Informations": "On y est presque ! 📋 Plus que quelques informations."
+    };
+    return transitionMessages[nextGroup.step] || `${nextGroup.icon} ${nextGroup.step}\n\nPassons maintenant à la suite.`;
   };
 
   const addUserMessage = (text: string) => {
@@ -301,6 +372,9 @@ export const DiagnosticChat = ({
   };
 
   const handleScreenSubmit = (answers: Partial<DiagnosticData>) => {
+    // Trigger haptic feedback on submit
+    triggerHaptic('medium');
+    
     // Hide screen immediately
     setShowScreen(false);
     
@@ -331,32 +405,28 @@ export const DiagnosticChat = ({
       },
     ]);
 
-    // Wait before showing next screen or results
+    // Wait before showing next screen or results (shorter delay)
     setTimeout(() => {
       setIsTyping(true);
       
       const nextIndex = currentGroupIndex + 1;
+      const transitionMessage = getTransitionMessage(nextIndex);
+      const typingDuration = getTypingDelay(transitionMessage);
       
       if (nextIndex < questionGroups.length) {
         setTimeout(() => {
           setIsTyping(false);
           const nextGroup = questionGroups[nextIndex];
           
-          // Messages de transition personnalisés selon l'étape suivante
-          const transitionMessages: { [key: string]: string } = {
-            "Activité physique": "C'est noté 🙂 Passons maintenant à l'activité physique !",
-            "Santé & Conditions": "Super, c'est noté ! 💪 Parlons maintenant de ta santé.",
-            "Habitudes": "Parfait ! ☕ Passons à tes habitudes quotidiennes.",
-            "Informations": "On y est presque ! 📋 Plus que quelques informations."
-          };
-          
-          const transitionMessage = transitionMessages[nextGroup.step] 
-            || `${nextGroup.icon} ${nextGroup.step}\n\nPassons maintenant à la suite.`;
-          
           addBotMessage(transitionMessage);
           setCurrentGroupIndex(nextIndex);
-          setShowScreen(true);
-        }, 1500);
+          
+          // Small delay before showing screen for smooth transition
+          setTimeout(() => {
+            setShowScreen(true);
+            triggerHaptic('light');
+          }, 150);
+        }, typingDuration);
       } else {
         // Complete - calculate results
         const results = calculateHydration(updatedData);
@@ -368,6 +438,7 @@ export const DiagnosticChat = ({
         setTimeout(() => {
           setIsTyping(false);
           setIsComplete(true);
+          triggerHaptic('success');
           
           // Show success toast
           toast({
@@ -378,9 +449,9 @@ export const DiagnosticChat = ({
           // Log data (in production, send to backend)
           console.log("Diagnostic Data:", updatedData);
           console.log("Hydration Results:", results);
-        }, 2000);
+        }, 1500);
       }
-    }, 600);
+    }, 400);
   };
 
   const handleEditStep = (stepIndex: number) => {
@@ -470,7 +541,11 @@ export const DiagnosticChat = ({
       
       {/* Messages Container */}
       {!showOnboarding && (
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+        <div 
+          ref={containerRef}
+          className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scroll-smooth-chat"
+          onScroll={handleScroll}
+        >
         {messages.map((message, index) => (
           <div key={index} className="space-y-2">
             <ChatMessage
@@ -478,13 +553,17 @@ export const DiagnosticChat = ({
               isBot={message.isBot}
               avatar={message.isBot ? pharmacistAvatar : undefined}
               timestamp={message.timestamp}
+              animationDelay={index === messages.length - 1 ? 0 : undefined}
             />
             {/* Bouton Modifier pour les réponses utilisateur */}
             {!message.isBot && message.stepIndex !== undefined && !isComplete && (
               <div className="flex justify-end px-2">
                 <button
-                  onClick={() => handleEditStep(message.stepIndex!)}
-                  className="text-xs text-primary hover:underline flex items-center gap-1 transition-colors"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    handleEditStep(message.stepIndex!);
+                  }}
+                  className="text-xs text-primary hover:underline flex items-center gap-1 transition-colors touch-manipulation"
                 >
                   <span>✏️</span>
                   <span>Modifier</span>
@@ -522,6 +601,20 @@ export const DiagnosticChat = ({
         )}
         
         <div ref={messagesEndRef} />
+        
+        {/* New messages indicator */}
+        {hasNewMessages && !isAtBottom && (
+          <button
+            onClick={() => {
+              triggerHaptic('light');
+              scrollToBottom(true, true);
+            }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm animate-message-in touch-manipulation z-50"
+          >
+            <ChevronDown className="w-4 h-4" />
+            Nouveaux messages
+          </button>
+        )}
         </div>
       )}
     </div>
