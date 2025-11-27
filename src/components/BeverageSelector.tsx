@@ -88,16 +88,16 @@ export const BeverageSelector = ({ quantities, onChange }: BeverageSelectorProps
               alt={beverage.label}
               className="w-20 h-20 object-contain mb-3"
             />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                className="h-10 w-10 rounded-full"
+                className="h-11 w-11 sm:h-10 sm:w-10 rounded-full touch-target touch-active touch-manipulation"
                 onClick={() => handleDecrement(beverage.id)}
                 disabled={quantities[beverage.id] === 0}
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
               <span className="text-lg font-semibold min-w-[2rem] text-center">
                 {quantities[beverage.id]}
@@ -106,10 +106,10 @@ export const BeverageSelector = ({ quantities, onChange }: BeverageSelectorProps
                 type="button"
                 variant="default"
                 size="icon"
-                className="h-10 w-10 rounded-full"
+                className="h-11 w-11 sm:h-10 sm:w-10 rounded-full touch-target touch-active touch-manipulation"
                 onClick={() => handleIncrement(beverage.id)}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>

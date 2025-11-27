@@ -300,20 +300,40 @@ export const ThematicScreen = ({
         return null;
     }
   };
-  return <div ref={screenRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-primary mb-1">{stepName}</h3>
-          
+  return (
+    <div ref={screenRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 sm:pb-6">
+      <div className="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
+        <div className="mb-4 sm:mb-6">
+          <h3 className="text-base sm:text-lg font-semibold text-primary mb-1">{stepName}</h3>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {visibleQuestions.map(renderQuestion)}
 
-          <Button type="submit" className="w-full" size="lg" disabled={!canSubmit}>
+          {/* Desktop button - hidden on mobile */}
+          <Button 
+            type="submit" 
+            className="w-full hidden sm:flex touch-target" 
+            size="lg" 
+            disabled={!canSubmit}
+          >
             Continuer
           </Button>
         </form>
       </div>
-    </div>;
+
+      {/* Mobile sticky button */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-background/95 backdrop-blur-sm border-t border-border/50 sm:hidden z-40">
+        <Button 
+          type="button"
+          onClick={handleSubmit}
+          className="w-full touch-target touch-active touch-manipulation" 
+          size="lg" 
+          disabled={!canSubmit}
+        >
+          Continuer
+        </Button>
+      </div>
+    </div>
+  );
 };

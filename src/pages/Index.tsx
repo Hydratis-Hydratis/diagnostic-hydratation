@@ -27,35 +27,35 @@ const Index = () => {
   const canRestart = progress && !progress.showOnboarding && progress.current > 0 && !progress.isComplete;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-dvh bg-background flex flex-col">
       {/* Header Sticky */}
       <header className={cn(
         "sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50",
         "transition-all duration-300"
       )}>
-        {/* Brand Section */}
+        {/* Brand Section - Ultra compact on mobile when showing progress */}
         <div className={cn(
           "bg-gradient-to-b from-primary/15 to-transparent text-center transition-all duration-300",
-          showProgress ? "py-3 px-4" : "py-8 px-4"
+          showProgress ? "py-2 sm:py-3 px-4" : "py-6 sm:py-8 px-4"
         )}>
           <h1 className={cn(
             "font-bold text-primary transition-all duration-300",
-            showProgress ? "text-2xl sm:text-3xl mb-0" : "text-4xl sm:text-5xl mb-1"
+            showProgress ? "text-xl sm:text-2xl md:text-3xl mb-0" : "text-3xl sm:text-4xl md:text-5xl mb-1"
           )}>
             Hydratis
           </h1>
           {!showProgress && (
             <>
-              <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-3">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground mb-2 sm:mb-3">
                 Diagnostic d'Hydratation
               </h2>
-              <p className="text-sm sm:text-base text-foreground/70 max-w-md mx-auto">
+              <p className="text-xs sm:text-sm md:text-base text-foreground/70 max-w-md mx-auto">
                 Obtiens une routine personnalisée en répondant à quelques questions 💧
               </p>
             </>
           )}
           {showProgress && (
-            <p className="text-xs text-foreground/70">
+            <p className="text-[10px] sm:text-xs text-foreground/70 hidden sm:block">
               Diagnostic d'Hydratation 💧
             </p>
           )}
@@ -105,7 +105,7 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="py-4 px-4 text-center text-xs text-muted-foreground border-t border-border/50">
+      <footer className="py-4 px-4 pb-safe text-center text-xs text-muted-foreground border-t border-border/50">
         Diagnostic d'hydratation - Prends soin de toi 💙
       </footer>
     </div>
