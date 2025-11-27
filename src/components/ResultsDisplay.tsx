@@ -413,8 +413,24 @@ export const ResultsDisplay = ({
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                    {formatVolume(results.besoins_basals_net_ml)}
+                  <div className="flex items-center justify-end gap-1">
+                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                      {formatVolume(results.besoins_basals_net_ml)}
+                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="text-muted-foreground hover:text-blue-500 transition-colors">
+                            <Info className="w-4 h-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left" className="max-w-[220px] text-xs">
+                          <p className="font-semibold mb-1">💡 Le savais-tu ?</p>
+                          <p>En moyenne, les femmes ont besoin d'environ <strong>1,6 L/jour</strong> et les hommes <strong>2 L/jour</strong>.</p>
+                          <p className="mt-1 text-muted-foreground">Ces valeurs varient selon ton âge, ton poids et ton activité !</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   <p className="text-xs text-muted-foreground">à boire</p>
                 </div>
