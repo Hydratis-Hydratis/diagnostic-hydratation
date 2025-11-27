@@ -7,9 +7,10 @@ interface ProgressIndicatorProps {
   current: number;
   total: number;
   steps?: string[];
+  onStepClick?: (stepIndex: number) => void;
 }
 
-export const ProgressIndicator = ({ current, total, steps }: ProgressIndicatorProps) => {
+export const ProgressIndicator = ({ current, total, steps, onStepClick }: ProgressIndicatorProps) => {
   const percentage = ((current + 1) / total) * 100;
 
   useEffect(() => {
@@ -79,10 +80,11 @@ export const ProgressIndicator = ({ current, total, steps }: ProgressIndicatorPr
                 )}
               >
                 <div
+                  onClick={() => index < current && onStepClick?.(index)}
                   className={cn(
                     "w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-semibold transition-all duration-300",
                     index < current
-                      ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                      ? "bg-primary border-primary text-primary-foreground shadow-sm cursor-pointer hover:scale-110 hover:shadow-md"
                       : index === current
                       ? "bg-primary/10 border-primary text-primary"
                       : "bg-background border-border text-muted-foreground"

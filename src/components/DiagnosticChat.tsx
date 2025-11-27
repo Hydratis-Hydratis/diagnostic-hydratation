@@ -374,7 +374,23 @@ export const DiagnosticChat = () => {
     setIsComplete(false);
   };
 
+  const handleGoToStep = (stepIndex: number) => {
+    // Naviguer vers une étape précédente en conservant les données
+    setCurrentGroupIndex(stepIndex);
+    setShowScreen(true);
+    setIsComplete(false);
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleRestart = () => {
+    const confirmRestart = window.confirm(
+      "Es-tu sûr de vouloir recommencer le diagnostic ? Toutes tes réponses seront perdues."
+    );
+    
+    if (!confirmRestart) return;
+    
     // Nettoyer localStorage
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
@@ -414,13 +430,25 @@ export const DiagnosticChat = () => {
         </div>
       )}
 
-      {/* Progress Indicator */}
+      {/* Progress Indicator with Restart Button */}
       {!showOnboarding && !isComplete && messages.length > 0 && (
-        <ProgressIndicator 
-          current={currentGroupIndex} 
-          total={totalSteps}
-          steps={stepNames}
-        />
+        <div className="relative">
+          <ProgressIndicator 
+            current={currentGroupIndex} 
+            total={totalSteps}
+            steps={stepNames}
+            onStepClick={handleGoToStep}
+          />
+          {currentGroupIndex > 0 && (
+            <button
+              onClick={handleRestart}
+              className="absolute top-4 right-4 text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+            >
+              <span>🔄</span>
+              <span className="hidden sm:inline">Recommencer</span>
+            </button>
+          )}
+        </div>
       )}
       
       {/* Messages Container */}
