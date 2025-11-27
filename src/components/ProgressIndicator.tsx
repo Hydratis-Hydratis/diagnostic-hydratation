@@ -8,9 +8,10 @@ interface ProgressIndicatorProps {
   total: number;
   steps?: string[];
   onStepClick?: (stepIndex: number) => void;
+  compact?: boolean;
 }
 
-export const ProgressIndicator = ({ current, total, steps, onStepClick }: ProgressIndicatorProps) => {
+export const ProgressIndicator = ({ current, total, steps, onStepClick, compact = false }: ProgressIndicatorProps) => {
   const percentage = ((current + 1) / total) * 100;
 
   useEffect(() => {
@@ -48,8 +49,11 @@ export const ProgressIndicator = ({ current, total, steps, onStepClick }: Progre
   }, [percentage]);
 
   return (
-    <div className="px-4 py-4 border-b border-border/50 bg-gradient-to-b from-background to-transparent">
-      <div className="max-w-2xl mx-auto space-y-4">
+    <div className={cn(
+      "px-4 transition-all duration-300",
+      compact ? "py-2" : "py-4 border-b border-border/50 bg-gradient-to-b from-background to-transparent"
+    )}>
+      <div className={cn("max-w-2xl mx-auto", compact ? "space-y-2" : "space-y-4")}>
         {/* Barre principale */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
