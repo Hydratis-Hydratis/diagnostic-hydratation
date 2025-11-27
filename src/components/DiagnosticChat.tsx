@@ -103,6 +103,7 @@ export const DiagnosticChat = ({
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [hasNewMessages, setHasNewMessages] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -160,15 +161,15 @@ export const DiagnosticChat = ({
     }
   }, [isTyping, scrollToBottom]);
 
-  // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding state
+  // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding/transitioning state
   useEffect(() => {
-    if (!showOnboarding && !isComplete && !isTyping && currentGroupIndex < questionGroups.length && !showScreen) {
+    if (!showOnboarding && !isComplete && !isTyping && !isTransitioning && currentGroupIndex < questionGroups.length && !showScreen) {
       // Only auto-show screen if we have messages (meaning diagnostic has started)
       if (messages.length > 0) {
         setShowScreen(true);
       }
     }
-  }, [showOnboarding, isComplete, isTyping, currentGroupIndex, showScreen, messages.length]);
+  }, [showOnboarding, isComplete, isTyping, isTransitioning, currentGroupIndex, showScreen, messages.length]);
 
   useEffect(() => {
     // Vérifier si des données sauvegardées existent
@@ -386,6 +387,9 @@ export const DiagnosticChat = ({
     // Trigger haptic feedback on submit
     triggerHaptic('medium');
     
+    // Block useEffect during transition
+    setIsTransitioning(true);
+    
     // Hide screen immediately
     setShowScreen(false);
     
@@ -435,6 +439,7 @@ export const DiagnosticChat = ({
           // Small delay before showing screen for smooth transition
           setTimeout(() => {
             setShowScreen(true);
+            setIsTransitioning(false);
             triggerHaptic('light');
           }, 150);
         }, typingDuration);
@@ -455,6 +460,7 @@ export const DiagnosticChat = ({
         setTimeout(() => {
           setIsTyping(false);
           setIsComplete(true);
+          setIsTransitioning(false);
           triggerHaptic('success');
           
           // Show success toast
