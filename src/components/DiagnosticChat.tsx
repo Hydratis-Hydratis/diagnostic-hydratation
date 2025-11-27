@@ -9,6 +9,7 @@ import { DiagnosticData, Question } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
 import { toast } from "@/hooks/use-toast";
 import { calculateHydration } from "@/lib/hydrationCalculator";
+import { saveDiagnosticToCloud } from "@/lib/saveDiagnostic";
 import { ChevronDown } from "lucide-react";
 
 // Clés localStorage
@@ -430,6 +431,12 @@ export const DiagnosticChat = ({
       } else {
         // Complete - calculate results
         const results = calculateHydration(updatedData);
+        
+        // Sauvegarder dans Lovable Cloud (anonyme, analytics + marketing)
+        saveDiagnosticToCloud(updatedData, results).catch(err => {
+          console.error('Erreur sauvegarde Cloud:', err);
+          // Ne pas bloquer l'utilisateur en cas d'erreur
+        });
         
         // Nettoyer localStorage une fois le diagnostic terminé
         localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
