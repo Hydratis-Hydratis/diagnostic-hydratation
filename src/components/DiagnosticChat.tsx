@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { ChatMessage } from "./ChatMessage";
 import { ThematicScreen } from "./ThematicScreen";
-import { ProgressIndicator } from "./ProgressIndicator";
 import { TypingIndicator } from "./TypingIndicator";
 import { ResultsDisplay } from "./ResultsDisplay";
 import { OnboardingScreen } from "./OnboardingScreen";
@@ -64,7 +63,23 @@ interface Message {
   answers?: Partial<DiagnosticData>;
 }
 
-export const DiagnosticChat = () => {
+interface DiagnosticChatProps {
+  onProgressChange?: (progress: {
+    current: number;
+    total: number;
+    steps: string[];
+    isComplete: boolean;
+    showOnboarding: boolean;
+  }) => void;
+  registerStepHandler?: (handler: (stepIndex: number) => void) => void;
+  registerRestartHandler?: (handler: () => void) => void;
+}
+
+export const DiagnosticChat = ({ 
+  onProgressChange, 
+  registerStepHandler,
+  registerRestartHandler 
+}: DiagnosticChatProps) => {
   const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [diagnosticData, setDiagnosticData] = useState<DiagnosticData>({});
@@ -421,6 +436,27 @@ export const DiagnosticChat = () => {
   const results = isComplete ? calculateHydration(diagnosticData) : null;
   const stepNames = questionGroups.map(g => g.step);
 
+  // Expose progress state to parent
+  useEffect(() => {
+    onProgressChange?.({
+      current: currentGroupIndex,
+      total: totalSteps,
+      steps: stepNames,
+      isComplete,
+      showOnboarding,
+    });
+  }, [currentGroupIndex, totalSteps, isComplete, showOnboarding, onProgressChange]);
+
+  // Register step handler for parent to call
+  useEffect(() => {
+    registerStepHandler?.(handleGoToStep);
+  }, [registerStepHandler]);
+
+  // Register restart handler for parent to call
+  useEffect(() => {
+    registerRestartHandler?.(handleRestart);
+  }, [registerRestartHandler]);
+
   return (
     <div className="flex flex-col h-full">
       {/* Onboarding Screen */}
@@ -430,28 +466,7 @@ export const DiagnosticChat = () => {
         </div>
       )}
 
-      {/* Progress Indicator with Restart Button */}
-      {!showOnboarding && !isComplete && messages.length > 0 && (
-        <div className="space-y-2">
-          {currentGroupIndex > 0 && (
-            <div className="flex justify-end">
-              <button
-                onClick={handleRestart}
-                className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 px-2 py-1 rounded hover:bg-accent"
-              >
-                <span>🔄</span>
-                <span>Recommencer</span>
-              </button>
-            </div>
-          )}
-          <ProgressIndicator 
-            current={currentGroupIndex} 
-            total={totalSteps}
-            steps={stepNames}
-            onStepClick={handleGoToStep}
-          />
-        </div>
-      )}
+      {/* Progress indicator is now in the header */}
       
       {/* Messages Container */}
       {!showOnboarding && (
