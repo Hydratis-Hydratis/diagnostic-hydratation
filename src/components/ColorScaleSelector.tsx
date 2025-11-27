@@ -33,22 +33,22 @@ export const ColorScaleSelector = ({ value, onSelect }: ColorScaleSelectorProps)
       <p className="text-xs uppercase tracking-wide mb-4 px-2" style={{ color: 'hsl(var(--chat-timestamp))' }}>
         Clique sur la couleur correspondante
       </p>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-2 sm:gap-3">
         {colorOptions.map((option, index) => (
           <button
             key={index}
             onClick={() => handleSelect(index, option.value)}
             className={cn(
-              "flex flex-col items-center gap-2 p-2 rounded-2xl transition-all duration-300",
-              "hover:scale-105 hover:shadow-lg active:scale-95",
+              "flex flex-col items-center gap-1 sm:gap-2 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl transition-all duration-300 touch-manipulation",
+              "hover:scale-105 hover:shadow-lg active:scale-90 active:opacity-90",
               selectedIndex === index && "ring-2 ring-primary ring-offset-2 scale-105"
             )}
           >
             <div
-              className="w-full aspect-square rounded-xl border-2 border-border/20 shadow-sm transition-all duration-300"
+              className="w-full aspect-square min-h-[44px] rounded-lg sm:rounded-xl border-2 border-border/20 shadow-sm transition-all duration-300"
               style={{ backgroundColor: option.color }}
             />
-            <span className="text-[10px] text-center text-foreground/70 font-medium leading-tight">
+            <span className="text-[9px] sm:text-[10px] text-center text-foreground/70 font-medium leading-tight">
               {option.label}
             </span>
           </button>

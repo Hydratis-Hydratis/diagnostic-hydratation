@@ -51,11 +51,11 @@ export const ProgressIndicator = ({ current, total, steps, onStepClick, compact 
   return (
     <div className={cn(
       "px-4 transition-all duration-300",
-      compact ? "py-2" : "py-4 border-b border-border/50 bg-gradient-to-b from-background to-transparent"
+      compact ? "py-1 sm:py-2" : "py-4 border-b border-border/50 bg-gradient-to-b from-background to-transparent"
     )}>
-      <div className={cn("max-w-2xl mx-auto", compact ? "space-y-2" : "space-y-4")}>
-        {/* Barre principale */}
-        <div className="space-y-2">
+      <div className={cn("max-w-2xl mx-auto", compact ? "space-y-1 sm:space-y-2" : "space-y-4")}>
+        {/* Barre principale - Ultra compact on mobile */}
+        <div className={cn("space-y-1 sm:space-y-2", compact && "hidden sm:block")}>
           <div className="flex justify-between items-center">
             <span className="text-xs font-medium text-muted-foreground">
               Étape {current + 1} sur {total}
@@ -86,18 +86,18 @@ export const ProgressIndicator = ({ current, total, steps, onStepClick, compact 
                 <div
                   onClick={() => index < current && onStepClick?.(index)}
                   className={cn(
-                    "w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-semibold transition-all duration-300",
+                    "w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs font-semibold transition-all duration-300 touch-manipulation",
                     index < current
-                      ? "bg-primary border-primary text-primary-foreground shadow-sm cursor-pointer hover:scale-110 hover:shadow-md"
+                      ? "bg-primary border-primary text-primary-foreground shadow-sm cursor-pointer hover:scale-110 hover:shadow-md active:scale-95"
                       : index === current
                       ? "bg-primary/10 border-primary text-primary"
                       : "bg-background border-border text-muted-foreground"
                   )}
                 >
                   {index < current ? (
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                   ) : (
-                    <span>{index + 1}</span>
+                    <span className="text-[10px] sm:text-xs">{index + 1}</span>
                   )}
                 </div>
                 <span

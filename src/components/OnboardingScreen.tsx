@@ -8,7 +8,7 @@ export const OnboardingScreen = ({
   onStart
 }: OnboardingScreenProps) => {
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 py-4 animate-fade-in">
+    <div className="w-full max-w-2xl mx-auto px-4 py-4 pb-safe animate-fade-in">
       {/* Header principal avec CTA */}
       <div className="text-center mb-6 space-y-4">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
@@ -21,7 +21,7 @@ export const OnboardingScreen = ({
           <Button
             onClick={onStart}
             size="lg"
-            className="w-full sm:w-auto px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+            className="w-full sm:w-auto px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all touch-target touch-active touch-manipulation"
           >
             🚀 Commencer mon diagnostic
           </Button>
@@ -49,11 +49,11 @@ export const OnboardingScreen = ({
           ].map((step, index) => (
             <div
               key={index}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10 hover-scale transition-all"
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10 hover-scale touch-active transition-all"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <span className="text-3xl">{step.icon}</span>
-              <span className="text-xs font-medium text-foreground/80 text-center">
+              <span className="text-2xl sm:text-3xl">{step.icon}</span>
+              <span className="text-[10px] sm:text-xs font-medium text-foreground/80 text-center">
                 {step.label}
               </span>
             </div>
@@ -92,15 +92,15 @@ export const OnboardingScreen = ({
           ].map((benefit, index) => (
             <div
               key={index}
-              className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 hover-scale transition-all"
+              className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 hover-scale touch-active transition-all"
               style={{ animationDelay: `${(index + 5) * 100}ms` }}
             >
-              <span className="text-2xl shrink-0">{benefit.icon}</span>
+              <span className="text-xl sm:text-2xl shrink-0">{benefit.icon}</span>
               <div>
-                <h4 className="font-semibold text-foreground mb-1">
+                <h4 className="font-semibold text-foreground text-sm sm:text-base mb-0.5 sm:mb-1">
                   {benefit.title}
                 </h4>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {benefit.description}
                 </p>
               </div>
@@ -110,11 +110,11 @@ export const OnboardingScreen = ({
       </div>
 
       {/* CTA Button en bas pour les utilisateurs qui scrollent */}
-      <div className="text-center mt-6">
+      <div className="text-center mt-6 mb-safe">
         <Button
           onClick={onStart}
           size="lg"
-          className="w-full sm:w-auto px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+          className="w-full sm:w-auto px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all touch-target touch-active touch-manipulation"
         >
           🚀 Commencer mon diagnostic
         </Button>
