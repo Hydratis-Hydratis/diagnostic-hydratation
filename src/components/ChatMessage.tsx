@@ -23,10 +23,7 @@ export const ChatMessage = ({
           ? "justify-start animate-message-in" 
           : "justify-end animate-message-in-right"
       )}
-      style={{ 
-        animationDelay: `${animationDelay}ms`,
-        opacity: 0 // Start invisible for animation
-      }}
+      style={{ animationDelay: `${animationDelay}ms` }}
     >
       {isBot && avatar && (
         <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
