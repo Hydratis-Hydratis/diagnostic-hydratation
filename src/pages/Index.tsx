@@ -2,6 +2,8 @@ import { DiagnosticChat } from "@/components/DiagnosticChat";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { RotateCcw } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProgressState {
   current: number;
@@ -73,13 +75,20 @@ const Index = () => {
                 />
               </div>
               {canRestart && (
-                <button
-                  onClick={() => restartHandlerRef.current?.()}
-                  className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 px-2 py-1 rounded hover:bg-accent ml-2 shrink-0"
-                >
-                  <span>🔄</span>
-                  <span className="hidden sm:inline">Recommencer</span>
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => restartHandlerRef.current?.()}
+                      className="p-1.5 text-muted-foreground hover:text-primary hover:bg-accent rounded-full transition-colors ml-2"
+                      aria-label="Recommencer le diagnostic"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Recommencer</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>
