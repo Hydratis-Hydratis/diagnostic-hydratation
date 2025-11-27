@@ -2,6 +2,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface ColorScaleSelectorProps {
+  value?: string;
   onSelect: (value: string) => void;
 }
 
@@ -16,8 +17,10 @@ const colorOptions = [
   { label: "Brun", value: "Brun (sévèrement déshydraté)", color: "hsl(50, 35%, 45%)" },
 ];
 
-export const ColorScaleSelector = ({ onSelect }: ColorScaleSelectorProps) => {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+export const ColorScaleSelector = ({ value, onSelect }: ColorScaleSelectorProps) => {
+  // Initialize with value if provided (value is 1-8, we need 0-7 for index)
+  const initialIndex = value ? parseInt(value) - 1 : null;
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(initialIndex);
 
   const handleSelect = (index: number, value: string) => {
     setSelectedIndex(index);

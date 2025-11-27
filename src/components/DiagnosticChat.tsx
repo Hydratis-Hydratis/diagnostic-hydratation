@@ -432,22 +432,24 @@ export const DiagnosticChat = () => {
 
       {/* Progress Indicator with Restart Button */}
       {!showOnboarding && !isComplete && messages.length > 0 && (
-        <div className="relative">
+        <div className="space-y-2">
+          {currentGroupIndex > 0 && (
+            <div className="flex justify-end">
+              <button
+                onClick={handleRestart}
+                className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 px-2 py-1 rounded hover:bg-accent"
+              >
+                <span>🔄</span>
+                <span>Recommencer</span>
+              </button>
+            </div>
+          )}
           <ProgressIndicator 
             current={currentGroupIndex} 
             total={totalSteps}
             steps={stepNames}
             onStepClick={handleGoToStep}
           />
-          {currentGroupIndex > 0 && (
-            <button
-              onClick={handleRestart}
-              className="absolute top-4 right-4 text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-            >
-              <span>🔄</span>
-              <span className="hidden sm:inline">Recommencer</span>
-            </button>
-          )}
         </div>
       )}
       

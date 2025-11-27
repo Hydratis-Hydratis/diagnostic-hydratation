@@ -54,6 +54,29 @@ export const ThematicScreen = ({
   });
   const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
 
+  // Pre-fill answers from previousAnswers when questions change
+  useEffect(() => {
+    const initialAnswers: Partial<DiagnosticData> = {};
+    questions.forEach(q => {
+      const value = previousAnswers[q.id];
+      // Only copy simple values (strings/numbers), not complex objects/arrays
+      if (value !== undefined && (typeof value === 'string' || typeof value === 'number')) {
+        (initialAnswers as any)[q.id] = value;
+      }
+    });
+    setAnswers(initialAnswers);
+    
+    // Pre-fill beverages if present
+    if (previousAnswers.boissons_journalieres && typeof previousAnswers.boissons_journalieres === 'object') {
+      setBeverageQuantities(previousAnswers.boissons_journalieres as BeverageQuantities);
+    }
+    
+    // Pre-fill selected sports if present
+    if (previousAnswers.sports_selectionnes && Array.isArray(previousAnswers.sports_selectionnes)) {
+      setSelectedSports(previousAnswers.sports_selectionnes as Sport[]);
+    }
+  }, [questions, previousAnswers]);
+
   // Filter questions based on conditionals and previous answers
   const visibleQuestions = questions.filter(q => {
     if (q.conditional) {
@@ -194,10 +217,13 @@ export const ThematicScreen = ({
                 </p>
               )}
             </div>
-            <ColorScaleSelector onSelect={value => setAnswers(prev => ({
-            ...prev,
-            [question.id]: value
-          }))} />
+            <ColorScaleSelector 
+              value={answers[question.id] as string}
+              onSelect={value => setAnswers(prev => ({
+                ...prev,
+                [question.id]: value
+              }))} 
+            />
           </div>;
       case "transpirationScale":
         return <div key={question.id} className="space-y-3">
@@ -211,10 +237,13 @@ export const ThematicScreen = ({
                 </p>
               )}
             </div>
-            <TranspirationScale onSelect={value => setAnswers(prev => ({
-            ...prev,
-            [question.id]: value
-          }))} />
+            <TranspirationScale 
+              value={answers[question.id] as string}
+              onSelect={value => setAnswers(prev => ({
+                ...prev,
+                [question.id]: value
+              }))} 
+            />
           </div>;
       case "beverageSelector":
         return <div key={question.id} className="space-y-3">
@@ -242,10 +271,13 @@ export const ThematicScreen = ({
                 </p>
               )}
             </div>
-            <TemperatureSelector onSelect={value => setAnswers(prev => ({
-            ...prev,
-            [question.id]: value
-          }))} />
+            <TemperatureSelector 
+              value={answers[question.id] as string}
+              onSelect={value => setAnswers(prev => ({
+                ...prev,
+                [question.id]: value
+              }))} 
+            />
           </div>;
       case "sportSelector":
         return <div key={question.id} className="space-y-3">
@@ -259,7 +291,10 @@ export const ThematicScreen = ({
                 </p>
               )}
             </div>
-            <SportSelector onSelect={sports => setSelectedSports(sports)} />
+            <SportSelector 
+              selectedSports={selectedSports}
+              onSelect={sports => setSelectedSports(sports)} 
+            />
           </div>;
       default:
         return null;
