@@ -119,6 +119,11 @@ export const OnboardingScreen = ({
           🚀 Commencer mon diagnostic
         </Button>
       </div>
+
+      {/* Mention RGPD discrète */}
+      <p className="text-center text-xs text-muted-foreground mt-6 px-4">
+        En continuant, vous acceptez que vos données soient collectées à des fins d'amélioration du service et de communication.
+      </p>
     </div>
   );
 };
