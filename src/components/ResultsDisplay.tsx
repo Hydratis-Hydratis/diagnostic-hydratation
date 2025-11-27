@@ -245,9 +245,10 @@ export const ResultsDisplay = ({
                 <div className="relative mb-2 h-10">
                   {animatedGaugePercent > 100 ? (
                     <>
-                      {/* Quand au-dessus : Ton idéal à GAUCHE */}
-                      <div className="absolute flex flex-col items-start transition-all duration-1000 ease-out" style={{
-                        left: '0',
+                      {/* Quand au-dessus : Ton idéal à 75% de la barre */}
+                      <div className="absolute flex flex-col items-center transition-all duration-1000 ease-out" style={{
+                        left: '75%',
+                        transform: 'translateX(-50%)',
                         top: '0'
                       }}>
                         <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">Ton idéal</span>
