@@ -274,10 +274,10 @@ export const ResultsDisplay = ({
               <div className="relative w-full">
                 {/* Labels positionnés au-dessus de la jauge - positionnement absolu */}
                 <div className="relative mb-2 h-12">
-                  {/* Hydratation quotidienne - positionné à 75% */}
+                  {/* Hydratation quotidienne - suit le % avec max 75% */}
                   <div 
-                    className="absolute flex flex-col items-center"
-                    style={{ left: '75%', transform: 'translateX(-50%)' }}
+                    className="absolute flex flex-col items-center transition-all duration-1000 ease-out"
+                    style={{ left: `${Math.min(Math.max(animatedGaugePercent, 15), 75)}%`, transform: 'translateX(-50%)' }}
                   >
                     <span className="text-[10px] sm:text-xs font-medium text-foreground text-center leading-tight">
                       {animatedGaugePercent > 100 ? (
