@@ -11,6 +11,7 @@ interface Sport {
 }
 
 interface SportSelectorProps {
+  selectedSports?: Sport[];
   onSelect: (sports: Sport[]) => void;
 }
 
@@ -149,9 +150,9 @@ const sportsData: Sport[] = [
   { name: "Quad", category: "Sports mécaniques", coefficient: 0.7 },
 ];
 
-export const SportSelector = ({ onSelect }: SportSelectorProps) => {
+export const SportSelector = ({ selectedSports: initialSports, onSelect }: SportSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
+  const [selectedSports, setSelectedSports] = useState<Sport[]>(initialSports || []);
 
   const filteredSports = sportsData.filter(sport =>
     sport.name.toLowerCase().includes(searchTerm.toLowerCase())

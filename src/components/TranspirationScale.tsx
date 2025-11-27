@@ -3,11 +3,14 @@ import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 
 interface TranspirationScaleProps {
+  value?: string;
   onSelect: (value: string) => void;
 }
 
-export const TranspirationScale = ({ onSelect }: TranspirationScaleProps) => {
-  const [selectedValue, setSelectedValue] = useState<number>(5);
+export const TranspirationScale = ({ value, onSelect }: TranspirationScaleProps) => {
+  // Initialize with value if provided
+  const initialValue = value ? parseInt(value) : 5;
+  const [selectedValue, setSelectedValue] = useState<number>(initialValue);
 
   const transpirationLabels: Record<number, string> = {
     0: "Pas du tout (peau sèche)",

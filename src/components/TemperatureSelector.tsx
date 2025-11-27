@@ -3,12 +3,14 @@ import { Thermometer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 interface TemperatureSelectorProps {
+  value?: string;
   onSelect: (value: string) => void;
 }
 export const TemperatureSelector = ({
+  value,
   onSelect
 }: TemperatureSelectorProps) => {
-  const [selectedTemp, setSelectedTemp] = useState<string>("");
+  const [selectedTemp, setSelectedTemp] = useState<string>(value || "");
   const temperatureRanges = [{
     value: "< 10°C",
     label: "< 10°C",
