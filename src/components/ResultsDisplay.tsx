@@ -272,12 +272,19 @@ export const ResultsDisplay = ({
               </div>
 
               <div className="relative w-full">
-                {/* Labels positionnés au-dessus de la jauge - disposition flex */}
-                <div className="flex justify-between items-end mb-2 gap-2">
-                  {/* Hydratation actuelle - aligné à gauche */}
-                  <div className="flex flex-col items-start">
-                    <span className="text-[10px] sm:text-xs font-medium text-foreground whitespace-nowrap">
-                      {animatedGaugePercent > 100 ? "Ta consommation" : "Ton hydratation quotidienne"}
+                {/* Labels positionnés au-dessus de la jauge - positionnement absolu */}
+                <div className="relative mb-2 h-12">
+                  {/* Hydratation quotidienne - positionné à 75% */}
+                  <div 
+                    className="absolute flex flex-col items-center"
+                    style={{ left: '75%', transform: 'translateX(-50%)' }}
+                  >
+                    <span className="text-[10px] sm:text-xs font-medium text-foreground text-center leading-tight">
+                      {animatedGaugePercent > 100 ? (
+                        <>Ta consommation</>
+                      ) : (
+                        <>Ton hydratation<br />quotidienne</>
+                      )}
                     </span>
                     <span className="text-xs sm:text-sm font-bold text-cyan-600 dark:text-cyan-400">
                       {formatVolume(gaugeCurrent)}
@@ -288,8 +295,8 @@ export const ResultsDisplay = ({
                   </div>
                   
                   {/* Idéal - aligné à droite */}
-                  <div className="flex flex-col items-end">
-                    <span className="text-[10px] sm:text-xs font-medium text-muted-foreground whitespace-nowrap">
+                  <div className="absolute right-0 flex flex-col items-end">
+                    <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">
                       Ton idéal
                     </span>
                     <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">
