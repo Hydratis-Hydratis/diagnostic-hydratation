@@ -160,6 +160,16 @@ export const DiagnosticChat = ({
     }
   }, [isTyping, scrollToBottom]);
 
+  // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding state
+  useEffect(() => {
+    if (!showOnboarding && !isComplete && !isTyping && currentGroupIndex < questionGroups.length && !showScreen) {
+      // Only auto-show screen if we have messages (meaning diagnostic has started)
+      if (messages.length > 0) {
+        setShowScreen(true);
+      }
+    }
+  }, [showOnboarding, isComplete, isTyping, currentGroupIndex, showScreen, messages.length]);
+
   useEffect(() => {
     // Vérifier si des données sauvegardées existent
     const savedData = localStorage.getItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
