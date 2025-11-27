@@ -108,6 +108,17 @@ export const OnboardingScreen = ({
           ))}
         </div>
       </div>
+
+      {/* CTA Button en bas pour les utilisateurs qui scrollent */}
+      <div className="text-center mt-6">
+        <Button
+          onClick={onStart}
+          size="lg"
+          className="w-full sm:w-auto px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+        >
+          🚀 Commencer mon diagnostic
+        </Button>
+      </div>
     </div>
   );
 };
