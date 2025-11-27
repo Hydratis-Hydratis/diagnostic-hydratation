@@ -307,15 +307,20 @@ export const DiagnosticChat = ({
       
       if (sportPratique === "Oui") {
         const sports = answers.sports_selectionnes;
-        const duree_hebdo = answers.duree_seance; // durée hebdomadaire totale
+        const dureeMinutes = answers.duree_minutes;
+        const frequence = answers.frequence;
         const transpiration = answers.transpiration;
         
         if (sports && Array.isArray(sports)) {
           const sportNames = sports.map((s: any) => s.name).join(" et ");
           let message = `Je pratique ${sportNames}`;
           
-          if (duree_hebdo) {
-            message += ` avec un volume de ${duree_hebdo} par semaine`;
+          if (dureeMinutes && frequence) {
+            message += ` avec des séances de ${dureeMinutes} min, ${frequence.toLowerCase()}`;
+          } else if (dureeMinutes) {
+            message += ` avec des séances de ${dureeMinutes} min`;
+          } else if (frequence) {
+            message += ` ${frequence.toLowerCase()}`;
           }
           
           if (transpiration) {
