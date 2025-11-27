@@ -619,7 +619,7 @@ export const ResultsDisplay = ({
                           <span>
                             {results.nb_pastilles_exercice === 1 
                               ? "1 pastille dans 1 verre d'eau pendant/après l'effort"
-                              : "2 pastilles dans un bidon ou une flasque pendant/après l'effort"}
+                              : "2 pastilles dans une gourde ou une flasque pendant/après l'effort"}
                           </span>
                         </div>
                       </div>
