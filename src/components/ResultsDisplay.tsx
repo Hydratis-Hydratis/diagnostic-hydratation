@@ -315,6 +315,12 @@ export const ResultsDisplay = ({
                   width: `${animatedGaugePercent}%`
                 }}>
                     <div className="relative w-full h-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 dark:from-blue-600 dark:via-blue-500 dark:to-cyan-500">
+                      {/* Pourcentage à l'intérieur de la barre */}
+                      {animatedGaugePercent >= 15 && (
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs sm:text-sm font-bold text-white drop-shadow-md">
+                          {animatedGaugePercent}%
+                        </span>
+                      )}
                       {/* Effet de brillance */}
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse-soft" />
                       
