@@ -368,12 +368,6 @@ export const ResultsDisplay = ({
                       </div>)}
                   </div>
 
-                  {/* Pourcentage au centre de la barre */}
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <span className="text-2xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
-                      {animatedGaugePercent}%
-                    </span>
-                  </div>
                 </div>
               </div>
 
