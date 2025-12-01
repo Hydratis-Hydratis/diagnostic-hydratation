@@ -243,7 +243,7 @@ export const DiagnosticChat = ({
         setIsTyping(true);
         setTimeout(() => {
           setIsTyping(false);
-          addBotMessage("Bonjour ! Réponds à quelques questions pour que je t'aide à mieux comprendre tes besoins d'hydratation. 💧");
+          addBotMessage("Bonjour ! Pour te donner ton score d'hydratation et des recommandations personnalisées, voici quelques questions 💦");
           setShowScreen(true);
         }, 2000);
       }, 800);
@@ -549,7 +549,7 @@ export const DiagnosticChat = ({
       setIsTyping(true);
       setTimeout(() => {
         setIsTyping(false);
-        addBotMessage("Bonjour ! Réponds à quelques questions pour que je t'aide à mieux comprendre tes besoins d'hydratation. 💧");
+        addBotMessage("Bonjour ! Pour te donner ton score d'hydratation et des recommandations personnalisées, voici quelques questions 💦");
         setShowScreen(true);
       }, 2000);
     }, 800);
