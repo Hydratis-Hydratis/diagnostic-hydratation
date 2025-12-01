@@ -47,17 +47,6 @@ export const OnboardingScreen = ({
         </ul>
       </div>
 
-      {/* CTA Button en bas pour les utilisateurs qui scrollent */}
-      <div className="text-center mt-6 mb-safe">
-        <Button
-          onClick={onStart}
-          size="lg"
-          className="w-full sm:w-auto px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all touch-target touch-active touch-manipulation"
-        >
-          🚀 Commencer mon diagnostic
-        </Button>
-      </div>
-
       {/* Mention RGPD discrète */}
       <p className="text-center text-xs text-muted-foreground mt-6 px-4">
         En continuant, vous acceptez que vos données soient collectées à des fins d'amélioration du service et de communication.
