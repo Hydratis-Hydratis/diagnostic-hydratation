@@ -50,7 +50,7 @@ const Index = () => {
                 Diagnostic d'Hydratation
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-foreground/70 max-w-md mx-auto">
-                Obtiens une routine personnalisée en répondant à quelques questions 💧
+                Obtiens ton résultat d'hydratation et des conseils personnalisés en répondant à quelques questions en 3 minutes top chrono !
               </p>
             </>
           )}
