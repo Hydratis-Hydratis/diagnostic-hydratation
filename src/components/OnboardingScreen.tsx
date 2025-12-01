@@ -57,46 +57,22 @@ export const OnboardingScreen = ({
           🎁 Ce que tu vas obtenir
         </h3>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <ul className="space-y-3">
           {[
-            {
-              icon: "💧",
-              title: "Besoins en eau calculés",
-              description: "Basés sur ton profil et tes activités"
-            },
-            {
-              icon: "📊",
-              title: "Plan quotidien personnalisé",
-              description: "Répartition optimale de ton hydratation"
-            },
-            {
-              icon: "🏋️",
-              title: "Conseils sportifs sur-mesure",
-              description: "Hydratation adaptée à tes efforts"
-            },
-            {
-              icon: "💡",
-              title: "Conseils personnalisés",
-              description: "Recommandations adaptées à ta situation"
-            }
-          ].map((benefit, index) => (
-            <div
+            "Ton score d'hydratation /100",
+            "Ta quantité d'eau idéale par jour selon ton profil",
+            "Des conseils d'hydratation adaptés à ton activité physique",
+            "Et d'autres recommandations personnalisées adaptées à tes résultats"
+          ].map((item, index) => (
+            <li
               key={index}
-              className="flex items-start gap-3 p-3 sm:p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 hover-scale touch-active transition-all"
-              style={{ animationDelay: `${(index + 5) * 100}ms` }}
+              className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20"
             >
-              <span className="text-xl sm:text-2xl shrink-0">{benefit.icon}</span>
-              <div>
-                <h4 className="font-semibold text-foreground text-sm sm:text-base mb-0.5 sm:mb-1">
-                  {benefit.title}
-                </h4>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  {benefit.description}
-                </p>
-              </div>
-            </div>
+              <span className="text-primary">✓</span>
+              <span className="text-sm sm:text-base text-foreground">{item}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       {/* CTA Button en bas pour les utilisateurs qui scrollent */}
