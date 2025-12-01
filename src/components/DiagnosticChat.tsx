@@ -16,6 +16,7 @@ import { ChevronDown } from "lucide-react";
 const STORAGE_KEYS = {
   DIAGNOSTIC_DATA: 'hydratis_diagnostic_data',
   DIAGNOSTIC_STEP: 'hydratis_diagnostic_step',
+  DIAGNOSTIC_RESULTS: 'hydratis_diagnostic_results',
 };
 
 // Haptic feedback utility
@@ -172,7 +173,24 @@ export const DiagnosticChat = ({
   }, [showOnboarding, isComplete, isTyping, isTransitioning, currentGroupIndex, showScreen, messages.length]);
 
   useEffect(() => {
-    // Vérifier si des données sauvegardées existent
+    // 1. Vérifier si des résultats complets existent (refresh sur page résultats)
+    const savedResults = localStorage.getItem(STORAGE_KEYS.DIAGNOSTIC_RESULTS);
+    
+    if (savedResults) {
+      try {
+        const { diagnosticData: savedDiagnosticData, results: savedResultsData } = JSON.parse(savedResults);
+        setDiagnosticData(savedDiagnosticData);
+        setIsComplete(true);
+        setShowOnboarding(false);
+        setCurrentGroupIndex(questionGroups.length); // Aller à la fin
+        return; // Ne pas continuer
+      } catch (error) {
+        console.error("Erreur lors de la restauration des résultats:", error);
+        localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_RESULTS);
+      }
+    }
+    
+    // 2. Vérifier si un diagnostic en cours existe
     const savedData = localStorage.getItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
     const savedStep = localStorage.getItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
     
@@ -216,7 +234,7 @@ export const DiagnosticChat = ({
         startFreshDiagnostic();
       }
     }
-    // Si pas de données sauvegardées, l'onboarding s'affichera par défaut
+    // 3. Si pas de données sauvegardées, l'onboarding s'affichera par défaut
   }, []);
   
   const startFreshDiagnostic = () => {
@@ -458,7 +476,13 @@ export const DiagnosticChat = ({
           // Ne pas bloquer l'utilisateur en cas d'erreur
         });
         
-        // Nettoyer localStorage une fois le diagnostic terminé
+        // Sauvegarder les résultats pour persistance après refresh navigateur
+        localStorage.setItem(STORAGE_KEYS.DIAGNOSTIC_RESULTS, JSON.stringify({
+          diagnosticData: updatedData,
+          results: results,
+        }));
+        
+        // Nettoyer les clés de progression (plus nécessaires)
         localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
         localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
         
@@ -505,9 +529,10 @@ export const DiagnosticChat = ({
     
     if (!confirmRestart) return;
     
-    // Nettoyer localStorage
+    // Nettoyer TOUTES les clés localStorage (y compris les résultats)
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
+    localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_RESULTS);
     
     setCurrentGroupIndex(0);
     setMessages([]);
