@@ -10,11 +10,7 @@ export const OnboardingScreen = ({
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-4 pb-safe animate-fade-in">
       {/* Header principal avec CTA */}
-      <div className="text-center mb-6 space-y-4">
-        <p className="text-base sm:text-lg text-foreground/80 max-w-md mx-auto">
-          Obtiens ton résultat d'hydratation et des conseils personnalisés en répondant à quelques questions en 3 minutes top chrono !
-        </p>
-
+      <div className="text-center mb-6">
         {/* CTA Button - Visible immédiatement */}
         <div>
           <Button
