@@ -11,10 +11,9 @@ export const OnboardingScreen = ({
     <div className="w-full max-w-2xl mx-auto px-4 py-4 pb-safe animate-fade-in">
       {/* Header principal avec CTA */}
       <div className="text-center mb-6 space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
-          <span className="text-lg">⏱️</span>
-          <span className="font-medium text-foreground">~3 minutes</span>
-        </div>
+        <p className="text-base sm:text-lg text-foreground/80 max-w-md mx-auto">
+          Obtiens ton résultat d'hydratation et des conseils personnalisés en répondant à quelques questions en 3 minutes top chrono !
+        </p>
 
         {/* CTA Button - Visible immédiatement */}
         <div>
@@ -26,11 +25,6 @@ export const OnboardingScreen = ({
             🚀 Commencer mon diagnostic
           </Button>
         </div>
-
-        {/* Séparateur */}
-        <p className="text-sm text-muted-foreground">
-          ou découvre ce que tu vas obtenir ↓
-        </p>
       </div>
 
       {/* Les 5 étapes */}
