@@ -56,7 +56,7 @@ export const questions: Question[] = [
   // ===== ÉTAPE 2 - ENVIRONNEMENT =====
   {
     id: "temperature_ext",
-    text: "Quelle est la température extérieure habituelle ?\n\n💡 La température influence tes besoins en eau : plus il fait chaud, plus les pertes hydriques augmentent.",
+    text: "En ce moment, quelle est la température extérieure ?\n\n💡 La température influence tes besoins en eau.",
     type: "temperatureSelector",
     step: "Santé & Conditions",
   },
