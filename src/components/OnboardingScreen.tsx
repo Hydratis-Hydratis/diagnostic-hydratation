@@ -23,34 +23,6 @@ export const OnboardingScreen = ({
         </div>
       </div>
 
-      {/* Les 5 étapes */}
-      <div className="mb-6 p-6 bg-card rounded-2xl border border-border shadow-sm">
-        <h3 className="text-lg font-semibold text-foreground mb-4 text-center">
-          📋 Les 5 étapes du diagnostic
-        </h3>
-
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-          {[
-            { icon: "👤", label: "Profil" },
-            { icon: "🏃", label: "Sport" },
-            { icon: "🩺", label: "Santé" },
-            { icon: "☕", label: "Habitudes" },
-            { icon: "🎯", label: "Résultats" }
-          ].map((step, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10 hover-scale touch-active transition-all"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <span className="text-2xl sm:text-3xl">{step.icon}</span>
-              <span className="text-[10px] sm:text-xs font-medium text-foreground/80 text-center">
-                {step.label}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Ce que tu vas obtenir */}
       <div className="p-6 bg-card rounded-2xl border border-border shadow-sm">
         <h3 className="text-lg font-semibold text-foreground mb-4 text-center">
