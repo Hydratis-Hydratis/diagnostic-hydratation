@@ -194,7 +194,7 @@ export const ResultsDisplay = ({
             Ton tableau de bord
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Métrique 1 : Score avec badge et comparaison */}
+            {/* Métrique 1 : Score avec badge */}
             <div className="p-4 rounded-lg bg-background border border-primary/20">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-sm font-medium text-muted-foreground">Score d'hydratation</h4>
@@ -204,15 +204,11 @@ export const ResultsDisplay = ({
               </div>
               <div className="text-3xl font-bold text-primary mb-2">{animatedScore}/100</div>
               <Progress value={results.score} className="h-2 mb-2" />
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Users className="w-3 h-3" />
-                <span>Mieux que {socialComparison}% des utilisateurs</span>
-              </div>
             </div>
 
             {/* Métrique 2 : Total à boire avec jauge */}
             <div className="p-4 rounded-lg bg-background border border-blue-500/20">
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">Total à boire aujourd'hui</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">Quantité d'eau à boire par jour</h4>
               <div className="text-3xl font-bold text-foreground mb-2">
                 {formatVolume(results.besoins_basals_net_ml)}
               </div>
@@ -224,7 +220,7 @@ export const ResultsDisplay = ({
 
             {/* Métrique 3 : Total pastilles */}
             <div className="p-4 rounded-lg bg-background border border-purple-500/20">
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">Pastilles recommandées</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">Pastilles Hydratis recommandées</h4>
               <div className="flex items-center gap-3">
                 <Disc className="w-8 h-8 text-purple-500" />
                 <div className="text-3xl font-bold text-foreground">
@@ -233,7 +229,7 @@ export const ResultsDisplay = ({
                 </div>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                {isSensitivePopulation ? "Consulte un professionnel" : "Pour optimiser ton hydratation"}
+                {isSensitivePopulation ? "Consulte un professionnel de santé" : (totalPastilles === 0 ? "" : "Pour optimiser ton hydratation")}
               </p>
             </div>
           </div>
@@ -256,6 +252,31 @@ export const ResultsDisplay = ({
           </div>
         </div>
       )}
+
+      {/* Découvrir Hydratis CTA */}
+      <Card className="border-2 border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10 overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-lg font-bold text-foreground mb-2 flex items-center justify-center md:justify-start gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Découvrir Hydratis
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Explore notre gamme complète de pastilles d'hydratation pour optimiser tes performances et ton bien-être au quotidien
+              </p>
+            </div>
+            <Button 
+              size="lg" 
+              className="gap-2 whitespace-nowrap"
+              onClick={() => window.open('https://www.hydratis.co', '_blank')}
+            >
+              Visiter le site
+              <ShoppingCart className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Jauge d'hydratation (après dashboard) */}
       {(() => {
