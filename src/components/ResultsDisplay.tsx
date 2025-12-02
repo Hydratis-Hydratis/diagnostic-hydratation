@@ -195,22 +195,22 @@ export const ResultsDisplay = ({
                   <Badge variant="outline" className="animate-scale-in border-primary/30 text-xs">
                     {badge.icon} {badge.level}
                   </Badge>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="inline-flex items-center justify-center">
                         <Info className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors" />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <div className="space-y-1 text-xs">
-                          <p className="font-semibold mb-2">Niveaux d'hydratation :</p>
-                          <p>🏆 Hydra'champion : 90-100</p>
-                          <p>⭐ Hydra'avancé : 70-89</p>
-                          <p>💧 Hydra'initié : 50-69</p>
-                          <p>🌱 Hydra'débutant : 0-49</p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-3" align="start">
+                      <div className="space-y-1 text-xs">
+                        <p className="font-semibold mb-2">Niveaux d'hydratation :</p>
+                        <p>🏆 Hydra'champion : 90-100</p>
+                        <p>⭐ Hydra'avancé : 70-89</p>
+                        <p>💧 Hydra'initié : 50-69</p>
+                        <p>🌱 Hydra'débutant : 0-49</p>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
               <div className="text-3xl font-bold text-primary mb-2">{animatedScore}/100</div>
