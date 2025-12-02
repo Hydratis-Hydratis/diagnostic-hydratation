@@ -432,6 +432,13 @@ export const calculateHydration = (data: DiagnosticData): HydrationResult => {
     nb_pastilles_basal = Math.min(nb_pastilles_basal, 2);
   }
 
+  // Règle du minimum 2 pastilles : si le total est 1, passer à 2
+  const total_pastilles_final = nb_pastilles_basal + nb_pastilles_exercice;
+  if (total_pastilles_final === 1) {
+    // Augmenter les pastilles basales de préférence car plus fréquentes (quotidiennes)
+    nb_pastilles_basal = 2;
+  }
+
   // Statut
   const statut = score >= 85 ? "Hydratation optimale"
                : score >= 70 ? "Hydratation correcte"
