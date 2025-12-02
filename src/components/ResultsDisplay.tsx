@@ -460,17 +460,14 @@ export const ResultsDisplay = ({
             <div className="relative p-5 rounded-xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-blue-500/10">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-1">
-                    💧 Tous les jours
+                  <h3 className="text-sm font-semibold text-muted-foreground">
+                    💧 Besoin en eau par jour
                   </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Besoins de base
-                  </p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center justify-end gap-1">
                     <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                      {formatVolume(results.besoins_basals_net_ml)}
+                      {formatVolume(results.besoins_basals_brut_ml)}
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -485,7 +482,7 @@ export const ResultsDisplay = ({
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <p className="text-xs text-muted-foreground">à boire</p>
+                  <p className="text-xs text-muted-foreground">Besoin total</p>
                 </div>
               </div>
 
@@ -515,15 +512,11 @@ export const ResultsDisplay = ({
               {/* Détails */}
               <div className="border-t border-blue-500/20 mt-4 pt-3 space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Besoin total</span>
-                  <span className="font-semibold">{formatVolume(results.besoins_basals_brut_ml)}</span>
+                  <span className="text-muted-foreground">• Apportée par l'alimentation</span>
+                  <span className="font-semibold">~{formatVolume(results.besoins_basals_brut_ml - results.besoins_basals_net_ml)}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">🍽️ Par l'alimentation</span>
-                  <span className="font-semibold">{formatVolume(results.besoins_basals_brut_ml - results.besoins_basals_net_ml)}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">💧 À boire</span>
+                  <span className="text-muted-foreground">• Apportée par la boisson</span>
                   <span className="font-bold text-blue-600 dark:text-blue-400">{formatVolume(results.besoins_basals_net_ml)}</span>
                 </div>
               </div>
