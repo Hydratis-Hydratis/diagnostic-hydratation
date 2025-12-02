@@ -467,7 +467,7 @@ export const ResultsDisplay = ({
                 <div className="text-right">
                   <div className="flex items-center justify-end gap-1">
                     <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                      {formatVolume(results.besoins_basals_brut_ml)}
+                      {formatVolume(results.besoins_basals_net_ml)}
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -482,7 +482,7 @@ export const ResultsDisplay = ({
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <p className="text-xs text-muted-foreground">Besoin total</p>
+                  <p className="text-xs text-muted-foreground">à boire</p>
                 </div>
               </div>
 
@@ -511,6 +511,10 @@ export const ResultsDisplay = ({
 
               {/* Détails */}
               <div className="border-t border-blue-500/20 mt-4 pt-3 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground font-medium">Besoin total</span>
+                  <span className="font-semibold">{formatVolume(results.besoins_basals_brut_ml)}</span>
+                </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">• Apportée par l'alimentation</span>
                   <span className="font-semibold">~{formatVolume(results.besoins_basals_brut_ml - results.besoins_basals_net_ml)}</span>
