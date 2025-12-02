@@ -189,7 +189,7 @@ export const ResultsDisplay = ({
       {/* Dashboard avec 3 métriques clés */}
       <Card className="border-2 border-primary/40 bg-gradient-to-br from-primary/10 to-transparent">
         <CardContent className="p-6">
-          <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+          <h3 className="text-2xl font-semibold tracking-tight mb-4 flex items-center gap-2">
             <Trophy className="w-5 h-5 text-primary" />
             Ton tableau de bord
           </h3>
@@ -236,49 +236,7 @@ export const ResultsDisplay = ({
         </CardContent>
       </Card>
 
-      {/* Disclaimer global personnalisé pour populations sensibles */}
-      {isSensitivePopulation && (
-        <div className="p-4 rounded-lg border-2 border-amber-400/50 bg-amber-50 dark:bg-amber-950/30">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">⚕️</span>
-            <div>
-              <h4 className="font-semibold text-sm text-amber-900 dark:text-amber-200 mb-2">
-                Avis professionnel recommandé
-              </h4>
-              <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
-                {getPersonalizedDisclaimerMessage()}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Découvrir Hydratis CTA */}
-      <Card className="border-2 border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex-1 text-center md:text-left">
-              <h3 className="text-lg font-bold text-foreground mb-2 flex items-center justify-center md:justify-start gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                Découvrir Hydratis
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Explore notre gamme complète de pastilles d'hydratation pour optimiser tes performances et ton bien-être au quotidien
-              </p>
-            </div>
-            <Button 
-              size="lg" 
-              className="gap-2 whitespace-nowrap"
-              onClick={() => window.open('https://www.hydratis.co', '_blank')}
-            >
-              Visiter le site
-              <ShoppingCart className="w-4 h-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Jauge d'hydratation (après dashboard) */}
+      {/* Jauge d'hydratation - Comparaison */}
       {(() => {
         const gaugeTarget = results.besoins_basals_net_ml;
         const gaugeCurrent = Math.max(0, results.hydratation_reelle_ml ?? 0);
@@ -288,7 +246,7 @@ export const ResultsDisplay = ({
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Droplets className="w-5 h-5 text-blue-500 animate-pulse-soft" />
-                <h3 className="font-bold text-base text-foreground">Comparaison    </h3>
+                <h3 className="font-bold text-base text-foreground">Comparaison    </h3>
               </div>
 
               <div className="relative w-full">
@@ -403,16 +361,58 @@ export const ResultsDisplay = ({
           </Card>;
       })()}
 
+      {/* Disclaimer global personnalisé pour populations sensibles */}
+      {isSensitivePopulation && (
+        <div className="p-4 rounded-lg border-2 border-amber-400/50 bg-amber-50 dark:bg-amber-950/30">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⚕️</span>
+            <div>
+              <h4 className="font-semibold text-sm text-amber-900 dark:text-amber-200 mb-2">
+                Avis professionnel recommandé
+              </h4>
+              <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+                {getPersonalizedDisclaimerMessage()}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Découvrir Hydratis CTA */}
+      <Card className="border-2 border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10 overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-lg font-bold text-foreground mb-2 flex items-center justify-center md:justify-start gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Découvrir Hydratis
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Explore notre gamme complète de pastilles d'hydratation pour optimiser tes performances et ton bien-être au quotidien
+              </p>
+            </div>
+            <Button 
+              size="lg" 
+              className="gap-2 whitespace-nowrap"
+              onClick={() => window.open('https://www.hydratis.co', '_blank')}
+            >
+              Visiter le site
+              <ShoppingCart className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Carte supplémentaire : Besoins sport (si entraînement aujourd'hui) */}
       {isSportPerson && results.besoins_exercice_ml > 0}
 
       {/* Carte unifiée : Plan d'hydratation quotidien */}
       <Card className="overflow-hidden border-2">
         <CardHeader className="bg-gradient-to-r from-blue-500/10 to-orange-500/10">
-          <CardTitle className="flex items-center gap-2">
+          <h3 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
             <Droplets className="w-5 h-5 text-blue-500" />
             Ton plan d'hydratation quotidien
-          </CardTitle>
+          </h3>
           <p className="text-sm text-muted-foreground mt-1">
             Voici tes besoins personnalisés pour rester bien hydraté
           </p>
