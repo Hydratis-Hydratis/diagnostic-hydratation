@@ -189,10 +189,10 @@ export const ResultsDisplay = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Métrique 1 : Score avec badge */}
             <div className="p-4 rounded-lg bg-background border border-primary/20">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-muted-foreground">Score d'hydratation</h4>
+              <div className="mb-2">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Score d'hydratation</h4>
                 <div className="flex items-center gap-1">
-                  <Badge variant="outline" className="animate-scale-in border-primary/30">
+                  <Badge variant="outline" className="animate-scale-in border-primary/30 text-xs">
                     {badge.icon} {badge.level}
                   </Badge>
                   <TooltipProvider>
