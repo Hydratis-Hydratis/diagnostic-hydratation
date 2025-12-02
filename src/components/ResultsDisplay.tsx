@@ -59,27 +59,19 @@ const formatDebit = (mlPerHour: number): string => {
 const getBadge = (score: number) => {
   if (score >= 90) return {
     level: "Hydra'champion",
-    icon: "🏆",
-    color: "bg-yellow-500",
-    textColor: "text-yellow-900"
+    icon: "🏆"
   };
   if (score >= 70) return {
     level: "Hydra'avancé",
-    icon: "⭐",
-    color: "bg-blue-500",
-    textColor: "text-white"
+    icon: "⭐"
   };
   if (score >= 50) return {
     level: "Hydra'initié",
-    icon: "💧",
-    color: "bg-cyan-500",
-    textColor: "text-white"
+    icon: "💧"
   };
   return {
     level: "Hydra'débutant",
-    icon: "🌱",
-    color: "bg-green-500",
-    textColor: "text-white"
+    icon: "🌱"
   };
 };
 export const ResultsDisplay = ({
@@ -200,7 +192,7 @@ export const ResultsDisplay = ({
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-sm font-medium text-muted-foreground">Score d'hydratation</h4>
                 <div className="flex items-center gap-1">
-                  <Badge className={`${badge.color} ${badge.textColor} animate-scale-in`}>
+                  <Badge variant="outline" className="animate-scale-in border-primary/30">
                     {badge.icon} {badge.level}
                   </Badge>
                   <TooltipProvider>
