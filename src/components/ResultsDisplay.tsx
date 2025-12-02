@@ -286,20 +286,20 @@ export const ResultsDisplay = ({
 
               <div className="relative w-full">
                 {/* Labels positionnés au-dessus de la jauge - positionnement absolu */}
-                <div className="relative mb-2 h-12">
-                  {/* Hydratation quotidienne - suit le % avec max 75% */}
+                <div className="relative mb-3 h-14 sm:h-16">
+                  {/* Hydratation quotidienne - suit le % avec max 70% sur desktop */}
                   <div 
                     className="absolute flex flex-col items-center transition-all duration-1000 ease-out"
-                    style={{ left: `${Math.min(Math.max(animatedGaugePercent, 15), 75)}%`, transform: 'translateX(-50%)' }}
+                    style={{ left: `${Math.min(Math.max(animatedGaugePercent, 15), 65)}%`, transform: 'translateX(-50%)' }}
                   >
-                    <span className="text-xs sm:text-sm font-medium text-foreground text-center leading-tight">
+                    <span className="text-[11px] sm:text-sm md:text-base font-medium text-foreground text-center leading-tight mb-1">
                       {animatedGaugePercent > 100 ? (
                         <>Ta consommation</>
                       ) : (
-                        <>Ton hydratation<br />quotidienne</>
+                        <>Ton hydratation<br className="sm:hidden" /><span className="hidden sm:inline"> </span>quotidienne</>
                       )}
                     </span>
-                    <span className="text-sm sm:text-base font-bold text-cyan-600 dark:text-cyan-400">
+                    <span className="text-sm sm:text-base md:text-lg font-bold text-cyan-600 dark:text-cyan-400">
                       {formatVolume(gaugeCurrent)}
                       {animatedGaugePercent > 100 && (
                         <span className="ml-1 text-[10px]">({animatedGaugePercent}%)</span>
@@ -309,10 +309,10 @@ export const ResultsDisplay = ({
                   
                   {/* Idéal - aligné à droite */}
                   <div className="absolute right-0 flex flex-col items-end">
-                    <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    <span className="text-[11px] sm:text-sm md:text-base font-medium text-muted-foreground mb-1">
                       Ton idéal
                     </span>
-                    <span className="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400">
+                    <span className="text-sm sm:text-base md:text-lg font-bold text-blue-600 dark:text-blue-400">
                       {formatVolume(gaugeTarget)}
                     </span>
                   </div>
@@ -385,10 +385,10 @@ export const ResultsDisplay = ({
               </div>
 
               {/* Message de progression */}
-              <div className="mt-3 text-center">
-                <p className={cn("text-base sm:text-lg font-medium", animatedGaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
+              <div className="mt-4 text-center">
+                <p className={cn("text-sm sm:text-base md:text-lg font-medium", animatedGaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
                   {animatedGaugePercent >= 100 ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" : <>
-                        Encore <span className="font-bold text-lg text-primary">{formatVolume(gaugeTarget - gaugeCurrent)}</span> à boire
+                        Encore <span className="font-bold text-base sm:text-lg md:text-xl text-primary">{formatVolume(gaugeTarget - gaugeCurrent)}</span> à boire
                       </>}
                 </p>
               </div>
