@@ -458,20 +458,20 @@ export const ResultsDisplay = ({
             
             {/* COLONNE 1 : Besoins quotidiens */}
             <div className="relative p-5 rounded-xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-blue-500/10">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-muted-foreground">
-                    💧 Besoin en eau par jour
-                  </h3>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+              {/* Layout vertical centré */}
+              <div className="flex flex-col items-center text-center mb-4 space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground">
+                  💧 Besoin en eau par jour
+                </h3>
+                
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-2">
+                    <div className="text-5xl font-bold text-blue-600 dark:text-blue-400">
                       {formatVolume(results.besoins_basals_net_ml)}
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <button className="text-muted-foreground hover:text-blue-500 transition-colors p-1">
+                        <button className="text-muted-foreground hover:text-blue-500 transition-colors p-1 self-start mt-1">
                           <Info className="w-4 h-4" />
                         </button>
                       </PopoverTrigger>
@@ -482,7 +482,7 @@ export const ResultsDisplay = ({
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <p className="text-xs text-muted-foreground">à boire</p>
+                  <p className="text-sm text-muted-foreground mt-1">à boire</p>
                 </div>
               </div>
 
