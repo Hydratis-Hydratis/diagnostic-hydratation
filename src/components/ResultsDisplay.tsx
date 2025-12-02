@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Droplet, Droplets, Activity, Disc, AlertCircle, CheckCircle, TrendingUp, Zap, Info, Sparkles, RefreshCw, Trophy, Target, ArrowUp, Sun, Users, Calendar, Clock, Thermometer, Heart, Beaker, Shield, BookOpen, AlertTriangle, ShoppingCart, RotateCcw } from "lucide-react";
 import type { HydrationResult } from "@/lib/hydrationCalculator";
 import type { DiagnosticData } from "@/types/diagnostic";
@@ -57,25 +58,25 @@ const formatDebit = (mlPerHour: number): string => {
 // Système de badges
 const getBadge = (score: number) => {
   if (score >= 90) return {
-    level: "Or",
-    icon: "🥇",
+    level: "Hydra'champion",
+    icon: "🏆",
     color: "bg-yellow-500",
     textColor: "text-yellow-900"
   };
   if (score >= 70) return {
-    level: "Argent",
-    icon: "🥈",
-    color: "bg-gray-400",
-    textColor: "text-gray-900"
+    level: "Hydra'avancé",
+    icon: "⭐",
+    color: "bg-blue-500",
+    textColor: "text-white"
   };
   if (score >= 50) return {
-    level: "Bronze",
-    icon: "🥉",
-    color: "bg-orange-600",
+    level: "Hydra'initié",
+    icon: "💧",
+    color: "bg-cyan-500",
     textColor: "text-white"
   };
   return {
-    level: "Débutant",
+    level: "Hydra'débutant",
     icon: "🌱",
     color: "bg-green-500",
     textColor: "text-white"
@@ -198,9 +199,27 @@ export const ResultsDisplay = ({
             <div className="p-4 rounded-lg bg-background border border-primary/20">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-sm font-medium text-muted-foreground">Score d'hydratation</h4>
-                <Badge className={`${badge.color} ${badge.textColor} animate-scale-in`}>
-                  {badge.icon} {badge.level}
-                </Badge>
+                <div className="flex items-center gap-1">
+                  <Badge className={`${badge.color} ${badge.textColor} animate-scale-in`}>
+                    {badge.icon} {badge.level}
+                  </Badge>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <div className="space-y-1 text-xs">
+                          <p className="font-semibold mb-2">Niveaux d'hydratation :</p>
+                          <p>🏆 Hydra'champion : 90-100</p>
+                          <p>⭐ Hydra'avancé : 70-89</p>
+                          <p>💧 Hydra'initié : 50-69</p>
+                          <p>🌱 Hydra'débutant : 0-49</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
               <div className="text-3xl font-bold text-primary mb-2">{animatedScore}/100</div>
               <Progress value={results.score} className="h-2 mb-2" />
