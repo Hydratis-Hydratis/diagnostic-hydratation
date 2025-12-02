@@ -220,7 +220,42 @@ export const ResultsDisplay = ({
 
             {/* Métrique 3 : Total pastilles */}
             <div className="p-4 rounded-lg bg-background border border-purple-500/20">
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">Pastilles Hydratis recommandées</h4>
+              <div className="flex items-center gap-1.5 mb-2">
+                <h4 className="text-sm font-medium text-muted-foreground">Pastilles Hydratis recommandées</h4>
+                {!isSensitivePopulation && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="text-muted-foreground hover:text-purple-500 transition-colors p-0.5">
+                        <Info className="w-4 h-4" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent side="top" className="w-[280px] text-sm">
+                      {totalPastilles === 0 ? (
+                        <>
+                          <p className="font-semibold mb-1">💡 Ton hydratation est optimale !</p>
+                          <p className="text-muted-foreground text-xs">Pas besoin de pastilles supplémentaires, continue comme ça ! 💪</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-semibold mb-2">💡 Comment sont calculées tes pastilles ?</p>
+                          <div className="space-y-2">
+                            <div>
+                              <p className="font-medium">🏠 Hydratation quotidienne : {results.nb_pastilles_basal} pastille{results.nb_pastilles_basal > 1 ? 's' : ''}</p>
+                              <p className="text-xs text-muted-foreground">→ Basé sur ton score d'hydratation et ton profil</p>
+                            </div>
+                            {results.nb_pastilles_exercice > 0 && (
+                              <div>
+                                <p className="font-medium">🏃 Jours de sport : +{results.nb_pastilles_exercice} pastille{results.nb_pastilles_exercice > 1 ? 's' : ''}</p>
+                                <p className="text-xs text-muted-foreground">→ Basé sur ta durée d'entraînement hebdomadaire et ton niveau de transpiration</p>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </div>
               <div className="flex items-center gap-3">
                 <Disc className="w-8 h-8 text-purple-500" />
                 <div className="text-3xl font-bold text-foreground">
