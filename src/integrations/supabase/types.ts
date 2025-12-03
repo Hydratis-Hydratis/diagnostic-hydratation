@@ -16,39 +16,66 @@ export type Database = {
     Tables: {
       diagnostics: {
         Row: {
+          age: number | null
+          besoin_total_ml: number | null
           completed_at: string | null
           created_at: string
           diagnostic_data: Json
+          ecart_hydratation_ml: number | null
           email: string | null
           first_name: string | null
+          hydratation_reelle_ml: number | null
           hydration_status: string | null
           id: string
+          nb_pastilles_basal: number | null
+          nb_pastilles_exercice: number | null
+          nb_pastilles_total: number | null
           results: Json | null
           score: number | null
+          sexe: string | null
+          sport: string | null
           user_agent: string | null
         }
         Insert: {
+          age?: number | null
+          besoin_total_ml?: number | null
           completed_at?: string | null
           created_at?: string
           diagnostic_data: Json
+          ecart_hydratation_ml?: number | null
           email?: string | null
           first_name?: string | null
+          hydratation_reelle_ml?: number | null
           hydration_status?: string | null
           id?: string
+          nb_pastilles_basal?: number | null
+          nb_pastilles_exercice?: number | null
+          nb_pastilles_total?: number | null
           results?: Json | null
           score?: number | null
+          sexe?: string | null
+          sport?: string | null
           user_agent?: string | null
         }
         Update: {
+          age?: number | null
+          besoin_total_ml?: number | null
           completed_at?: string | null
           created_at?: string
           diagnostic_data?: Json
+          ecart_hydratation_ml?: number | null
           email?: string | null
           first_name?: string | null
+          hydratation_reelle_ml?: number | null
           hydration_status?: string | null
           id?: string
+          nb_pastilles_basal?: number | null
+          nb_pastilles_exercice?: number | null
+          nb_pastilles_total?: number | null
           results?: Json | null
           score?: number | null
+          sexe?: string | null
+          sport?: string | null
           user_agent?: string | null
         }
         Relationships: []

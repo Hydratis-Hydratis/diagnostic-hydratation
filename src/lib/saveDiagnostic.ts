@@ -7,6 +7,11 @@ export async function saveDiagnosticToCloud(
   results: HydrationResult
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Determine sport value
+    const sportValue = diagnosticData.sport_pratique === "Oui" 
+      ? (diagnosticData.sports_selectionnes?.map(s => s.name).join(", ") || "Sport non spécifié")
+      : "Non sportif";
+
     const payload = {
       email: diagnosticData.email || null,
       first_name: diagnosticData.firstName || null,
@@ -15,7 +20,17 @@ export async function saveDiagnosticToCloud(
       score: results.score,
       hydration_status: results.statut,
       user_agent: navigator.userAgent,
-      completed_at: new Date().toISOString()
+      completed_at: new Date().toISOString(),
+      // Nouvelles colonnes dénormalisées
+      age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
+      sexe: diagnosticData.sexe || null,
+      sport: sportValue,
+      besoin_total_ml: Math.round(results.besoin_total_ml),
+      hydratation_reelle_ml: Math.round(results.hydratation_reelle_ml),
+      ecart_hydratation_ml: Math.round(results.ecart_hydratation_ml),
+      nb_pastilles_basal: results.nb_pastilles_basal,
+      nb_pastilles_exercice: results.nb_pastilles_exercice,
+      nb_pastilles_total: results.nb_pastilles_basal + results.nb_pastilles_exercice
     };
 
     const { error } = await supabase
