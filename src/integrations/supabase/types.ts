@@ -24,6 +24,7 @@ export type Database = {
           ecart_hydratation_ml: number | null
           email: string | null
           first_name: string | null
+          hydra_rank: string | null
           hydratation_reelle_ml: number | null
           hydration_status: string | null
           id: string
@@ -45,6 +46,7 @@ export type Database = {
           ecart_hydratation_ml?: number | null
           email?: string | null
           first_name?: string | null
+          hydra_rank?: string | null
           hydratation_reelle_ml?: number | null
           hydration_status?: string | null
           id?: string
@@ -66,6 +68,7 @@ export type Database = {
           ecart_hydratation_ml?: number | null
           email?: string | null
           first_name?: string | null
+          hydra_rank?: string | null
           hydratation_reelle_ml?: number | null
           hydration_status?: string | null
           id?: string

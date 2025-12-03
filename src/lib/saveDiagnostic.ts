@@ -12,6 +12,14 @@ export async function saveDiagnosticToCloud(
       ? (diagnosticData.sports_selectionnes?.map(s => s.name).join(", ") || "Sport non spécifié")
       : "Non sportif";
 
+    // Determine hydra_rank based on score
+    const getHydraRank = (score: number): string => {
+      if (score >= 90) return "Hydra'champion";
+      if (score >= 70) return "Hydra'avancé";
+      if (score >= 50) return "Hydra'initié";
+      return "Hydra'débutant";
+    };
+
     const payload = {
       email: diagnosticData.email || null,
       first_name: diagnosticData.firstName || null,
@@ -30,7 +38,8 @@ export async function saveDiagnosticToCloud(
       ecart_hydratation_ml: Math.round(results.ecart_hydratation_ml),
       nb_pastilles_basal: results.nb_pastilles_basal,
       nb_pastilles_exercice: results.nb_pastilles_exercice,
-      nb_pastilles_total: results.nb_pastilles_basal + results.nb_pastilles_exercice
+      nb_pastilles_total: results.nb_pastilles_basal + results.nb_pastilles_exercice,
+      hydra_rank: getHydraRank(results.score)
     };
 
     const { error } = await supabase
