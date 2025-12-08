@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import logoHydratis from "@/assets/logo-hydratis.png";
 
 interface ProgressState {
   current: number;
@@ -38,12 +39,14 @@ const Index = () => {
           "bg-gradient-to-b from-primary/15 to-transparent text-center transition-all duration-300",
           showProgress ? "py-2 sm:py-3 px-4" : "py-6 sm:py-8 px-4"
         )}>
-          <h1 className={cn(
-            "font-bold text-primary transition-all duration-300",
-            showProgress ? "text-xl sm:text-2xl md:text-3xl mb-0" : "text-3xl sm:text-4xl md:text-5xl mb-1"
-          )}>
-            Hydratis
-          </h1>
+          <img 
+            src={logoHydratis} 
+            alt="Hydratis - Optimise l'hydratation" 
+            className={cn(
+              "mx-auto transition-all duration-300",
+              showProgress ? "h-8 sm:h-10" : "h-16 sm:h-20 md:h-24"
+            )}
+          />
           {!showProgress && (
             <>
               <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground mb-2 sm:mb-3">
