@@ -31,7 +31,7 @@ export const OnboardingScreen = ({
 
         <ul className="space-y-3">
           {[
-            "Ton score d'hydratation /100",
+            "Ton score d'hydratation sur 100",
             "Ta quantité d'eau idéale par jour selon ton profil",
             "Des conseils d'hydratation adaptés à ton activité physique",
             "Et d'autres recommandations personnalisées adaptées à tes résultats"
