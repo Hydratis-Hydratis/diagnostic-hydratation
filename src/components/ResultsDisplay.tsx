@@ -1011,10 +1011,10 @@ export const ResultsDisplay = ({
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-sm mb-1">
+                  <h4 className="font-semibold text-base mb-1">
                     {results.score < 70 ? `Atteins ${formatVolume(results.besoins_basals_net_ml)}` : "Maintiens ton objectif"}
                   </h4>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {results.score < 70 ? "pendant 7 jours consécutifs" : "pendant 30 jours"}
                   </p>
                 </div>
@@ -1031,14 +1031,14 @@ export const ResultsDisplay = ({
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-sm mb-1">
+                  <h4 className="font-semibold text-base mb-1">
                     {isSensitivePopulation 
                       ? "Fractionne ton hydratation" 
                       : results.nb_pastilles_basal >= 1 
                         ? "1 pastille Hydratis chaque matin" 
                         : "Teste Hydratis"}
                   </h4>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {isSensitivePopulation 
                       ? "Boire 8 petits verres répartis dans la journée pendant 7 jours" 
                       : results.nb_pastilles_basal >= 1 
@@ -1063,10 +1063,10 @@ export const ResultsDisplay = ({
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-sm mb-1">
+                  <h4 className="font-semibold text-base mb-1">
                     {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 ? "Urine claire (≤3)" : diagnosticData?.crampes === "Oui" ? "Réduis les crampes" : "Partage tes résultats"}
                   </h4>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {diagnosticData?.urine_couleur && parseInt(diagnosticData.urine_couleur) > 5 ? "pendant 5 jours" : diagnosticData?.crampes === "Oui" ? "avec une hydratation optimale" : "avec un ami"}
                   </p>
                 </div>
