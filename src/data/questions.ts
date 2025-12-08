@@ -90,7 +90,7 @@ export const questions: Question[] = [
     id: "frequence",
     text: "Quelle est la fréquence de ta pratique sportive ?",
     type: "options",
-    options: ["Jamais", "1-2 fois/semaine", "3-5 fois/semaine", "6+ fois/semaine"],
+    options: ["Jamais", "1 à 2 fois par semaine", "3 à 5 fois par semaine", "Plus de 6 fois par semaine"],
     multiColumn: true,
     step: "Activité physique",
     conditional: {
