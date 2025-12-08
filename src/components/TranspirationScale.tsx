@@ -55,8 +55,8 @@ export const TranspirationScale = ({ value, onSelect }: TranspirationScaleProps)
         />
         
         <div className="flex justify-between mt-4 px-1">
-          <span className="text-xs text-muted-foreground">Pas du tout</span>
-          <span className="text-xs text-muted-foreground">Énormément</span>
+          <span className="text-xs text-muted-foreground">0 (pas du tout)</span>
+          <span className="text-xs text-muted-foreground">10 (extrême)</span>
         </div>
       </div>
     </div>

@@ -216,7 +216,7 @@ export const SportSelector = ({ selectedSports: initialSports, onSelect }: Sport
       )}
 
       <div className="relative">
-        <div className="max-h-32 overflow-y-auto border rounded-lg shadow-sm">
+        <div className="max-h-56 overflow-y-auto border rounded-lg shadow-sm">
           {filteredSports.length > 0 ? (
             <div className="divide-y">
               {filteredSports.map((sport) => {
@@ -227,13 +227,13 @@ export const SportSelector = ({ selectedSports: initialSports, onSelect }: Sport
                     type="button"
                     onClick={() => handleSelectSport(sport)}
                     className={cn(
-                      "w-full text-left p-3 transition-colors",
+                      "w-full text-left p-4 transition-colors",
                       "hover:bg-accent/50",
                       isSelected && "bg-primary/10 border-l-4 border-primary"
                     )}
                   >
                     <div className="flex items-center justify-between">
-                      <p className="font-medium text-sm">{sport.name}</p>
+                      <p className="font-medium text-base">{sport.name}</p>
                       {isSelected && (
                         <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                       )}
