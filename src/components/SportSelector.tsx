@@ -227,7 +227,7 @@ export const SportSelector = ({ selectedSports: initialSports, onSelect }: Sport
                     type="button"
                     onClick={() => handleSelectSport(sport)}
                     className={cn(
-                      "w-full text-left p-4 transition-colors",
+                      "w-full text-left p-2.5 transition-colors",
                       "hover:bg-accent/50",
                       isSelected && "bg-primary/10 border-l-4 border-primary"
                     )}
