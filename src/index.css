@@ -49,42 +49,48 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 40 30% 95%;
-    --foreground: 230 70% 20%;
+    /* #F2EBE5 - Beige for backgrounds */
+    --background: 25 33% 92%;
+    /* #10069F - Blue for text */
+    --foreground: 243 92% 32%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 230 70% 20%;
+    /* Beige for cards */
+    --card: 25 33% 92%;
+    --card-foreground: 243 92% 32%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 230 70% 20%;
+    --popover-foreground: 243 92% 32%;
 
-    --primary: 230 70% 45%;
+    /* #10069F - Blue as primary */
+    --primary: 243 92% 32%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 40% 90%;
-    --secondary-foreground: 230 70% 25%;
+    /* #5EACA3 - Green/blue as secondary */
+    --secondary: 173 33% 52%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 40 25% 85%;
-    --muted-foreground: 230 30% 45%;
+    --muted: 25 20% 88%;
+    --muted-foreground: 243 50% 45%;
 
-    --accent: 230 70% 50%;
+    /* #5EACA3 - Green/blue as accent */
+    --accent: 173 33% 52%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 25% 88%;
+    --border: 25 20% 85%;
     --input: 0 0% 100%;
-    --ring: 230 70% 45%;
+    --ring: 243 92% 32%;
 
     --radius: 1.5rem;
     
     --chat-bot: 0 0% 100%;
-    --chat-user: 230 70% 45%;
-    --chat-timestamp: 230 30% 50%;
+    --chat-user: 243 92% 32%;
+    --chat-timestamp: 243 50% 50%;
     
-    --chart-1: 221 83% 53%;
-    --chart-2: 30 80% 55%;
+    --chart-1: 243 92% 32%;
+    --chart-2: 173 33% 52%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
