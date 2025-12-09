@@ -1,1 +1,4 @@
 project_id = "jbnnmapqaoapsrednasd"
+
+[functions.notify-n8n]
+verify_jwt = false
