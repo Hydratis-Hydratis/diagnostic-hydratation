@@ -43,9 +43,10 @@ const sportsData: Sport[] = [
   { name: "Triathlon", category: "Endurance continue", coefficient: 1.0 },
   { name: "Duathlon", category: "Endurance continue", coefficient: 1.0 },
   
-  // Intermittent/collectif/HIIT (5 sports)
+  // Intermittent/collectif/HIIT (6 sports)
   { name: "HIIT", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
   { name: "CrossFit", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
+  { name: "Hyrox", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
   { name: "Interval Training", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
   { name: "Circuit Training", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
   { name: "Boot Camp", category: "Intermittent/collectif/HIIT", coefficient: 0.9 },
