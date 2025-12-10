@@ -13,6 +13,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTo
 import { useCountUp } from "@/hooks/use-count-up";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
+import { supabase } from "@/integrations/supabase/client";
 interface ResultsDisplayProps {
   results: HydrationResult;
   diagnosticData?: DiagnosticData;
@@ -108,11 +109,29 @@ export const ResultsDisplay = ({
   const animatedScore = useCountUp(results.score, 2000);
   const [visiblePills, setVisiblePills] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [socialComparison, setSocialComparison] = useState<number | null>(null);
   const badge = getBadge(results.score);
   const progressPercent = results.hydratation_reelle_ml > 0 ? Math.min(100, Math.round(results.hydratation_reelle_ml / results.besoins_basals_net_ml * 100)) : 0;
 
-  // Comparaison sociale fictive basée sur le score
-  const socialComparison = Math.min(95, Math.round(results.score + Math.random() * 10));
+  // Fetch real percentile from database
+  useEffect(() => {
+    const fetchPercentile = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-score-percentile', {
+          body: { score: results.score }
+        });
+        
+        if (!error && data && typeof data.percentile === 'number') {
+          setSocialComparison(data.percentile);
+        }
+      } catch (err) {
+        console.error('Erreur récupération percentile:', err);
+      }
+    };
+    
+    fetchPercentile();
+  }, [results.score]);
+
   useEffect(() => {
     const timers = [setTimeout(() => setVisiblePills(1), 300), setTimeout(() => setVisiblePills(2), 600), setTimeout(() => setVisiblePills(3), 900)];
     return () => timers.forEach(clearTimeout);
@@ -215,6 +234,12 @@ export const ResultsDisplay = ({
               </div>
               <div className="text-3xl font-bold text-primary mb-2">{animatedScore}/100</div>
               <Progress value={results.score} className="h-2 mb-2" />
+              {socialComparison !== null && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Tu fais mieux que <strong className="text-foreground">{socialComparison}%</strong> des utilisateurs</span>
+                </div>
+              )}
             </div>
 
             {/* Métrique 2 : Total à boire avec jauge */}
