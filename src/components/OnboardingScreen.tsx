@@ -49,7 +49,7 @@ export const OnboardingScreen = ({
 
       {/* Mention RGPD discrète */}
       <p className="text-center text-xs text-muted-foreground mt-6 px-4">
-        En continuant, vous acceptez que vos données soient collectées à des fins d'amélioration du service et de communication.
+        En continuant, vous acceptez de recevoir des emails marketing de la part d'Hydratis.
       </p>
     </div>
   );
