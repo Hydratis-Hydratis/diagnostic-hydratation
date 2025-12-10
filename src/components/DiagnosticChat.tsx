@@ -145,26 +145,31 @@ export const DiagnosticChat = ({
 
   // Scroll centralisé vers le ThematicScreen (scroll le conteneur, pas la fenêtre)
   const scrollToThematicScreen = useCallback(() => {
-    console.log('[SCROLL] scrollToThematicScreen called');
-    console.log('[SCROLL] containerRef.current:', !!containerRef.current);
-    console.log('[SCROLL] thematicScreenRef.current:', !!thematicScreenRef.current);
-    
     if (!containerRef.current || !thematicScreenRef.current) {
-      console.log('[SCROLL] Missing refs, aborting');
       return;
     }
     
     const container = containerRef.current;
     const target = thematicScreenRef.current;
     
-    // Calculer la position relative de la cible dans le conteneur
-    const targetOffset = target.offsetTop - container.offsetTop;
-    console.log('[SCROLL] target.offsetTop:', target.offsetTop);
-    console.log('[SCROLL] container.offsetTop:', container.offsetTop);
-    console.log('[SCROLL] Final scroll position:', Math.max(0, targetOffset - 20));
+    // Utiliser getBoundingClientRect pour obtenir la position relative au viewport
+    // puis calculer la position de scroll nécessaire
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    
+    // Position actuelle de la cible par rapport au conteneur visible
+    const relativeTop = targetRect.top - containerRect.top;
+    
+    // Nouvelle position de scroll = scroll actuel + position relative - marge
+    const newScrollTop = container.scrollTop + relativeTop - 20;
+    
+    console.log('[SCROLL] Using getBoundingClientRect');
+    console.log('[SCROLL] container.scrollTop:', container.scrollTop);
+    console.log('[SCROLL] relativeTop:', relativeTop);
+    console.log('[SCROLL] newScrollTop:', newScrollTop);
     
     container.scrollTo({
-      top: Math.max(0, targetOffset - 20), // 20px de marge pour le header
+      top: Math.max(0, newScrollTop),
       behavior: 'smooth'
     });
   }, []);
