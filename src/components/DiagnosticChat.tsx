@@ -11,6 +11,16 @@ import { toast } from "@/hooks/use-toast";
 import { calculateHydration } from "@/lib/hydrationCalculator";
 import { saveDiagnosticToCloud } from "@/lib/saveDiagnostic";
 import { ChevronDown } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Clés localStorage
 const STORAGE_KEYS = {
@@ -105,6 +115,8 @@ export const DiagnosticChat = ({
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [hasNewMessages, setHasNewMessages] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
+  const [pendingResumeData, setPendingResumeData] = useState<{ data: DiagnosticData; step: number } | null>(null);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -195,43 +207,16 @@ export const DiagnosticChat = ({
     const savedStep = localStorage.getItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
     
     if (savedData && savedStep) {
-      // Skip l'onboarding si diagnostic en cours
-      setShowOnboarding(false);
-      
-      // Demander si l'utilisateur veut reprendre
-      const shouldResume = window.confirm(
-        "Tu as un diagnostic en cours. Veux-tu le reprendre ?"
-      );
-      
-      if (shouldResume) {
-        // Restaurer les données
-        try {
-          const parsedData = JSON.parse(savedData);
-          const parsedStep = parseInt(savedStep);
-          
-          setDiagnosticData(parsedData);
-          setCurrentGroupIndex(parsedStep);
-          
-          // Afficher message de reprise
-          setTimeout(() => {
-            setIsTyping(true);
-            setTimeout(() => {
-              setIsTyping(false);
-              addBotMessage("Bon retour ! Reprenons là où tu t'étais arrêté. 💧");
-              setShowScreen(true);
-            }, 1500);
-          }, 500);
-        } catch (error) {
-          console.error("Erreur lors de la restauration des données:", error);
-          localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
-          localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
-          startFreshDiagnostic();
-        }
-      } else {
-        // Nettoyer localStorage et démarrer un nouveau diagnostic
+      // Préparer les données pour le dialog
+      try {
+        const parsedData = JSON.parse(savedData);
+        const parsedStep = parseInt(savedStep);
+        setPendingResumeData({ data: parsedData, step: parsedStep });
+        setShowResumeDialog(true);
+      } catch (error) {
+        console.error("Erreur lors de la restauration des données:", error);
         localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
         localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
-        startFreshDiagnostic();
       }
     }
     // 3. Si pas de données sauvegardées, l'onboarding s'affichera par défaut
@@ -248,6 +233,36 @@ export const DiagnosticChat = ({
         }, 2000);
       }, 800);
     }
+  };
+
+  // Handlers pour le dialog de reprise
+  const handleAcceptResume = () => {
+    if (!pendingResumeData) return;
+    
+    setShowResumeDialog(false);
+    setShowOnboarding(false);
+    setDiagnosticData(pendingResumeData.data);
+    setCurrentGroupIndex(pendingResumeData.step);
+    setPendingResumeData(null);
+    
+    // Afficher message de reprise
+    setTimeout(() => {
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+        addBotMessage("Bon retour ! Reprenons là où tu t'étais arrêté. 💧");
+        setShowScreen(true);
+      }, 1500);
+    }, 500);
+  };
+
+  const handleDeclineResume = () => {
+    // Nettoyer localStorage et retourner à l'accueil
+    localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
+    localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
+    setShowResumeDialog(false);
+    setPendingResumeData(null);
+    setShowOnboarding(true); // Retour à la page d'accueil
   };
 
   // Calculate realistic typing delay based on message length (optimized for UX)
@@ -670,6 +685,22 @@ export const DiagnosticChat = ({
         )}
         </div>
       )}
+
+      {/* Dialog de reprise du diagnostic */}
+      <AlertDialog open={showResumeDialog} onOpenChange={setShowResumeDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reprendre le diagnostic ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tu as un diagnostic en cours. Veux-tu le reprendre là où tu t'étais arrêté ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeclineResume}>Non</AlertDialogCancel>
+            <AlertDialogAction onClick={handleAcceptResume}>Oui</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
