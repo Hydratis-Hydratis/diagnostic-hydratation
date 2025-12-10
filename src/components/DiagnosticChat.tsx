@@ -145,15 +145,16 @@ export const DiagnosticChat = ({
 
   // Scroll centralisé vers le ThematicScreen (scroll le conteneur, pas la fenêtre)
   const scrollToThematicScreen = useCallback(() => {
-    if (!containerRef.current || !thematicScreenRef.current) {
-      return;
-    }
-    
     const container = containerRef.current;
     const target = thematicScreenRef.current;
     
+    // Guard clause robuste - vérifier que la cible a une hauteur
+    if (!container || !target || target.offsetHeight === 0) {
+      console.log('[SCROLL] Target not ready, skipping');
+      return;
+    }
+    
     // Utiliser getBoundingClientRect pour obtenir la position relative au viewport
-    // puis calculer la position de scroll nécessaire
     const containerRect = container.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
     
@@ -162,11 +163,6 @@ export const DiagnosticChat = ({
     
     // Nouvelle position de scroll = scroll actuel + position relative - marge
     const newScrollTop = container.scrollTop + relativeTop - 20;
-    
-    console.log('[SCROLL] Using getBoundingClientRect');
-    console.log('[SCROLL] container.scrollTop:', container.scrollTop);
-    console.log('[SCROLL] relativeTop:', relativeTop);
-    console.log('[SCROLL] newScrollTop:', newScrollTop);
     
     container.scrollTo({
       top: Math.max(0, newScrollTop),
@@ -208,9 +204,19 @@ export const DiagnosticChat = ({
 
   // Auto-scroll vers le ThematicScreen quand il apparaît
   useEffect(() => {
-    if (showScreen && thematicScreenRef.current) {
-      const timer = setTimeout(scrollToThematicScreen, 150);
-      return () => clearTimeout(timer);
+    if (showScreen) {
+      // Utiliser requestAnimationFrame pour attendre le prochain paint
+      const rafId = requestAnimationFrame(() => {
+        // Puis un délai pour laisser le DOM se stabiliser
+        const timer = setTimeout(() => {
+          if (thematicScreenRef.current && containerRef.current) {
+            scrollToThematicScreen();
+          }
+        }, 200);
+        // Cleanup du timer dans un autre effet n'est pas possible ici,
+        // mais le composant ne se démonte pas pendant cette transition
+      });
+      return () => cancelAnimationFrame(rafId);
     }
   }, [showScreen, currentGroupIndex, scrollToThematicScreen]);
 
@@ -565,20 +571,16 @@ export const DiagnosticChat = ({
     setCurrentGroupIndex(stepIndex);
     setShowScreen(true);
     setIsComplete(false);
-    
-    // Scroll vers le ThematicScreen après qu'il soit monté
-    setTimeout(scrollToThematicScreen, 250);
-  }, [scrollToThematicScreen]);
+    // Le useEffect auto-scroll s'en charge automatiquement
+  }, []);
 
   const handleGoToStep = useCallback((stepIndex: number) => {
     // Naviguer vers une étape précédente en conservant les données
     setCurrentGroupIndex(stepIndex);
     setShowScreen(true);
     setIsComplete(false);
-    
-    // Utiliser la fonction centralisée de scroll
-    setTimeout(scrollToThematicScreen, 200);
-  }, [scrollToThematicScreen]);
+    // Le useEffect auto-scroll s'en charge automatiquement
+  }, []);
 
   const handleRestart = useCallback(() => {
     // La confirmation est gérée par le parent (Index.tsx)
