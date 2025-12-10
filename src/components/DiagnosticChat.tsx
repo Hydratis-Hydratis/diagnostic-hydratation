@@ -204,20 +204,26 @@ export const DiagnosticChat = ({
 
   // Auto-scroll vers le ThematicScreen quand il apparaît
   useEffect(() => {
-    if (showScreen) {
-      // Utiliser requestAnimationFrame pour attendre le prochain paint
-      const rafId = requestAnimationFrame(() => {
-        // Puis un délai pour laisser le DOM se stabiliser
-        const timer = setTimeout(() => {
+    if (!showScreen) return;
+    
+    let timerId: ReturnType<typeof setTimeout> | null = null;
+    let rafId: number | null = null;
+    
+    // Double requestAnimationFrame pour s'assurer que le DOM est prêt
+    rafId = requestAnimationFrame(() => {
+      rafId = requestAnimationFrame(() => {
+        timerId = setTimeout(() => {
           if (thematicScreenRef.current && containerRef.current) {
             scrollToThematicScreen();
           }
-        }, 200);
-        // Cleanup du timer dans un autre effet n'est pas possible ici,
-        // mais le composant ne se démonte pas pendant cette transition
+        }, 100);
       });
-      return () => cancelAnimationFrame(rafId);
-    }
+    });
+    
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (timerId) clearTimeout(timerId);
+    };
   }, [showScreen, currentGroupIndex, scrollToThematicScreen]);
 
   // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding/transitioning state
