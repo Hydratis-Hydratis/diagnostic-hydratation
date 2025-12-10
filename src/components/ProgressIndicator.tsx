@@ -86,9 +86,9 @@ export const ProgressIndicator = ({ current, total, steps, onStepClick, compact 
                 <div
                   onClick={() => index < current && onStepClick?.(index)}
                   className={cn(
-                    "w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs font-semibold transition-all duration-300 touch-manipulation",
+                    "w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 flex items-center justify-center text-xs font-semibold transition-transform duration-150 touch-manipulation",
                     index < current
-                      ? "bg-primary border-primary text-primary-foreground shadow-sm cursor-pointer hover:scale-110 hover:shadow-md active:scale-95"
+                      ? "bg-primary border-primary text-primary-foreground shadow-sm cursor-pointer hover:scale-105 hover:shadow-md active:scale-90"
                       : index === current
                       ? "bg-primary/10 border-primary text-primary"
                       : "bg-background border-border text-muted-foreground"
