@@ -314,6 +314,13 @@ export const ThematicScreen = ({
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {visibleQuestions.map(renderQuestion)}
 
+          {/* Marketing consent mention - only show on email step */}
+          {visibleQuestions.some(q => q.id === "email") && (
+            <p className="text-xs text-muted-foreground italic text-center">
+              En continuant, vous acceptez de recevoir des emails marketing de la part d'Hydratis.
+            </p>
+          )}
+
           {/* Desktop button - hidden on mobile */}
           <Button 
             type="submit" 
