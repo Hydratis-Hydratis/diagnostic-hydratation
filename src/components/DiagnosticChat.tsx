@@ -533,17 +533,17 @@ export const DiagnosticChat = ({
     setShowScreen(true);
     setIsComplete(false);
     
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll le conteneur de messages vers le haut
+    containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Scroll le ThematicScreen dans la vue après qu'il s'affiche
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const handleRestart = () => {
-    const confirmRestart = window.confirm(
-      "Es-tu sûr de vouloir recommencer le diagnostic ? Toutes tes réponses seront perdues."
-    );
-    
-    if (!confirmRestart) return;
-    
+    // La confirmation est gérée par le parent (Index.tsx)
     // Nettoyer TOUTES les clés localStorage (y compris les résultats)
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
