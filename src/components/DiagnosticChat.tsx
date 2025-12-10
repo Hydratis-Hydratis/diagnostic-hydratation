@@ -120,6 +120,7 @@ export const DiagnosticChat = ({
   
   const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const thematicScreenRef = useRef<HTMLDivElement>(null);
 
   // Smart scroll detection
   const checkIfAtBottom = useCallback(() => {
@@ -173,6 +174,16 @@ export const DiagnosticChat = ({
       return () => clearTimeout(timer);
     }
   }, [isTyping, scrollToBottom]);
+
+  // Auto-scroll vers le ThematicScreen quand il apparaît
+  useEffect(() => {
+    if (showScreen && thematicScreenRef.current) {
+      const timer = setTimeout(() => {
+        thematicScreenRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [showScreen, currentGroupIndex]);
 
   // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding/transitioning state
   useEffect(() => {
@@ -533,13 +544,10 @@ export const DiagnosticChat = ({
     setShowScreen(true);
     setIsComplete(false);
     
-    // Scroll le conteneur de messages vers le haut
-    containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // Scroll le ThematicScreen dans la vue après qu'il s'affiche
+    // Scroll vers le ThematicScreen après qu'il s'affiche
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+      thematicScreenRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
   };
 
   const handleRestart = () => {
@@ -658,7 +666,7 @@ export const DiagnosticChat = ({
         
         {/* Current Thematic Screen */}
         {!isComplete && showScreen && currentGroup && (
-          <div className="pt-4">
+          <div ref={thematicScreenRef} className="pt-4 scroll-mt-4">
             <ThematicScreen
               questions={currentGroup.questions}
               stepName={`${currentGroup.icon} ${currentGroup.step}`}
