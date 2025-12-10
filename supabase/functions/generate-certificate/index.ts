@@ -187,6 +187,18 @@ serve(async (req) => {
     const certificateUrl = urlData.publicUrl;
     console.log("Certificate uploaded successfully:", certificateUrl);
 
+    // Update the diagnostics table with the certificate URL (using service role to bypass RLS)
+    const { error: updateError } = await supabase
+      .from('diagnostics')
+      .update({ certificate_url: certificateUrl })
+      .eq('id', diagnosticId);
+
+    if (updateError) {
+      console.error("Error updating diagnostic with certificate URL:", updateError);
+    } else {
+      console.log("Diagnostic updated with certificate URL");
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 

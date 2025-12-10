@@ -122,8 +122,7 @@ export async function saveDiagnosticToCloud(
     
     console.log('Diagnostic sauvegardé avec succès');
 
-    // Générer le certificat en arrière-plan
-    let certificateUrl: string | null = null;
+    // Générer le certificat en arrière-plan - l'Edge Function se charge de sauvegarder l'URL
     generateCertificate({
       firstName: diagnosticData.firstName || null,
       score: results.score,
@@ -131,16 +130,8 @@ export async function saveDiagnosticToCloud(
       besoinTotalMl: Math.round(results.besoin_total_ml),
       hydratationReelleMl: Math.round(results.hydratation_reelle_ml),
       diagnosticId: diagnosticId
-    }).then(async (url) => {
-      certificateUrl = url;
-      
-      // Mettre à jour le diagnostic avec l'URL du certificat
-      if (certificateUrl) {
-        await supabase
-          .from('diagnostics')
-          .update({ certificate_url: certificateUrl } as any)
-          .eq('id', diagnosticId);
-      }
+    }).then((certificateUrl) => {
+      console.log('Certificat généré et sauvegardé par Edge Function:', certificateUrl);
       
       // Synchroniser avec Klaviyo
       syncToKlaviyo({
