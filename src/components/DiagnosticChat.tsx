@@ -143,6 +143,22 @@ export const DiagnosticChat = ({
     setHasNewMessages(false);
   }, [isAtBottom]);
 
+  // Scroll centralisé vers le ThematicScreen (scroll le conteneur, pas la fenêtre)
+  const scrollToThematicScreen = useCallback(() => {
+    if (!containerRef.current || !thematicScreenRef.current) return;
+    
+    const container = containerRef.current;
+    const target = thematicScreenRef.current;
+    
+    // Calculer la position relative de la cible dans le conteneur
+    const targetOffset = target.offsetTop - container.offsetTop;
+    
+    container.scrollTo({
+      top: Math.max(0, targetOffset - 20), // 20px de marge pour le header
+      behavior: 'smooth'
+    });
+  }, []);
+
   // Handle scroll events
   const handleScroll = useCallback(() => {
     const atBottom = checkIfAtBottom();
@@ -178,12 +194,10 @@ export const DiagnosticChat = ({
   // Auto-scroll vers le ThematicScreen quand il apparaît
   useEffect(() => {
     if (showScreen && thematicScreenRef.current) {
-      const timer = setTimeout(() => {
-        thematicScreenRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+      const timer = setTimeout(scrollToThematicScreen, 150);
       return () => clearTimeout(timer);
     }
-  }, [showScreen, currentGroupIndex]);
+  }, [showScreen, currentGroupIndex, scrollToThematicScreen]);
 
   // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding/transitioning state
   useEffect(() => {
@@ -544,10 +558,8 @@ export const DiagnosticChat = ({
     setShowScreen(true);
     setIsComplete(false);
     
-    // Scroll vers le ThematicScreen après qu'il s'affiche
-    setTimeout(() => {
-      thematicScreenRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 150);
+    // Utiliser la fonction centralisée de scroll
+    setTimeout(scrollToThematicScreen, 200);
   };
 
   const handleRestart = () => {
