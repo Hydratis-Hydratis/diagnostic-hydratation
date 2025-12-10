@@ -10,8 +10,8 @@ const getHydraRank = (score: number): string => {
   return "Hydra'débutant";
 };
 
-// Notify n8n webhook with diagnostic data
-async function notifyN8nWebhook(payload: {
+// Sync diagnostic data to Klaviyo
+async function syncToKlaviyo(payload: {
   email: string | null;
   first_name: string | null;
   score: number;
@@ -24,18 +24,18 @@ async function notifyN8nWebhook(payload: {
   completed_at: string;
 }): Promise<void> {
   try {
-    const { error } = await supabase.functions.invoke('notify-n8n', {
+    const { error } = await supabase.functions.invoke('sync-klaviyo', {
       body: payload
     });
     
     if (error) {
-      console.error('Erreur notification n8n:', error);
+      console.error('Erreur synchronisation Klaviyo:', error);
     } else {
-      console.log('Webhook n8n notifié avec succès');
+      console.log('Profil synchronisé avec Klaviyo');
     }
   } catch (err) {
-    // Ne pas bloquer le flux principal si le webhook échoue
-    console.error('Erreur appel webhook n8n:', err);
+    // Ne pas bloquer le flux principal si la sync échoue
+    console.error('Erreur appel sync Klaviyo:', err);
   }
 }
 
@@ -85,8 +85,8 @@ export async function saveDiagnosticToCloud(
     
     console.log('Diagnostic sauvegardé avec succès');
 
-    // Notifier n8n en arrière-plan (non-bloquant)
-    notifyN8nWebhook({
+    // Synchroniser avec Klaviyo en arrière-plan (non-bloquant)
+    syncToKlaviyo({
       email: diagnosticData.email || null,
       first_name: diagnosticData.firstName || null,
       score: results.score,
