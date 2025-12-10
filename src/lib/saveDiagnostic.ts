@@ -18,6 +18,8 @@ async function generateCertificate(payload: {
   besoinTotalMl: number;
   hydratationReelleMl: number;
   diagnosticId: string;
+  nbPastillesTotal: number;
+  isSensitivePopulation: boolean;
 }): Promise<string | null> {
   try {
     const { data, error } = await supabase.functions.invoke('generate-certificate', {
@@ -122,6 +124,14 @@ export async function saveDiagnosticToCloud(
     
     console.log('Diagnostic sauvegardé avec succès');
 
+    // Déterminer si population sensible (enceinte, allaitante, 70+)
+    const age = diagnosticData.age ? parseInt(diagnosticData.age) : null;
+    const situation = diagnosticData.situation_particuliere;
+    const isSensitivePopulation = 
+      situation === "Enceinte" || 
+      situation === "Allaitante" || 
+      (age !== null && age >= 70);
+
     // Générer le certificat en arrière-plan - l'Edge Function se charge de sauvegarder l'URL
     generateCertificate({
       firstName: diagnosticData.firstName || null,
@@ -129,7 +139,9 @@ export async function saveDiagnosticToCloud(
       hydraRank: hydraRank,
       besoinTotalMl: Math.round(results.besoin_total_ml),
       hydratationReelleMl: Math.round(results.hydratation_reelle_ml),
-      diagnosticId: diagnosticId
+      diagnosticId: diagnosticId,
+      nbPastillesTotal: results.nb_pastilles_basal + results.nb_pastilles_exercice,
+      isSensitivePopulation: isSensitivePopulation
     }).then((certificateUrl) => {
       console.log('Certificat généré et sauvegardé par Edge Function:', certificateUrl);
       
