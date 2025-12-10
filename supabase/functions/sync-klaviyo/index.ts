@@ -16,6 +16,7 @@ interface DiagnosticPayload {
   besoin_total_ml: number;
   hydratation_reelle_ml: number;
   completed_at: string;
+  certificate_url: string | null;
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -71,6 +72,7 @@ serve(async (req: Request): Promise<Response> => {
             hydratis_besoin_ml: payload.besoin_total_ml,
             hydratis_hydratation_ml: payload.hydratation_reelle_ml,
             hydratis_completed_at: payload.completed_at,
+            hydratis_certificate_url: payload.certificate_url,
           },
         },
       },
@@ -123,6 +125,7 @@ serve(async (req: Request): Promise<Response> => {
                   hydratis_besoin_ml: payload.besoin_total_ml,
                   hydratis_hydratation_ml: payload.hydratation_reelle_ml,
                   hydratis_completed_at: payload.completed_at,
+                  hydratis_certificate_url: payload.certificate_url,
                 },
               },
             },
