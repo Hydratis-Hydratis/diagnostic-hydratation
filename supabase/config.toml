@@ -1,8 +1,5 @@
 project_id = "jbnnmapqaoapsrednasd"
 
-[functions.notify-n8n]
-verify_jwt = false
-
 [functions.sync-klaviyo]
 verify_jwt = false
 
