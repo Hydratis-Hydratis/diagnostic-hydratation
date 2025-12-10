@@ -10,6 +10,37 @@ const getHydraRank = (score: number): string => {
   return "Hydra'débutant";
 };
 
+// Generate certificate image and upload to storage
+async function generateCertificate(payload: {
+  firstName: string | null;
+  score: number;
+  hydraRank: string;
+  besoinTotalMl: number;
+  hydratationReelleMl: number;
+  diagnosticId: string;
+}): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke('generate-certificate', {
+      body: payload
+    });
+    
+    if (error) {
+      console.error('Erreur génération certificat:', error);
+      return null;
+    }
+    
+    if (data?.success && data?.certificateUrl) {
+      console.log('Certificat généré:', data.certificateUrl);
+      return data.certificateUrl;
+    }
+    
+    return null;
+  } catch (err) {
+    console.error('Erreur appel generate-certificate:', err);
+    return null;
+  }
+}
+
 // Sync diagnostic data to Klaviyo
 async function syncToKlaviyo(payload: {
   email: string | null;
@@ -22,6 +53,7 @@ async function syncToKlaviyo(payload: {
   besoin_total_ml: number;
   hydratation_reelle_ml: number;
   completed_at: string;
+  certificate_url: string | null;
 }): Promise<void> {
   try {
     const { error } = await supabase.functions.invoke('sync-klaviyo', {
@@ -51,8 +83,10 @@ export async function saveDiagnosticToCloud(
 
     const hydraRank = getHydraRank(results.score);
     const completedAt = new Date().toISOString();
+    const diagnosticId = crypto.randomUUID();
 
     const payload = {
+      id: diagnosticId,
       email: diagnosticData.email || null,
       first_name: diagnosticData.firstName || null,
       diagnostic_data: diagnosticData as any,
@@ -61,7 +95,6 @@ export async function saveDiagnosticToCloud(
       hydration_status: results.statut,
       user_agent: navigator.userAgent,
       completed_at: completedAt,
-      // Nouvelles colonnes dénormalisées
       age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
       sexe: diagnosticData.sexe || null,
       sport: sportValue,
@@ -85,18 +118,40 @@ export async function saveDiagnosticToCloud(
     
     console.log('Diagnostic sauvegardé avec succès');
 
-    // Synchroniser avec Klaviyo en arrière-plan (non-bloquant)
-    syncToKlaviyo({
-      email: diagnosticData.email || null,
-      first_name: diagnosticData.firstName || null,
+    // Générer le certificat en arrière-plan
+    let certificateUrl: string | null = null;
+    generateCertificate({
+      firstName: diagnosticData.firstName || null,
       score: results.score,
-      hydra_rank: hydraRank,
-      age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
-      sexe: diagnosticData.sexe || null,
-      sport: sportValue,
-      besoin_total_ml: Math.round(results.besoin_total_ml),
-      hydratation_reelle_ml: Math.round(results.hydratation_reelle_ml),
-      completed_at: completedAt
+      hydraRank: hydraRank,
+      besoinTotalMl: Math.round(results.besoin_total_ml),
+      hydratationReelleMl: Math.round(results.hydratation_reelle_ml),
+      diagnosticId: diagnosticId
+    }).then(async (url) => {
+      certificateUrl = url;
+      
+      // Mettre à jour le diagnostic avec l'URL du certificat
+      if (certificateUrl) {
+        await supabase
+          .from('diagnostics')
+          .update({ certificate_url: certificateUrl } as any)
+          .eq('id', diagnosticId);
+      }
+      
+      // Synchroniser avec Klaviyo
+      syncToKlaviyo({
+        email: diagnosticData.email || null,
+        first_name: diagnosticData.firstName || null,
+        score: results.score,
+        hydra_rank: hydraRank,
+        age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
+        sexe: diagnosticData.sexe || null,
+        sport: sportValue,
+        besoin_total_ml: Math.round(results.besoin_total_ml),
+        hydratation_reelle_ml: Math.round(results.hydratation_reelle_ml),
+        completed_at: completedAt,
+        certificate_url: certificateUrl
+      });
     });
 
     return { success: true };

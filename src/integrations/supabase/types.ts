@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           age: number | null
           besoin_total_ml: number | null
+          certificate_url: string | null
           completed_at: string | null
           created_at: string
           diagnostic_data: Json
@@ -40,6 +41,7 @@ export type Database = {
         Insert: {
           age?: number | null
           besoin_total_ml?: number | null
+          certificate_url?: string | null
           completed_at?: string | null
           created_at?: string
           diagnostic_data: Json
@@ -62,6 +64,7 @@ export type Database = {
         Update: {
           age?: number | null
           besoin_total_ml?: number | null
+          certificate_url?: string | null
           completed_at?: string | null
           created_at?: string
           diagnostic_data?: Json
