@@ -31,6 +31,15 @@ function getScoreColor(score: number): string {
   return "#ef4444";
 }
 
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 function generateSVG(data: {
   displayName: string;
   score: number;
@@ -107,15 +116,6 @@ function generateSVG(data: {
 </svg>`;
 }
 
-function escapeXml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -125,7 +125,7 @@ serve(async (req) => {
     const data: CertificateData = await req.json();
     const { firstName, score, hydraRank, besoinTotalMl, hydratationReelleMl, diagnosticId } = data;
 
-    console.log("Generating certificate for:", firstName, "Score:", score);
+    console.log("Generating certificate for:", firstName, "Score:", score, "DiagnosticId:", diagnosticId);
 
     const today = new Date().toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -151,41 +151,26 @@ serve(async (req) => {
       today
     });
 
-    // Convert SVG to PNG using resvg-wasm
-    const { Resvg, initWasm } = await import("https://esm.sh/@aspect-ratio/resvg-wasm@1.0.0");
-    
-    // Initialize WASM (only needed once, but safe to call multiple times)
-    try {
-      await initWasm();
-    } catch {
-      // Already initialized
-    }
-
-    const resvg = new Resvg(svg, {
-      fitTo: {
-        mode: 'width',
-        value: 1200
-      }
-    });
-    
-    const pngData = resvg.render();
-    const pngBuffer = pngData.asPng();
+    // Convert SVG to base64 for storage
+    const svgBase64 = btoa(unescape(encodeURIComponent(svg)));
+    const svgDataUrl = `data:image/svg+xml;base64,${svgBase64}`;
 
     // Initialize Supabase client with service role
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Generate unique filename
-    const fileName = `cert_${diagnosticId}.png`;
+    // Generate unique filename (SVG format now)
+    const fileName = `cert_${diagnosticId}.svg`;
 
     console.log("Uploading certificate to storage:", fileName);
 
-    // Upload to Supabase Storage
+    // Upload SVG to Supabase Storage
+    const svgBuffer = new TextEncoder().encode(svg);
     const { error: uploadError } = await supabase.storage
       .from('certificates')
-      .upload(fileName, pngBuffer, {
-        contentType: 'image/png',
+      .upload(fileName, svgBuffer, {
+        contentType: 'image/svg+xml',
         upsert: true,
       });
 

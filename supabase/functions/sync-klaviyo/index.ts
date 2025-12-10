@@ -15,6 +15,10 @@ interface DiagnosticPayload {
   sport: string;
   besoin_total_ml: number;
   hydratation_reelle_ml: number;
+  ecart_hydratation_ml: number;
+  nb_pastilles_basal: number;
+  nb_pastilles_exercice: number;
+  nb_pastilles_total: number;
   completed_at: string;
   certificate_url: string | null;
 }
@@ -71,6 +75,10 @@ serve(async (req: Request): Promise<Response> => {
             hydratis_sport: payload.sport,
             hydratis_besoin_ml: payload.besoin_total_ml,
             hydratis_hydratation_ml: payload.hydratation_reelle_ml,
+            hydratis_ecart_ml: payload.ecart_hydratation_ml,
+            hydratis_pastilles_basal: payload.nb_pastilles_basal,
+            hydratis_pastilles_exercice: payload.nb_pastilles_exercice,
+            hydratis_pastilles_total: payload.nb_pastilles_total,
             hydratis_completed_at: payload.completed_at,
             hydratis_certificate_url: payload.certificate_url,
           },
@@ -124,6 +132,10 @@ serve(async (req: Request): Promise<Response> => {
                   hydratis_sport: payload.sport,
                   hydratis_besoin_ml: payload.besoin_total_ml,
                   hydratis_hydratation_ml: payload.hydratation_reelle_ml,
+                  hydratis_ecart_ml: payload.ecart_hydratation_ml,
+                  hydratis_pastilles_basal: payload.nb_pastilles_basal,
+                  hydratis_pastilles_exercice: payload.nb_pastilles_exercice,
+                  hydratis_pastilles_total: payload.nb_pastilles_total,
                   hydratis_completed_at: payload.completed_at,
                   hydratis_certificate_url: payload.certificate_url,
                 },

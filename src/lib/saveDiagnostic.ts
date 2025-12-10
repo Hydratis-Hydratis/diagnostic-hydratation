@@ -52,6 +52,10 @@ async function syncToKlaviyo(payload: {
   sport: string;
   besoin_total_ml: number;
   hydratation_reelle_ml: number;
+  ecart_hydratation_ml: number;
+  nb_pastilles_basal: number;
+  nb_pastilles_exercice: number;
+  nb_pastilles_total: number;
   completed_at: string;
   certificate_url: string | null;
 }): Promise<void> {
@@ -149,6 +153,10 @@ export async function saveDiagnosticToCloud(
         sport: sportValue,
         besoin_total_ml: Math.round(results.besoin_total_ml),
         hydratation_reelle_ml: Math.round(results.hydratation_reelle_ml),
+        ecart_hydratation_ml: Math.round(results.ecart_hydratation_ml),
+        nb_pastilles_basal: results.nb_pastilles_basal,
+        nb_pastilles_exercice: results.nb_pastilles_exercice,
+        nb_pastilles_total: results.nb_pastilles_basal + results.nb_pastilles_exercice,
         completed_at: completedAt,
         certificate_url: certificateUrl
       });
