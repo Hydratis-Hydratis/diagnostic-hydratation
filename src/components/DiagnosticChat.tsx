@@ -145,13 +145,23 @@ export const DiagnosticChat = ({
 
   // Scroll centralisé vers le ThematicScreen (scroll le conteneur, pas la fenêtre)
   const scrollToThematicScreen = useCallback(() => {
-    if (!containerRef.current || !thematicScreenRef.current) return;
+    console.log('[SCROLL] scrollToThematicScreen called');
+    console.log('[SCROLL] containerRef.current:', !!containerRef.current);
+    console.log('[SCROLL] thematicScreenRef.current:', !!thematicScreenRef.current);
+    
+    if (!containerRef.current || !thematicScreenRef.current) {
+      console.log('[SCROLL] Missing refs, aborting');
+      return;
+    }
     
     const container = containerRef.current;
     const target = thematicScreenRef.current;
     
     // Calculer la position relative de la cible dans le conteneur
     const targetOffset = target.offsetTop - container.offsetTop;
+    console.log('[SCROLL] target.offsetTop:', target.offsetTop);
+    console.log('[SCROLL] container.offsetTop:', container.offsetTop);
+    console.log('[SCROLL] Final scroll position:', Math.max(0, targetOffset - 20));
     
     container.scrollTo({
       top: Math.max(0, targetOffset - 20), // 20px de marge pour le header
@@ -546,11 +556,14 @@ export const DiagnosticChat = ({
     }, 400);
   };
 
-  const handleEditStep = (stepIndex: number) => {
+  const handleEditStep = useCallback((stepIndex: number) => {
     setCurrentGroupIndex(stepIndex);
     setShowScreen(true);
     setIsComplete(false);
-  };
+    
+    // Scroll vers le ThematicScreen après qu'il soit monté
+    setTimeout(scrollToThematicScreen, 250);
+  }, [scrollToThematicScreen]);
 
   const handleGoToStep = useCallback((stepIndex: number) => {
     // Naviguer vers une étape précédente en conservant les données
