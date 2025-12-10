@@ -178,13 +178,17 @@ export const ThematicScreen = ({
           }))} className={cn("gap-2", question.multiColumn && "grid grid-cols-2")}>
               {question.options?.map((option, idx) => {
               const icon = getOptionIcon(question, option);
-              return <div key={idx} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
+              return <label 
+                key={idx} 
+                htmlFor={`${question.id}-${idx}`}
+                className="flex items-center space-x-3 p-3 min-h-[48px] border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-[0.98]"
+              >
                     <RadioGroupItem value={option} id={`${question.id}-${idx}`} />
-                    <Label htmlFor={`${question.id}-${idx}`} className="flex-1 cursor-pointer font-normal flex items-center gap-2">
+                    <span className="flex-1 font-normal flex items-center gap-2">
                       {icon}
                       {option}
-                    </Label>
-                  </div>;
+                    </span>
+                  </label>;
             })}
             </RadioGroup>
           </div>;
