@@ -39,8 +39,8 @@ export const ColorScaleSelector = ({ value, onSelect }: ColorScaleSelectorProps)
             key={index}
             onClick={() => handleSelect(index, option.value)}
             className={cn(
-              "flex flex-col items-center gap-1 sm:gap-2 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl transition-all duration-300 touch-manipulation",
-              "hover:scale-105 hover:shadow-lg active:scale-90 active:opacity-90",
+              "flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl transition-all duration-300 touch-manipulation",
+              "hover:scale-105 hover:shadow-lg active:scale-95 active:opacity-90",
               selectedIndex === index && "ring-2 ring-primary ring-offset-2 scale-105"
             )}
           >

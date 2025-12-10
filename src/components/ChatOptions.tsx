@@ -23,8 +23,9 @@ export const ChatOptions = ({ options, onSelect, multiColumn = false }: ChatOpti
           <Button
             key={index}
             variant="chat"
+            size="touch"
             onClick={() => onSelect(option)}
-            className="flex-1 min-w-[120px]"
+            className="flex-1 min-w-[120px] touch-manipulation active:scale-95"
           >
             {option}
           </Button>
