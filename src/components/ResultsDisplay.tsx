@@ -323,35 +323,58 @@ export const ResultsDisplay = ({
               <div className="relative w-full">
                 {/* Labels positionnés au-dessus de la jauge - positionnement absolu */}
                 <div className="relative mb-3 h-14 sm:h-16">
-                  {/* Hydratation quotidienne - suit le % avec max 70% sur desktop */}
-                  <div 
-                    className="absolute flex flex-col items-center transition-all duration-1000 ease-out"
-                    style={{ left: `${Math.min(Math.max(animatedGaugePercent, 15), 65)}%`, transform: 'translateX(-50%)' }}
-                  >
-                    <span className="text-[11px] sm:text-sm md:text-base font-medium text-foreground text-center leading-tight mb-1">
-                      {animatedGaugePercent > 100 ? (
-                        <>Ta consommation</>
-                      ) : (
-                        <>Ton hydratation<br className="sm:hidden" /><span className="hidden sm:inline"> </span>quotidienne</>
-                      )}
-                    </span>
-                    <span className="text-sm sm:text-base md:text-lg font-bold text-cyan-600 dark:text-cyan-400">
-                      {formatVolume(gaugeCurrent)}
-                      {animatedGaugePercent > 100 && (
-                        <span className="ml-1 text-[10px]">({animatedGaugePercent}%)</span>
-                      )}
-                    </span>
-                  </div>
-                  
-                  {/* Idéal - aligné à droite */}
-                  <div className="absolute right-0 flex flex-col items-end">
-                    <span className="text-[11px] sm:text-sm md:text-base font-medium text-muted-foreground mb-1">
-                      Ton idéal
-                    </span>
-                    <span className="text-sm sm:text-base md:text-lg font-bold text-blue-600 dark:text-blue-400">
-                      {formatVolume(gaugeTarget)}
-                    </span>
-                  </div>
+                  {animatedGaugePercent > 100 ? (
+                    <>
+                      {/* Quand > 100%: Idéal à gauche (position ~65%), Consommation à droite */}
+                      <div 
+                        className="absolute flex flex-col items-center transition-all duration-1000 ease-out"
+                        style={{ left: '65%', transform: 'translateX(-50%)' }}
+                      >
+                        <span className="text-[11px] sm:text-sm md:text-base font-medium text-muted-foreground text-center leading-tight mb-1">
+                          Ton idéal
+                        </span>
+                        <span className="text-sm sm:text-base md:text-lg font-bold text-blue-600 dark:text-blue-400">
+                          {formatVolume(gaugeTarget)}
+                        </span>
+                      </div>
+                      
+                      {/* Consommation - alignée à droite */}
+                      <div className="absolute right-0 flex flex-col items-end">
+                        <span className="text-[11px] sm:text-sm md:text-base font-medium text-foreground mb-1">
+                          Ta consommation
+                        </span>
+                        <span className="text-sm sm:text-base md:text-lg font-bold text-cyan-600 dark:text-cyan-400">
+                          {formatVolume(gaugeCurrent)}
+                          <span className="ml-1 text-[10px]">({animatedGaugePercent}%)</span>
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Quand <= 100%: Hydratation suit le %, Idéal à droite */}
+                      <div 
+                        className="absolute flex flex-col items-center transition-all duration-1000 ease-out"
+                        style={{ left: `${Math.min(Math.max(animatedGaugePercent, 15), 65)}%`, transform: 'translateX(-50%)' }}
+                      >
+                        <span className="text-[11px] sm:text-sm md:text-base font-medium text-foreground text-center leading-tight mb-1">
+                          Ton hydratation<br className="sm:hidden" /><span className="hidden sm:inline"> </span>quotidienne
+                        </span>
+                        <span className="text-sm sm:text-base md:text-lg font-bold text-cyan-600 dark:text-cyan-400">
+                          {formatVolume(gaugeCurrent)}
+                        </span>
+                      </div>
+                      
+                      {/* Idéal - aligné à droite */}
+                      <div className="absolute right-0 flex flex-col items-end">
+                        <span className="text-[11px] sm:text-sm md:text-base font-medium text-muted-foreground mb-1">
+                          Ton idéal
+                        </span>
+                        <span className="text-sm sm:text-base md:text-lg font-bold text-blue-600 dark:text-blue-400">
+                          {formatVolume(gaugeTarget)}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Jauge avec effet liquide - barre horizontale */}
@@ -359,9 +382,9 @@ export const ResultsDisplay = ({
                   {/* Fond animé avec vagues */}
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-100/20 via-cyan-100/20 to-blue-100/20 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20" />
                   
-                  {/* Eau avec gradient - remplissage horizontal de gauche à droite */}
+                  {/* Eau avec gradient - remplissage horizontal de gauche à droite (max 100%) */}
                   <div className="absolute top-0 bottom-0 left-0 h-full transition-all duration-1000 ease-out" style={{
-                  width: `${animatedGaugePercent}%`
+                  width: `${Math.min(animatedGaugePercent, 100)}%`
                 }}>
                     <div className="relative w-full h-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 dark:from-blue-600 dark:via-blue-500 dark:to-cyan-500">
                       {/* Pourcentage à l'intérieur de la barre */}
