@@ -13,6 +13,8 @@ interface CertificateData {
   besoinTotalMl: number;
   hydratationReelleMl: number;
   diagnosticId: string;
+  nbPastillesTotal?: number;
+  isSensitivePopulation?: boolean;
 }
 
 function getHydraEmoji(rank: string): string {
@@ -31,6 +33,15 @@ function getScoreColor(score: number): string {
   return "#ef4444";
 }
 
+function getBadgeColor(rank: string): string {
+  switch (rank) {
+    case "Hydra'champion": return "#22c55e";
+    case "Hydra'avancé": return "#3b82f6";
+    case "Hydra'initié": return "#0ea5e9";
+    default: return "#f59e0b";
+  }
+}
+
 function escapeXml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -46,73 +57,197 @@ function generateSVG(data: {
   hydraRank: string;
   emoji: string;
   scoreColor: string;
+  badgeColor: string;
   besoinL: string;
   hydratationL: string;
   today: string;
+  nbPastilles: number | null;
+  isSensitive: boolean;
+  ecartL: string;
+  gaugePercent: number;
+  isExcellent: boolean;
 }): string {
-  const { displayName, score, hydraRank, emoji, scoreColor, besoinL, hydratationL, today } = data;
+  const { 
+    displayName, score, hydraRank, emoji, scoreColor, badgeColor,
+    besoinL, hydratationL, today, nbPastilles, isSensitive,
+    ecartL, gaugePercent, isExcellent
+  } = data;
   
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  // Calculate score bar width (max 280px)
+  const scoreBarWidth = Math.round((score / 100) * 280);
+  
+  // Calculate gauge fill width (max 900px for the gauge track)
+  const gaugeFillWidth = Math.round(Math.min(gaugePercent, 100) * 9);
+  
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
   <defs>
+    <!-- Background gradient - light blue like the app -->
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0ea5e9"/>
-      <stop offset="50%" style="stop-color:#0284c7"/>
-      <stop offset="100%" style="stop-color:#0369a1"/>
+      <stop offset="0%" style="stop-color:#e0f2fe"/>
+      <stop offset="50%" style="stop-color:#f0f9ff"/>
+      <stop offset="100%" style="stop-color:#e0f2fe"/>
     </linearGradient>
-    <linearGradient id="topBar" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#38bdf8"/>
-      <stop offset="50%" style="stop-color:#7dd3fc"/>
-      <stop offset="100%" style="stop-color:#38bdf8"/>
-    </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="10" stdDeviation="20" flood-opacity="0.2"/>
+    
+    <!-- Card shadow -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0369a1" flood-opacity="0.1"/>
     </filter>
+    
+    <!-- Gauge gradient (water effect) -->
+    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="50%" style="stop-color:#0ea5e9"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+    
+    <!-- Score progress gradient -->
+    <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:${scoreColor}"/>
+      <stop offset="100%" style="stop-color:${scoreColor}99"/>
+    </linearGradient>
   </defs>
   
   <!-- Background -->
-  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  <rect width="1200" height="800" fill="url(#bgGradient)"/>
   
-  <!-- Top decoration bar -->
-  <rect x="0" y="0" width="1200" height="8" fill="url(#topBar)"/>
+  <!-- Decorative water drops -->
+  <text x="100" y="100" font-size="40" opacity="0.15">💧</text>
+  <text x="1080" y="150" font-size="50" opacity="0.12">💧</text>
+  <text x="150" y="750" font-size="35" opacity="0.1">💧</text>
+  <text x="1050" y="700" font-size="45" opacity="0.1">💧</text>
   
-  <!-- Bottom decoration bar -->
-  <rect x="0" y="622" width="1200" height="8" fill="url(#topBar)"/>
+  <!-- Header section -->
+  <text x="600" y="60" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#0369a1">
+    Ton diagnostic est prêt, ${escapeXml(displayName)} ! 💧
+  </text>
+  <text x="600" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#64748b">
+    Voici tes résultats personnalisés
+  </text>
   
-  <!-- Logo text -->
-  <text x="600" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" letter-spacing="4">HYDRATIS</text>
+  <!-- ============= 3 CARDS DASHBOARD ============= -->
   
-  <!-- Title -->
-  <text x="600" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="white" opacity="0.9">🏅 CERTIFICAT D'HYDRATATION 🏅</text>
+  <!-- Card 1: Score d'hydratation -->
+  <rect x="50" y="130" width="350" height="220" rx="16" fill="white" filter="url(#cardShadow)"/>
+  <rect x="50" y="130" width="350" height="6" rx="3" fill="${badgeColor}"/>
   
-  <!-- Congratulations -->
-  <text x="600" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="white" opacity="0.9">Félicitations,</text>
-  
-  <!-- Name -->
-  <text x="600" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white">${escapeXml(displayName)} !</text>
-  
-  <!-- Score container -->
-  <rect x="400" y="240" width="400" height="120" rx="20" fill="white" filter="url(#shadow)"/>
-  <text x="540" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="${scoreColor}">${score}</text>
-  <text x="660" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="600" fill="#64748b">/100</text>
+  <text x="225" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#64748b">Score d'hydratation</text>
   
   <!-- Badge -->
-  <rect x="400" y="380" width="400" height="50" rx="25" fill="rgba(255,255,255,0.2)"/>
-  <text x="600" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="white">${emoji} ${escapeXml(hydraRank)} ${emoji}</text>
+  <rect x="100" y="185" width="250" height="36" rx="18" fill="${badgeColor}22" stroke="${badgeColor}" stroke-width="1.5"/>
+  <text x="225" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="${badgeColor}">${emoji} ${escapeXml(hydraRank)}</text>
   
-  <!-- Metrics -->
-  <text x="400" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="white" opacity="0.8">Besoin quotidien</text>
-  <text x="400" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">${besoinL}L</text>
+  <!-- Score display -->
+  <text x="170" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="${scoreColor}">${score}</text>
+  <text x="250" y="275" text-anchor="start" font-family="Arial, sans-serif" font-size="28" fill="#94a3b8">/100</text>
   
-  <rect x="598" y="460" width="4" height="60" fill="rgba(255,255,255,0.3)"/>
+  <!-- Score progress bar -->
+  <rect x="85" y="305" width="280" height="12" rx="6" fill="#e2e8f0"/>
+  <rect x="85" y="305" width="${scoreBarWidth}" height="12" rx="6" fill="url(#scoreGradient)"/>
   
-  <text x="800" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="white" opacity="0.8">Hydratation actuelle</text>
-  <text x="800" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">${hydratationL}L</text>
+  <!-- Card 2: Quantité d'eau à boire -->
+  <rect x="425" y="130" width="350" height="220" rx="16" fill="white" filter="url(#cardShadow)"/>
+  <rect x="425" y="130" width="350" height="6" rx="3" fill="#f59e0b"/>
+  
+  <text x="600" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#64748b">Besoin en eau par jour</text>
+  
+  <!-- Water icon -->
+  <text x="600" y="220" text-anchor="middle" font-size="36">🥤</text>
+  
+  <!-- Volume display -->
+  <text x="600" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#0369a1">${besoinL}</text>
+  <text x="600" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#64748b">litres à boire</text>
+  
+  <!-- Card 3: Pastilles recommandées -->
+  <rect x="800" y="130" width="350" height="220" rx="16" fill="white" filter="url(#cardShadow)"/>
+  <rect x="800" y="130" width="350" height="6" rx="3" fill="#8b5cf6"/>
+  
+  <text x="975" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#64748b">Pastilles recommandées</text>
+  
+  <!-- Pastille icon -->
+  <text x="975" y="220" text-anchor="middle" font-size="36">💊</text>
+  
+  ${isSensitive ? `
+  <!-- Sensitive population message -->
+  <text x="975" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#94a3b8">—</text>
+  <text x="975" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Consulte un</text>
+  <text x="975" y="335" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#64748b">professionnel de santé</text>
+  ` : `
+  <!-- Pastilles count -->
+  <text x="975" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#8b5cf6">${nbPastilles}</text>
+  <text x="975" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#64748b">pastilles/jour</text>
+  `}
+  
+  <!-- ============= HYDRATION GAUGE SECTION ============= -->
+  
+  <!-- Section title -->
+  <text x="600" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="600" fill="#0369a1">
+    Ton plan d'hydratation au quotidien
+  </text>
+  
+  <!-- Gauge container card -->
+  <rect x="100" y="420" width="1000" height="180" rx="16" fill="white" filter="url(#cardShadow)"/>
+  
+  <!-- Gauge track (background) -->
+  <rect x="150" y="490" width="900" height="40" rx="20" fill="#e2e8f0"/>
+  
+  <!-- Gauge fill (water level) -->
+  <rect x="150" y="490" width="${gaugeFillWidth}" height="40" rx="20" fill="url(#gaugeGradient)"/>
+  
+  <!-- Current hydration label (above the fill) -->
+  <text x="${150 + Math.min(Math.max(gaugeFillWidth, 100), 700)}" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#3b82f6">
+    Ton hydratation
+  </text>
+  <text x="${150 + Math.min(Math.max(gaugeFillWidth, 100), 700)}" y="458" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#3b82f6">
+    quotidienne
+  </text>
+  
+  <!-- Percentage inside gauge -->
+  ${gaugeFillWidth >= 80 ? `
+  <text x="${145 + gaugeFillWidth - 10}" y="518" text-anchor="end" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" style="text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+    ${Math.round(gaugePercent)}%
+  </text>
+  ` : ''}
+  
+  <!-- Ideal marker line -->
+  <line x1="1050" y1="485" x2="1050" y2="535" stroke="#0369a1" stroke-width="3" stroke-dasharray="4,2"/>
+  
+  <!-- Ideal label -->
+  <text x="1050" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#0369a1">Ton idéal</text>
+  <text x="1050" y="555" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0369a1">${besoinL}L</text>
+  
+  <!-- Status message -->
+  ${isExcellent ? `
+  <rect x="400" y="555" width="400" height="36" rx="18" fill="#dcfce7"/>
+  <text x="600" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#16a34a">
+    🎉 Excellent ! Tu es bien hydraté(e)
+  </text>
+  ` : `
+  <rect x="400" y="555" width="400" height="36" rx="18" fill="#fef3c7"/>
+  <text x="600" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#d97706">
+    💡 Encore ${ecartL}L à boire pour atteindre ton idéal
+  </text>
+  `}
+  
+  <!-- ============= FOOTER ============= -->
+  
+  <!-- Hydratis branding -->
+  <text x="600" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#0369a1" letter-spacing="2">
+    HYDRATIS
+  </text>
+  <text x="600" y="685" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#64748b">
+    L'hydratation optimisée
+  </text>
   
   <!-- Date -->
-  <text x="600" y="560" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="white" opacity="0.7">Diagnostic du ${today}</text>
+  <text x="600" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">
+    Diagnostic réalisé le ${today}
+  </text>
   
   <!-- Website -->
-  <text x="600" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="600" fill="white" opacity="0.9">hydratis.fr</text>
+  <rect x="475" y="740" width="250" height="36" rx="18" fill="#0369a1"/>
+  <text x="600" y="765" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="600" fill="white">
+    hydratis.fr
+  </text>
 </svg>`;
 }
 
@@ -123,21 +258,32 @@ serve(async (req) => {
 
   try {
     const data: CertificateData = await req.json();
-    const { firstName, score, hydraRank, besoinTotalMl, hydratationReelleMl, diagnosticId } = data;
+    const { firstName, score, hydraRank, besoinTotalMl, hydratationReelleMl, diagnosticId, nbPastillesTotal, isSensitivePopulation } = data;
 
     console.log("Generating certificate for:", firstName, "Score:", score, "DiagnosticId:", diagnosticId);
 
     const today = new Date().toLocaleDateString('fr-FR', {
       day: '2-digit',
-      month: '2-digit',
+      month: 'long',
       year: 'numeric'
     });
 
     const emoji = getHydraEmoji(hydraRank);
     const scoreColor = getScoreColor(score);
+    const badgeColor = getBadgeColor(hydraRank);
     const besoinL = (besoinTotalMl / 1000).toFixed(1);
     const hydratationL = (hydratationReelleMl / 1000).toFixed(1);
     const displayName = firstName || "Utilisateur";
+    
+    // Calculate gauge values
+    const ecart = Math.max(0, besoinTotalMl - hydratationReelleMl);
+    const ecartL = (ecart / 1000).toFixed(1);
+    const gaugePercent = besoinTotalMl > 0 ? (hydratationReelleMl / besoinTotalMl) * 100 : 0;
+    const isExcellent = hydratationReelleMl >= besoinTotalMl;
+    
+    // Handle pastilles
+    const nbPastilles = nbPastillesTotal ?? null;
+    const isSensitive = isSensitivePopulation ?? false;
 
     // Generate SVG
     const svg = generateSVG({
@@ -146,9 +292,15 @@ serve(async (req) => {
       hydraRank,
       emoji,
       scoreColor,
+      badgeColor,
       besoinL,
       hydratationL,
-      today
+      today,
+      nbPastilles,
+      isSensitive,
+      ecartL,
+      gaugePercent,
+      isExcellent
     });
 
     // Convert SVG to base64 for storage
