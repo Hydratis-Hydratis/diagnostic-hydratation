@@ -174,22 +174,22 @@ export const DiagnosticChat = ({
     return () => container.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // Auto-scroll on new messages
+  // Auto-scroll on new messages - SAUF si showScreen est actif
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 0 && !showScreen) {
       // Small delay to let animation start
       const timer = setTimeout(() => scrollToBottom(true, false), 100);
       return () => clearTimeout(timer);
     }
-  }, [messages.length, scrollToBottom]);
+  }, [messages.length, scrollToBottom, showScreen]);
 
-  // Auto-scroll when typing indicator appears
+  // Auto-scroll when typing indicator appears - SAUF si showScreen est actif
   useEffect(() => {
-    if (isTyping) {
+    if (isTyping && !showScreen) {
       const timer = setTimeout(() => scrollToBottom(true, true), 50);
       return () => clearTimeout(timer);
     }
-  }, [isTyping, scrollToBottom]);
+  }, [isTyping, scrollToBottom, showScreen]);
 
   // Auto-scroll vers le ThematicScreen quand il apparaît
   useEffect(() => {
@@ -552,7 +552,7 @@ export const DiagnosticChat = ({
     setIsComplete(false);
   };
 
-  const handleGoToStep = (stepIndex: number) => {
+  const handleGoToStep = useCallback((stepIndex: number) => {
     // Naviguer vers une étape précédente en conservant les données
     setCurrentGroupIndex(stepIndex);
     setShowScreen(true);
@@ -560,9 +560,9 @@ export const DiagnosticChat = ({
     
     // Utiliser la fonction centralisée de scroll
     setTimeout(scrollToThematicScreen, 200);
-  };
+  }, [scrollToThematicScreen]);
 
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     // La confirmation est gérée par le parent (Index.tsx)
     // Nettoyer TOUTES les clés localStorage (y compris les résultats)
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
@@ -576,7 +576,7 @@ export const DiagnosticChat = ({
     setIsTyping(false);
     setShowScreen(false);
     setShowOnboarding(true);
-  };
+  }, []);
 
   const handleStartDiagnostic = () => {
     setShowOnboarding(false);
@@ -609,12 +609,12 @@ export const DiagnosticChat = ({
   // Register step handler for parent to call
   useEffect(() => {
     registerStepHandler?.(handleGoToStep);
-  }, [registerStepHandler]);
+  }, [registerStepHandler, handleGoToStep]);
 
   // Register restart handler for parent to call
   useEffect(() => {
     registerRestartHandler?.(handleRestart);
-  }, [registerRestartHandler]);
+  }, [registerRestartHandler, handleRestart]);
 
   return (
     <div className="flex flex-col h-full">
