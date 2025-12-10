@@ -5,6 +5,16 @@ import { cn } from "@/lib/utils";
 import { RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import logoHydratis from "@/assets/logo-hydratis.png";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ProgressState {
   current: number;
@@ -16,6 +26,7 @@ interface ProgressState {
 
 const Index = () => {
   const [progress, setProgress] = useState<ProgressState | null>(null);
+  const [showRestartDialog, setShowRestartDialog] = useState(false);
   const stepHandlerRef = useRef<((stepIndex: number) => void) | null>(null);
   const restartHandlerRef = useRef<(() => void) | null>(null);
 
@@ -26,6 +37,15 @@ const Index = () => {
 
   const showProgress = progress && !progress.showOnboarding && !progress.isComplete && progress.current >= 0;
   const canRestart = progress && !progress.showOnboarding && progress.current > 0 && !progress.isComplete;
+
+  const handleRestartClick = () => {
+    setShowRestartDialog(true);
+  };
+
+  const handleConfirmRestart = () => {
+    setShowRestartDialog(false);
+    restartHandlerRef.current?.();
+  };
 
   return (
     <div className="min-h-dvh bg-background flex flex-col">
@@ -81,7 +101,7 @@ const Index = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => restartHandlerRef.current?.()}
+                      onClick={handleRestartClick}
                       className="p-1.5 text-muted-foreground hover:text-primary hover:bg-accent rounded-full transition-colors ml-2"
                       aria-label="Recommencer le diagnostic"
                     >
@@ -111,6 +131,22 @@ const Index = () => {
       <footer className="py-4 px-4 pb-safe text-center text-xs text-muted-foreground border-t border-border/50">
         Diagnostic d'hydratation - Prends soin de toi 💙
       </footer>
+
+      {/* Dialog de confirmation pour recommencer */}
+      <AlertDialog open={showRestartDialog} onOpenChange={setShowRestartDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Recommencer le diagnostic ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ta progression sera perdue. Es-tu sûr de vouloir recommencer ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Non</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRestart}>Oui</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
