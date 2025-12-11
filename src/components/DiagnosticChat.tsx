@@ -211,7 +211,7 @@ export const DiagnosticChat = ({
         top: Math.max(0, newScrollTop),
         behavior: 'smooth'
       });
-    }, 500);
+    }, 350); // 350ms après showScreen = ~500ms après le message blanc (150ms + 350ms)
     
     return () => clearTimeout(timerId);
   }, [showScreen, currentGroupIndex]);
