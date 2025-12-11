@@ -646,19 +646,22 @@ export const DiagnosticChat = ({
           className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scroll-smooth-chat"
           onScroll={handleScroll}
         >
-        <div data-messages-container className="space-y-0">
-        {messages.map((message, index) => (
-          <div key={index} className="space-y-2" data-message data-is-bot={message.isBot}>
-            <ChatMessage
-              message={message.text}
-              isBot={message.isBot}
-              avatar={message.isBot ? pharmacistAvatar : undefined}
-              timestamp={message.timestamp}
-              animationDelay={index === messages.length - 1 ? 0 : undefined}
-            />
+        {/* Messages uniquement pendant le diagnostic */}
+        {!isComplete && (
+          <div data-messages-container className="space-y-0">
+            {messages.map((message, index) => (
+              <div key={index} className="space-y-2" data-message data-is-bot={message.isBot}>
+                <ChatMessage
+                  message={message.text}
+                  isBot={message.isBot}
+                  avatar={message.isBot ? pharmacistAvatar : undefined}
+                  timestamp={message.timestamp}
+                  animationDelay={index === messages.length - 1 ? 0 : undefined}
+                />
+              </div>
+            ))}
           </div>
-        ))}
-        </div>
+        )}
         
         {/* Typing Indicator */}
         {isTyping && <TypingIndicator />}
