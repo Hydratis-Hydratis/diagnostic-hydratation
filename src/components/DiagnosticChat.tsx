@@ -666,29 +666,31 @@ export const DiagnosticChat = ({
         {/* Typing Indicator */}
         {isTyping && !isLoadingResults && <TypingIndicator />}
         
-        {/* Loading Droplet Animation */}
+        {/* Loading Droplet Animation - Full screen overlay */}
         {isLoadingResults && (
-          <LoadingDroplet 
-            onComplete={() => {
-              setIsLoadingResults(false);
-              setIsComplete(true);
-              triggerHaptic('success');
-              
-              // Scroll to top for results
-              if (containerRef.current) {
-                containerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-              
-              if (pendingResults) {
-                toast({
-                  title: "Diagnostic terminé !",
-                  description: `Score : ${pendingResults.score}/100 - ${pendingResults.statut}`,
-                });
-                console.log("Diagnostic Data:", diagnosticData);
-                console.log("Hydration Results:", pendingResults);
-              }
-            }}
-          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+            <LoadingDroplet 
+              onComplete={() => {
+                setIsLoadingResults(false);
+                setIsComplete(true);
+                triggerHaptic('success');
+                
+                // Scroll to top for results
+                if (containerRef.current) {
+                  containerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                
+                if (pendingResults) {
+                  toast({
+                    title: "Diagnostic terminé !",
+                    description: `Score : ${pendingResults.score}/100 - ${pendingResults.statut}`,
+                  });
+                  console.log("Diagnostic Data:", diagnosticData);
+                  console.log("Hydration Results:", pendingResults);
+                }
+              }}
+            />
+          </div>
         )}
         
         {/* Results Display */}
