@@ -119,7 +119,7 @@ const Index = () => {
       </header>
 
       {/* Chat Container */}
-      <main className="flex-1 max-w-2xl w-full mx-auto flex flex-col overflow-hidden min-h-0">
+      <main className="flex-1 max-w-2xl w-full mx-auto flex flex-col min-h-0">
         <DiagnosticChat
           onProgressChange={setProgress}
           registerStepHandler={(handler) => { stepHandlerRef.current = handler; }}
