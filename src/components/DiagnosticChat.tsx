@@ -162,8 +162,8 @@ export const DiagnosticChat = ({
     // Position actuelle de la cible par rapport au conteneur visible
     const relativeTop = targetRect.top - containerRect.top;
     
-    // Nouvelle position de scroll = scroll actuel + position relative - marge
-    const newScrollTop = container.scrollTop + relativeTop - 20;
+    // Nouvelle position de scroll = scroll actuel + position relative - marge (100px pour laisser voir le contexte)
+    const newScrollTop = container.scrollTop + relativeTop - 100;
     
     container.scrollTo({
       top: Math.max(0, newScrollTop),
