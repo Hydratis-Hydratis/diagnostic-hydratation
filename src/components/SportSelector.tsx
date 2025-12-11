@@ -217,7 +217,7 @@ export const SportSelector = ({ selectedSports: initialSports, onSelect }: Sport
       )}
 
       <div className="relative">
-        <div className="max-h-56 overflow-y-auto border rounded-lg shadow-sm">
+        <div className="max-h-40 sm:max-h-56 overflow-y-auto border rounded-lg shadow-sm">
           {filteredSports.length > 0 ? (
             <div className="divide-y">
               {filteredSports.map((sport) => {
