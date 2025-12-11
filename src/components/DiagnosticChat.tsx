@@ -496,6 +496,17 @@ export const DiagnosticChat = ({
             setShowScreen(true);
             setIsTransitioning(false);
             triggerHaptic('light');
+            
+            // Léger scroll pour montrer le début du ThematicScreen sous le message blanc
+            setTimeout(() => {
+              const container = containerRef.current;
+              if (container) {
+                container.scrollTo({
+                  top: container.scrollHeight - container.clientHeight + 100,
+                  behavior: 'smooth'
+                });
+              }
+            }, 100);
           }, 150);
         }, typingDuration);
       } else {
