@@ -117,6 +117,7 @@ export const DiagnosticChat = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [pendingResumeData, setPendingResumeData] = useState<{ data: DiagnosticData; step: number } | null>(null);
+  const [pendingScrollToScreen, setPendingScrollToScreen] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -202,9 +203,10 @@ export const DiagnosticChat = ({
     }
   }, [isTyping, scrollToBottom, showScreen]);
 
-  // Auto-scroll vers le ThematicScreen quand il apparaît
+  // Auto-scroll vers le ThematicScreen quand il apparaît (uniquement pour le flux normal)
   useEffect(() => {
-    if (!showScreen) return;
+    // Ne pas déclencher si un scroll explicite est en attente (géré par l'autre useEffect)
+    if (!showScreen || pendingScrollToScreen) return;
     
     let timerId: ReturnType<typeof setTimeout> | null = null;
     let rafId: number | null = null;
@@ -224,7 +226,19 @@ export const DiagnosticChat = ({
       if (rafId) cancelAnimationFrame(rafId);
       if (timerId) clearTimeout(timerId);
     };
-  }, [showScreen, currentGroupIndex, scrollToThematicScreen]);
+  }, [showScreen, currentGroupIndex, scrollToThematicScreen, pendingScrollToScreen]);
+
+  // Scroll explicite après navigation (handleEditStep/handleGoToStep)
+  useEffect(() => {
+    if (!pendingScrollToScreen || !showScreen) return;
+    
+    const timerId = setTimeout(() => {
+      scrollToThematicScreen();
+      setPendingScrollToScreen(false);
+    }, 300); // Délai plus long pour laisser le DOM se stabiliser
+    
+    return () => clearTimeout(timerId);
+  }, [pendingScrollToScreen, showScreen, scrollToThematicScreen]);
 
   // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding/transitioning state
   useEffect(() => {
@@ -577,7 +591,7 @@ export const DiagnosticChat = ({
     setCurrentGroupIndex(stepIndex);
     setShowScreen(true);
     setIsComplete(false);
-    // Le useEffect auto-scroll s'en charge automatiquement
+    setPendingScrollToScreen(true);
   }, []);
 
   const handleGoToStep = useCallback((stepIndex: number) => {
@@ -585,7 +599,7 @@ export const DiagnosticChat = ({
     setCurrentGroupIndex(stepIndex);
     setShowScreen(true);
     setIsComplete(false);
-    // Le useEffect auto-scroll s'en charge automatiquement
+    setPendingScrollToScreen(true);
   }, []);
 
   const handleRestart = useCallback(() => {
