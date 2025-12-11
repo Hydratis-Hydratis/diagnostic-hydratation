@@ -646,8 +646,8 @@ export const DiagnosticChat = ({
           className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scroll-smooth-chat"
           onScroll={handleScroll}
         >
-        {/* Messages uniquement pendant le diagnostic */}
-        {!isComplete && (
+        {/* Messages uniquement pendant le diagnostic (masqués pendant chargement et résultats) */}
+        {!isComplete && !isLoadingResults && (
           <div data-messages-container className="space-y-0">
             {messages.map((message, index) => (
               <div key={index} className="space-y-2" data-message data-is-bot={message.isBot}>
@@ -664,7 +664,7 @@ export const DiagnosticChat = ({
         )}
         
         {/* Typing Indicator */}
-        {isTyping && <TypingIndicator />}
+        {isTyping && !isLoadingResults && <TypingIndicator />}
         
         {/* Loading Droplet Animation */}
         {isLoadingResults && (
@@ -673,6 +673,11 @@ export const DiagnosticChat = ({
               setIsLoadingResults(false);
               setIsComplete(true);
               triggerHaptic('success');
+              
+              // Scroll to top for results
+              if (containerRef.current) {
+                containerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+              }
               
               if (pendingResults) {
                 toast({
