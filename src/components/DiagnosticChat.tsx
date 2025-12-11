@@ -520,6 +520,11 @@ export const DiagnosticChat = ({
                   top: Math.max(0, newScrollTop),
                   behavior: 'smooth'
                 });
+                
+                // Vérifier la position après le scroll
+                setTimeout(() => {
+                  console.log('[Scroll Debug] AFTER scroll - containerScrollTop:', container.scrollTop);
+                }, 500);
               }
             }, 150);
           }, 150);
