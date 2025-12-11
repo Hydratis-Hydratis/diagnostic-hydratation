@@ -180,7 +180,7 @@ export const SportSelector = ({ selectedSports: initialSports, onSelect }: Sport
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-sm mx-auto">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
