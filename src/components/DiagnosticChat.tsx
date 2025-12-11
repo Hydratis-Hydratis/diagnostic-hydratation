@@ -656,21 +656,6 @@ export const DiagnosticChat = ({
               timestamp={message.timestamp}
               animationDelay={index === messages.length - 1 ? 0 : undefined}
             />
-            {/* Bouton Modifier pour les réponses utilisateur */}
-            {!message.isBot && message.stepIndex !== undefined && !isComplete && (
-              <div className="flex justify-end px-2">
-                <button
-                  onClick={() => {
-                    triggerHaptic('light');
-                    handleEditStep(message.stepIndex!);
-                  }}
-                  className="text-xs text-primary hover:underline flex items-center gap-1 transition-colors touch-manipulation"
-                >
-                  <span>✏️</span>
-                  <span>Modifier</span>
-                </button>
-              </div>
-            )}
           </div>
         ))}
         </div>
