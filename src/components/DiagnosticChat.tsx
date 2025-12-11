@@ -497,12 +497,13 @@ export const DiagnosticChat = ({
             setIsTransitioning(false);
             triggerHaptic('light');
             
-            // Léger scroll pour montrer le début du ThematicScreen sous le message blanc
+            // Léger scroll pour montrer le message blanc + début du ThematicScreen
             setTimeout(() => {
               const container = containerRef.current;
               if (container) {
+                // Scroll de 150px depuis la position actuelle (pas vers le bas absolu)
                 container.scrollTo({
-                  top: container.scrollHeight - container.clientHeight + 200,
+                  top: container.scrollTop + 150,
                   behavior: 'smooth'
                 });
               }
