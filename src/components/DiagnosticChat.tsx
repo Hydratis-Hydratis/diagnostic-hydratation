@@ -205,7 +205,7 @@ export const DiagnosticChat = ({
       const relativeTop = targetRect.top - containerRect.top;
       
       // Offset de ~80px pour laisser le message blanc visible au-dessus
-      const newScrollTop = container.scrollTop + relativeTop - 80;
+      const newScrollTop = container.scrollTop + relativeTop - 40;
       
       container.scrollTo({
         top: Math.max(0, newScrollTop),
