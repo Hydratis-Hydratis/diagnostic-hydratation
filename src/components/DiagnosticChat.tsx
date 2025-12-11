@@ -205,13 +205,13 @@ export const DiagnosticChat = ({
       const relativeTop = targetRect.top - containerRect.top;
       
       // Offset de ~80px pour laisser le message blanc visible au-dessus
-      const newScrollTop = container.scrollTop + relativeTop - 40;
+      const newScrollTop = container.scrollTop + relativeTop - 120;
       
       container.scrollTo({
         top: Math.max(0, newScrollTop),
         behavior: 'smooth'
       });
-    }, 350); // 350ms après showScreen = ~500ms après le message blanc (150ms + 350ms)
+    }, 800); // 800ms après showScreen pour laisser le temps de lire le message blanc
     
     return () => clearTimeout(timerId);
   }, [showScreen, currentGroupIndex]);
