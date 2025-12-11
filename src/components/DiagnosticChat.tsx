@@ -513,8 +513,8 @@ export const DiagnosticChat = ({
                 console.log('[Scroll Debug] Container scrollHeight:', container.scrollHeight, 'clientHeight:', container.clientHeight, 'scrollTop:', container.scrollTop);
                 console.log('[Scroll Debug] relativeTop:', relativeTop);
                 
-                // Positionner le ThematicScreen à ~120px du haut (laissant le message blanc visible)
-                const newScrollTop = container.scrollTop + relativeTop - 120;
+                // Positionner le ThematicScreen à ~180px du haut (laissant le message bleu visible)
+                const newScrollTop = container.scrollTop + relativeTop - 180;
                 
                 console.log('[Scroll Debug] newScrollTop:', newScrollTop);
                 
