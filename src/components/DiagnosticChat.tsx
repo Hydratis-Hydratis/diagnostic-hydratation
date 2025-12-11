@@ -147,28 +147,25 @@ export const DiagnosticChat = ({
   // Scroll centralisé vers le ThematicScreen (scroll le conteneur, pas la fenêtre)
   const scrollToThematicScreen = useCallback(() => {
     const container = containerRef.current;
-    const target = thematicScreenRef.current;
+    // Trouver le dernier message (message de transition)
+    const messagesContainer = container.querySelector('[data-messages-container]');
+    const lastMessage = messagesContainer?.lastElementChild as HTMLElement;
     
-    // Guard clause robuste - vérifier que la cible a une hauteur
-    if (!container || !target || target.offsetHeight === 0) {
-      console.log('[SCROLL] Target not ready, skipping');
+    if (!container || !lastMessage) {
+      console.log('[SCROLL] Container or last message not ready, skipping');
       return;
     }
     
-    // Calcul manuel de la position (plus fiable sur mobile que scrollIntoView)
+    // Calcul de la position du dernier message
     const containerRect = container.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
+    const messageRect = lastMessage.getBoundingClientRect();
+    const relativeTop = messageRect.top - containerRect.top;
     
-    // Position de la cible par rapport au conteneur
-    const relativeTop = targetRect.top - containerRect.top;
-    
-    // Positionner le ThematicScreen à ~55% du haut de l'écran visible
-    // Cela laisse beaucoup d'espace pour voir les messages de transition au-dessus
-    const visibleHeight = container.clientHeight;
-    const offset = Math.max(250, visibleHeight * 0.55);
+    // Positionner le message de transition à ~80px du haut
+    // Cela laisse de l'espace pour le header sticky
+    const offset = 80;
     const newScrollTop = container.scrollTop + relativeTop - offset;
     
-    // Un seul appel scrollTo (évite les conflits d'animation double)
     container.scrollTo({
       top: Math.max(0, newScrollTop),
       behavior: 'smooth'
@@ -219,10 +216,10 @@ export const DiagnosticChat = ({
     rafId = requestAnimationFrame(() => {
       rafId = requestAnimationFrame(() => {
         timerId = setTimeout(() => {
-          if (thematicScreenRef.current && containerRef.current) {
+          if (containerRef.current) {
             scrollToThematicScreen();
           }
-        }, 200);
+        }, 450); // Attendre que l'animation screen-enter (400ms) soit terminée
       });
     });
     
@@ -678,6 +675,7 @@ export const DiagnosticChat = ({
           className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scroll-smooth-chat"
           onScroll={handleScroll}
         >
+        <div data-messages-container className="space-y-0">
         {messages.map((message, index) => (
           <div key={index} className="space-y-2">
             <ChatMessage
@@ -704,6 +702,7 @@ export const DiagnosticChat = ({
             )}
           </div>
         ))}
+        </div>
         
         {/* Typing Indicator */}
         {isTyping && <TypingIndicator />}
