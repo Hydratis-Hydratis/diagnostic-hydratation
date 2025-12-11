@@ -190,22 +190,22 @@ export const DiagnosticChat = ({
     return () => container.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // Auto-scroll on new messages - SAUF si showScreen est actif
+  // Auto-scroll on new messages - SAUF si showScreen ou transition en cours
   useEffect(() => {
-    if (messages.length > 0 && !showScreen) {
+    if (messages.length > 0 && !showScreen && !isTransitioning) {
       // Small delay to let animation start
       const timer = setTimeout(() => scrollToBottom(true, false), 100);
       return () => clearTimeout(timer);
     }
-  }, [messages.length, scrollToBottom, showScreen]);
+  }, [messages.length, scrollToBottom, showScreen, isTransitioning]);
 
-  // Auto-scroll when typing indicator appears - SAUF si showScreen est actif
+  // Auto-scroll when typing indicator appears - SAUF si showScreen ou transition en cours
   useEffect(() => {
-    if (isTyping && !showScreen) {
+    if (isTyping && !showScreen && !isTransitioning) {
       const timer = setTimeout(() => scrollToBottom(true, true), 50);
       return () => clearTimeout(timer);
     }
-  }, [isTyping, scrollToBottom, showScreen]);
+  }, [isTyping, scrollToBottom, showScreen, isTransitioning]);
 
   // Auto-scroll vers le ThematicScreen quand il apparaît (uniquement pour le flux normal)
   useEffect(() => {
