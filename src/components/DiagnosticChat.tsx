@@ -497,36 +497,40 @@ export const DiagnosticChat = ({
             setIsTransitioning(false);
             triggerHaptic('light');
             
-            // Scroll pour positionner le haut du ThematicScreen juste sous le message blanc
+            // Scroll fluide personnalisé vers le ThematicScreen
             setTimeout(() => {
               const container = containerRef.current;
               const target = thematicScreenRef.current;
-              
-              console.log('[Scroll Debug] Step:', nextIndex, 'Container:', !!container, 'Target:', !!target);
               
               if (container && target) {
                 const containerRect = container.getBoundingClientRect();
                 const targetRect = target.getBoundingClientRect();
                 const relativeTop = targetRect.top - containerRect.top;
                 
-                // Debug: vérifier les dimensions du container
-                console.log('[Scroll Debug] Container scrollHeight:', container.scrollHeight, 'clientHeight:', container.clientHeight, 'scrollTop:', container.scrollTop);
-                console.log('[Scroll Debug] relativeTop:', relativeTop);
-                
                 // Positionner le ThematicScreen à ~180px du haut (laissant le message bleu visible)
-                const newScrollTop = container.scrollTop + relativeTop - 180;
+                const targetScrollTop = Math.max(0, container.scrollTop + relativeTop - 180);
+                const startScrollTop = container.scrollTop;
+                const distance = targetScrollTop - startScrollTop;
+                const duration = 600; // 600ms pour une animation fluide
+                let startTime: number | null = null;
                 
-                console.log('[Scroll Debug] newScrollTop:', newScrollTop);
+                // Fonction d'easing (ease-out-cubic pour un effet naturel)
+                const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
                 
-                container.scrollTo({
-                  top: Math.max(0, newScrollTop),
-                  behavior: 'smooth'
-                });
+                const animateScroll = (currentTime: number) => {
+                  if (!startTime) startTime = currentTime;
+                  const elapsed = currentTime - startTime;
+                  const progress = Math.min(elapsed / duration, 1);
+                  const easedProgress = easeOutCubic(progress);
+                  
+                  container.scrollTop = startScrollTop + (distance * easedProgress);
+                  
+                  if (progress < 1) {
+                    requestAnimationFrame(animateScroll);
+                  }
+                };
                 
-                // Vérifier la position après le scroll
-                setTimeout(() => {
-                  console.log('[Scroll Debug] AFTER scroll - containerScrollTop:', container.scrollTop, 'scrollHeight:', container.scrollHeight);
-                }, 500);
+                requestAnimationFrame(animateScroll);
               }
             }, 150);
           }, 150);
