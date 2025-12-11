@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Question, DiagnosticData } from "@/types/diagnostic";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -39,7 +39,6 @@ export const ThematicScreen = ({
   previousAnswers
 }: ThematicScreenProps) => {
   const screenRef = useRef<HTMLDivElement>(null);
-  const questionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [answers, setAnswers] = useState<Partial<DiagnosticData>>({});
   const [beverageQuantities, setBeverageQuantities] = useState<BeverageQuantities>({
     eau: 0,
@@ -106,102 +105,6 @@ export const ThematicScreen = ({
     return true;
   });
 
-  // Smooth scroll animation function (ease-out-cubic)
-  const smoothScrollTo = useCallback((element: HTMLElement, offset: number = 100) => {
-    const container = screenRef.current?.closest('.overflow-y-auto') as HTMLElement;
-    if (!container || !element) return;
-
-    const containerRect = container.getBoundingClientRect();
-    const elementRect = element.getBoundingClientRect();
-    const relativeTop = elementRect.top - containerRect.top;
-    
-    const targetScrollTop = Math.max(0, container.scrollTop + relativeTop - offset);
-    const startScrollTop = container.scrollTop;
-    const distance = targetScrollTop - startScrollTop;
-    
-    // Skip if already in view or distance is too small
-    if (Math.abs(distance) < 20) return;
-    
-    const duration = 600;
-    let startTime: number | null = null;
-
-    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-    const animateScroll = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easedProgress = easeOutCubic(progress);
-      
-      container.scrollTop = startScrollTop + (distance * easedProgress);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animateScroll);
-      }
-    };
-
-    requestAnimationFrame(animateScroll);
-  }, []);
-
-  // Scroll to next question after answering
-  const scrollToNextQuestion = useCallback((currentQuestionId: keyof DiagnosticData, newVisibleQuestions?: Question[]) => {
-    // Small delay to allow DOM to update (especially for conditional questions)
-    setTimeout(() => {
-      const questionsToUse = newVisibleQuestions || visibleQuestions;
-      const questionIds = questionsToUse.map(q => q.id);
-      const currentIndex = questionIds.indexOf(currentQuestionId);
-      
-      if (currentIndex >= 0 && currentIndex < questionIds.length - 1) {
-        const nextQuestionId = questionIds[currentIndex + 1];
-        const nextQuestionEl = questionRefs.current.get(nextQuestionId as string);
-        if (nextQuestionEl) {
-          smoothScrollTo(nextQuestionEl, 120);
-        }
-      }
-    }, 150);
-  }, [visibleQuestions, smoothScrollTo]);
-
-  // Handle answer change with auto-scroll
-  // Handle answer change with auto-scroll
-  const handleAnswerChange = useCallback((questionId: keyof DiagnosticData, value: string) => {
-    setAnswers(prev => {
-      const newAnswers = {
-        ...prev,
-        [questionId]: value
-      };
-      
-      // Recalculate visible questions with new answers to handle conditional questions
-      const newVisibleQuestions = questions.filter(q => {
-        if (q.conditional) {
-          const dependsOnValue = previousAnswers[q.conditional.dependsOn] || (newAnswers as any)[q.conditional.dependsOn];
-          return dependsOnValue === q.conditional.value;
-        }
-        if (q.conditionalMultiple) {
-          if (q.id === "transpiration") {
-            const sportValue = previousAnswers["sport_pratique"] || (newAnswers as any)["sport_pratique"];
-            const metierValue = previousAnswers["metier_physique"] || (newAnswers as any)["metier_physique"];
-            return sportValue === "Oui" || metierValue === "Oui";
-          }
-          const dependsOnValue = previousAnswers[q.conditionalMultiple.dependsOn] || (newAnswers as any)[q.conditionalMultiple.dependsOn];
-          if (typeof dependsOnValue === "string") {
-            return q.conditionalMultiple.values.includes(dependsOnValue);
-          }
-          return false;
-        }
-        if (q.skipIfNo) {
-          const skipValue = previousAnswers[q.skipIfNo] || (newAnswers as any)[q.skipIfNo];
-          return skipValue !== "Non";
-        }
-        return true;
-      });
-      
-      // Schedule scroll with the new visible questions
-      scrollToNextQuestion(questionId, newVisibleQuestions);
-      
-      return newAnswers;
-    });
-  }, [questions, previousAnswers, scrollToNextQuestion]);
-
   const canSubmit = visibleQuestions.every(q => {
     if (q.type === "beverageSelector") return true;
     if (q.type === "sportSelector") return selectedSports.length > 0;
@@ -262,14 +165,6 @@ export const ThematicScreen = ({
     return null;
   };
 
-  const setQuestionRef = (id: string) => (el: HTMLDivElement | null) => {
-    if (el) {
-      questionRefs.current.set(id, el);
-    } else {
-      questionRefs.current.delete(id);
-    }
-  };
-
   const renderQuestion = (question: Question) => {
     const cleanText = question.text.replace(/\*\*.*?\*\*\n\n/g, '')
       .replace(/^.*?Pour commencer, es-tu\.\.\.$/m, 'Es-tu...');
@@ -279,7 +174,7 @@ export const ThematicScreen = ({
     switch (question.type) {
       case "options":
         return (
-          <div key={question.id} ref={setQuestionRef(question.id)} className="space-y-3">
+          <div key={question.id} className="space-y-3">
             <div className="space-y-1">
               <Label className="text-sm font-medium text-foreground">
                 {mainText}
@@ -292,7 +187,10 @@ export const ThematicScreen = ({
             </div>
             <RadioGroup 
               value={answers[question.id] as string || ""} 
-              onValueChange={value => handleAnswerChange(question.id, value)} 
+              onValueChange={value => setAnswers(prev => ({
+                ...prev,
+                [question.id]: value
+              }))} 
               className={cn("gap-2", question.multiColumn && "grid grid-cols-2")}
             >
               {question.options?.map((option, idx) => {
@@ -316,7 +214,7 @@ export const ThematicScreen = ({
         );
       case "input":
         return (
-          <div key={question.id} ref={setQuestionRef(question.id)} className="space-y-2">
+          <div key={question.id} className="space-y-2">
             <div className="space-y-1">
               <Label htmlFor={question.id} className="text-sm font-medium text-foreground">
                 {mainText}
@@ -342,7 +240,7 @@ export const ThematicScreen = ({
         );
       case "colorScale":
         return (
-          <div key={question.id} ref={setQuestionRef(question.id)} className="space-y-3">
+          <div key={question.id} className="space-y-3">
             <div className="space-y-1">
               <Label className="text-sm font-medium text-foreground">
                 {mainText}
@@ -355,13 +253,16 @@ export const ThematicScreen = ({
             </div>
             <ColorScaleSelector 
               value={answers[question.id] as string}
-              onSelect={value => handleAnswerChange(question.id, value)} 
+              onSelect={value => setAnswers(prev => ({
+                ...prev,
+                [question.id]: value
+              }))} 
             />
           </div>
         );
       case "transpirationScale":
         return (
-          <div key={question.id} ref={setQuestionRef(question.id)} className="space-y-3">
+          <div key={question.id} className="space-y-3">
             <div className="space-y-1">
               <Label className="text-sm font-medium text-foreground">
                 {mainText}
@@ -374,13 +275,16 @@ export const ThematicScreen = ({
             </div>
             <TranspirationScale 
               value={answers[question.id] as string}
-              onSelect={value => handleAnswerChange(question.id, value)} 
+              onSelect={value => setAnswers(prev => ({
+                ...prev,
+                [question.id]: value
+              }))} 
             />
           </div>
         );
       case "beverageSelector":
         return (
-          <div key={question.id} ref={setQuestionRef(question.id)} className="space-y-3">
+          <div key={question.id} className="space-y-3">
             <div className="space-y-1">
               <Label className="text-sm font-medium text-foreground">
                 {mainText}
@@ -396,7 +300,7 @@ export const ThematicScreen = ({
         );
       case "temperatureSelector":
         return (
-          <div key={question.id} ref={setQuestionRef(question.id)} className="space-y-3">
+          <div key={question.id} className="space-y-3">
             <div className="space-y-1">
               <Label className="text-sm font-medium text-foreground">
                 {mainText}
@@ -409,13 +313,16 @@ export const ThematicScreen = ({
             </div>
             <TemperatureSelector 
               value={answers[question.id] as string}
-              onSelect={value => handleAnswerChange(question.id, value)} 
+              onSelect={value => setAnswers(prev => ({
+                ...prev,
+                [question.id]: value
+              }))} 
             />
           </div>
         );
       case "sportSelector":
         return (
-          <div key={question.id} ref={setQuestionRef(question.id)} className="space-y-3">
+          <div key={question.id} className="space-y-3">
             <div className="space-y-1">
               <Label className="text-sm font-medium text-foreground">
                 {mainText}
