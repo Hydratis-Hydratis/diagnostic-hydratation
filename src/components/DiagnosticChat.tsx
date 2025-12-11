@@ -155,22 +155,21 @@ export const DiagnosticChat = ({
       return;
     }
     
-    // Sur mobile, utiliser scrollIntoView avec block: "start" puis ajuster
-    // Cela fonctionne mieux que scrollTo sur les navigateurs mobiles
-    target.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
+    // Calcul manuel de la position (plus fiable sur mobile que scrollIntoView)
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
     
-    // Après le scroll, ajuster pour montrer plus de contexte (100px du haut)
-    setTimeout(() => {
-      if (container) {
-        container.scrollBy({
-          top: -100,
-          behavior: 'smooth'
-        });
-      }
-    }, 50);
+    // Position de la cible par rapport au conteneur
+    const relativeTop = targetRect.top - containerRect.top;
+    
+    // Nouvelle position : scroll actuel + position relative - 100px de marge
+    const newScrollTop = container.scrollTop + relativeTop - 100;
+    
+    // Un seul appel scrollTo (évite les conflits d'animation double)
+    container.scrollTo({
+      top: Math.max(0, newScrollTop),
+      behavior: 'smooth'
+    });
   }, []);
 
   // Handle scroll events
@@ -220,7 +219,7 @@ export const DiagnosticChat = ({
           if (thematicScreenRef.current && containerRef.current) {
             scrollToThematicScreen();
           }
-        }, 100);
+        }, 200);
       });
     });
     
