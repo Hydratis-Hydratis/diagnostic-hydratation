@@ -497,19 +497,25 @@ export const DiagnosticChat = ({
             setIsTransitioning(false);
             triggerHaptic('light');
             
-            // Léger scroll pour montrer le message blanc + début du ThematicScreen
+            // Scroll pour positionner le haut du ThematicScreen juste sous le message blanc
             setTimeout(() => {
               const container = containerRef.current;
-              if (container) {
-                // Sur mobile, scroll plus léger (80px) pour garder le message blanc visible
-                const isMobile = window.innerWidth < 640;
-                const scrollAmount = isMobile ? 80 : 150;
+              const target = thematicScreenRef.current;
+              
+              if (container && target) {
+                const containerRect = container.getBoundingClientRect();
+                const targetRect = target.getBoundingClientRect();
+                const relativeTop = targetRect.top - containerRect.top;
+                
+                // Positionner le ThematicScreen à ~120px du haut (laissant le message blanc visible)
+                const newScrollTop = container.scrollTop + relativeTop - 120;
+                
                 container.scrollTo({
-                  top: container.scrollTop + scrollAmount,
+                  top: Math.max(0, newScrollTop),
                   behavior: 'smooth'
                 });
               }
-            }, 100);
+            }, 150);
           }, 150);
         }, typingDuration);
       } else {
