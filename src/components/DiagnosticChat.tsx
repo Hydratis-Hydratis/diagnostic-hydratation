@@ -502,7 +502,7 @@ export const DiagnosticChat = ({
               const container = containerRef.current;
               if (container) {
                 container.scrollTo({
-                  top: container.scrollHeight - container.clientHeight + 100,
+                  top: container.scrollHeight - container.clientHeight + 200,
                   behavior: 'smooth'
                 });
               }
