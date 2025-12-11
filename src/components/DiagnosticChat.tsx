@@ -4,6 +4,7 @@ import { ThematicScreen } from "./ThematicScreen";
 import { TypingIndicator } from "./TypingIndicator";
 import { ResultsDisplay } from "./ResultsDisplay";
 import { OnboardingScreen } from "./OnboardingScreen";
+import { LoadingDroplet } from "./LoadingDroplet";
 import { questions } from "@/data/questions";
 import { DiagnosticData, Question } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
@@ -118,7 +119,8 @@ export const DiagnosticChat = ({
   const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [pendingResumeData, setPendingResumeData] = useState<{ data: DiagnosticData; step: number } | null>(null);
   const [pendingScrollToScreen, setPendingScrollToScreen] = useState(false);
-  
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [pendingResults, setPendingResults] = useState<ReturnType<typeof calculateHydration> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const thematicScreenRef = useRef<HTMLDivElement>(null);
@@ -555,22 +557,14 @@ export const DiagnosticChat = ({
         localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
         localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
         
+        // Show loading droplet animation
         setTimeout(() => {
           setIsTyping(false);
-          setIsComplete(true);
           setIsTransitioning(false);
-          triggerHaptic('success');
-          
-          // Show success toast
-          toast({
-            title: "Diagnostic terminé !",
-            description: `Score : ${results.score}/100 - ${results.statut}`,
-          });
-          
-          // Log data (in production, send to backend)
-          console.log("Diagnostic Data:", updatedData);
-          console.log("Hydration Results:", results);
-        }, 1500);
+          setPendingResults(results);
+          setIsLoadingResults(true);
+          triggerHaptic('light');
+        }, 400);
       }
     }, 400);
   };
@@ -694,9 +688,29 @@ export const DiagnosticChat = ({
         {/* Typing Indicator */}
         {isTyping && <TypingIndicator />}
         
+        {/* Loading Droplet Animation */}
+        {isLoadingResults && (
+          <LoadingDroplet 
+            onComplete={() => {
+              setIsLoadingResults(false);
+              setIsComplete(true);
+              triggerHaptic('success');
+              
+              if (pendingResults) {
+                toast({
+                  title: "Diagnostic terminé !",
+                  description: `Score : ${pendingResults.score}/100 - ${pendingResults.statut}`,
+                });
+                console.log("Diagnostic Data:", diagnosticData);
+                console.log("Hydration Results:", pendingResults);
+              }
+            }}
+          />
+        )}
+        
         {/* Results Display */}
         {isComplete && results && (
-          <div className="pt-4">
+          <div className="pt-4 animate-fade-in">
             <ResultsDisplay 
               results={results} 
               diagnosticData={diagnosticData}
