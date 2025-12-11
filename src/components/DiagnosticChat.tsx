@@ -190,59 +190,8 @@ export const DiagnosticChat = ({
     return () => container.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // Auto-scroll on new messages - SAUF si showScreen ou transition en cours
-  useEffect(() => {
-    if (messages.length > 0 && !showScreen && !isTransitioning) {
-      // Small delay to let animation start
-      const timer = setTimeout(() => scrollToBottom(true, false), 100);
-      return () => clearTimeout(timer);
-    }
-  }, [messages.length, scrollToBottom, showScreen, isTransitioning]);
-
-  // Auto-scroll when typing indicator appears - SAUF si showScreen ou transition en cours
-  useEffect(() => {
-    if (isTyping && !showScreen && !isTransitioning) {
-      const timer = setTimeout(() => scrollToBottom(true, true), 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isTyping, scrollToBottom, showScreen, isTransitioning]);
-
-  // Auto-scroll vers le ThematicScreen quand il apparaît (uniquement pour le flux normal)
-  useEffect(() => {
-    // Ne pas déclencher si un scroll explicite est en attente (géré par l'autre useEffect)
-    if (!showScreen || pendingScrollToScreen) return;
-    
-    let timerId: ReturnType<typeof setTimeout> | null = null;
-    let rafId: number | null = null;
-    
-    // Double requestAnimationFrame pour s'assurer que le DOM est prêt
-    rafId = requestAnimationFrame(() => {
-      rafId = requestAnimationFrame(() => {
-        timerId = setTimeout(() => {
-          if (containerRef.current) {
-            scrollToThematicScreen();
-          }
-        }, 450); // Attendre que l'animation screen-enter (400ms) soit terminée
-      });
-    });
-    
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      if (timerId) clearTimeout(timerId);
-    };
-  }, [showScreen, currentGroupIndex, scrollToThematicScreen, pendingScrollToScreen]);
-
-  // Scroll explicite après navigation (handleEditStep/handleGoToStep)
-  useEffect(() => {
-    if (!pendingScrollToScreen || !showScreen) return;
-    
-    const timerId = setTimeout(() => {
-      scrollToThematicScreen();
-      setPendingScrollToScreen(false);
-    }, 300); // Délai plus long pour laisser le DOM se stabiliser
-    
-    return () => clearTimeout(timerId);
-  }, [pendingScrollToScreen, showScreen, scrollToThematicScreen]);
+  // SCROLLS AUTOMATIQUES DÉSACTIVÉS - L'utilisateur scrolle manuellement
+  // Les useEffects de scroll auto ont été supprimés selon la demande utilisateur
 
   // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding/transitioning state
   useEffect(() => {
