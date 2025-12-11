@@ -48,7 +48,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-dvh bg-background flex flex-col">
+    <div className="h-dvh bg-background flex flex-col overflow-hidden">
       {/* Header Sticky */}
       <header className={cn(
         "sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50",
