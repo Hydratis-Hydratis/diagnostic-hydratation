@@ -144,26 +144,26 @@ export const DiagnosticChat = ({
     setHasNewMessages(false);
   }, [isAtBottom]);
 
-  // Scroll centralisé vers le ThematicScreen (scroll le conteneur, pas la fenêtre)
+  // Scroll centralisé vers le ThematicScreen - positionne le message de transition visible en haut
   const scrollToThematicScreen = useCallback(() => {
     const container = containerRef.current;
-    // Trouver le dernier message (message de transition)
-    const messagesContainer = container.querySelector('[data-messages-container]');
-    const lastMessage = messagesContainer?.lastElementChild as HTMLElement;
+    const target = thematicScreenRef.current;
     
-    if (!container || !lastMessage) {
-      console.log('[SCROLL] Container or last message not ready, skipping');
+    if (!container || !target || target.offsetHeight === 0) {
+      console.log('[SCROLL] Target not ready, skipping');
       return;
     }
     
-    // Calcul de la position du dernier message
+    // On veut que le ThematicScreen commence au milieu de l'écran
+    // pour que le message de transition soit visible au-dessus
     const containerRect = container.getBoundingClientRect();
-    const messageRect = lastMessage.getBoundingClientRect();
-    const relativeTop = messageRect.top - containerRect.top;
+    const targetRect = target.getBoundingClientRect();
+    const relativeTop = targetRect.top - containerRect.top;
     
-    // Positionner le message de transition à ~80px du haut
-    // Cela laisse de l'espace pour le header sticky
-    const offset = 80;
+    // Positionner le ThematicScreen à 40% du haut de l'écran visible
+    // Cela laisse 40% d'espace au-dessus pour les messages de transition
+    const visibleHeight = container.clientHeight;
+    const offset = visibleHeight * 0.4;
     const newScrollTop = container.scrollTop + relativeTop - offset;
     
     container.scrollTo({
