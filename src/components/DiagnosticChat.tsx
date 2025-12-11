@@ -162,10 +162,10 @@ export const DiagnosticChat = ({
     // Position de la cible par rapport au conteneur
     const relativeTop = targetRect.top - containerRect.top;
     
-    // Positionner le ThematicScreen à ~35% du haut de l'écran visible
-    // Cela laisse de l'espace pour voir le message de transition au-dessus
+    // Positionner le ThematicScreen à ~55% du haut de l'écran visible
+    // Cela laisse beaucoup d'espace pour voir les messages de transition au-dessus
     const visibleHeight = container.clientHeight;
-    const offset = Math.max(150, visibleHeight * 0.35);
+    const offset = Math.max(250, visibleHeight * 0.55);
     const newScrollTop = container.scrollTop + relativeTop - offset;
     
     // Un seul appel scrollTo (évite les conflits d'animation double)
