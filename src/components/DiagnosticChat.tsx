@@ -477,96 +477,86 @@ export const DiagnosticChat = ({
       },
     ]);
 
-    // Wait before showing next screen or results (shorter delay)
-    setTimeout(() => {
-      setIsTyping(true);
+    // Show next screen immediately without typing delay
+    const nextIndex = currentGroupIndex + 1;
+    const transitionMessage = getTransitionMessage(nextIndex);
+    
+    if (nextIndex < questionGroups.length) {
+      // Add bot message immediately
+      addBotMessage(transitionMessage);
+      setCurrentGroupIndex(nextIndex);
       
-      const nextIndex = currentGroupIndex + 1;
-      const transitionMessage = getTransitionMessage(nextIndex);
-      const typingDuration = getTypingDelay(transitionMessage);
-      
-      if (nextIndex < questionGroups.length) {
+      // Show screen immediately
+      setTimeout(() => {
+        setShowScreen(true);
+        setIsTransitioning(false);
+        triggerHaptic('light');
+        
+        // Scroll fluide personnalisé vers le ThematicScreen
         setTimeout(() => {
-          setIsTyping(false);
-          const nextGroup = questionGroups[nextIndex];
+          const container = containerRef.current;
+          const target = thematicScreenRef.current;
           
-          addBotMessage(transitionMessage);
-          setCurrentGroupIndex(nextIndex);
-          
-          // Small delay before showing screen for smooth transition
-          setTimeout(() => {
-            setShowScreen(true);
-            setIsTransitioning(false);
-            triggerHaptic('light');
+          if (container && target) {
+            const containerRect = container.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const relativeTop = targetRect.top - containerRect.top;
             
-            // Scroll fluide personnalisé vers le ThematicScreen
-            setTimeout(() => {
-              const container = containerRef.current;
-              const target = thematicScreenRef.current;
+            // Positionner le ThematicScreen à ~180px du haut (laissant le message bleu visible)
+            const targetScrollTop = Math.max(0, container.scrollTop + relativeTop - 180);
+            const startScrollTop = container.scrollTop;
+            const distance = targetScrollTop - startScrollTop;
+            const duration = 600;
+            let startTime: number | null = null;
+            
+            const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+            
+            const animateScroll = (currentTime: number) => {
+              if (!startTime) startTime = currentTime;
+              const elapsed = currentTime - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const easedProgress = easeOutCubic(progress);
               
-              if (container && target) {
-                const containerRect = container.getBoundingClientRect();
-                const targetRect = target.getBoundingClientRect();
-                const relativeTop = targetRect.top - containerRect.top;
-                
-                // Positionner le ThematicScreen à ~180px du haut (laissant le message bleu visible)
-                const targetScrollTop = Math.max(0, container.scrollTop + relativeTop - 180);
-                const startScrollTop = container.scrollTop;
-                const distance = targetScrollTop - startScrollTop;
-                const duration = 600; // 600ms pour une animation fluide
-                let startTime: number | null = null;
-                
-                // Fonction d'easing (ease-out-cubic pour un effet naturel)
-                const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-                
-                const animateScroll = (currentTime: number) => {
-                  if (!startTime) startTime = currentTime;
-                  const elapsed = currentTime - startTime;
-                  const progress = Math.min(elapsed / duration, 1);
-                  const easedProgress = easeOutCubic(progress);
-                  
-                  container.scrollTop = startScrollTop + (distance * easedProgress);
-                  
-                  if (progress < 1) {
-                    requestAnimationFrame(animateScroll);
-                  }
-                };
-                
+              container.scrollTop = startScrollTop + (distance * easedProgress);
+              
+              if (progress < 1) {
                 requestAnimationFrame(animateScroll);
               }
-            }, 150);
-          }, 150);
-        }, typingDuration);
-      } else {
-        // Complete - calculate results
-        const results = calculateHydration(updatedData);
-        
-        // Sauvegarder dans Lovable Cloud (anonyme, analytics + marketing)
-        saveDiagnosticToCloud(updatedData, results).catch(err => {
-          console.error('Erreur sauvegarde Cloud:', err);
-          // Ne pas bloquer l'utilisateur en cas d'erreur
-        });
-        
-        // Sauvegarder les résultats pour persistance après refresh navigateur
-        localStorage.setItem(STORAGE_KEYS.DIAGNOSTIC_RESULTS, JSON.stringify({
-          diagnosticData: updatedData,
-          results: results,
-        }));
-        
-        // Nettoyer les clés de progression (plus nécessaires)
-        localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
-        localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
-        
-        // Show loading droplet animation
-        setTimeout(() => {
-          setIsTyping(false);
-          setIsTransitioning(false);
-          setPendingResults(results);
-          setIsLoadingResults(true);
-          triggerHaptic('light');
-        }, 400);
-      }
-    }, 400);
+            };
+            
+            requestAnimationFrame(animateScroll);
+          }
+        }, 100);
+      }, 50);
+    } else {
+      // Complete - calculate results
+      const results = calculateHydration(updatedData);
+      
+      // Sauvegarder dans Lovable Cloud (anonyme, analytics + marketing)
+      saveDiagnosticToCloud(updatedData, results).catch(err => {
+        console.error('Erreur sauvegarde Cloud:', err);
+        // Ne pas bloquer l'utilisateur en cas d'erreur
+      });
+      
+      // Sauvegarder les résultats pour persistance après refresh navigateur
+      localStorage.setItem(STORAGE_KEYS.DIAGNOSTIC_RESULTS, JSON.stringify({
+        diagnosticData: updatedData,
+        results: results,
+      }));
+      
+      // Nettoyer les clés de progression (plus nécessaires)
+      localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
+      localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
+      
+      // Show loading droplet animation
+      setTimeout(() => {
+        setIsTyping(false);
+        setIsTransitioning(false);
+        setPendingResults(results);
+        setIsLoadingResults(true);
+        triggerHaptic('light');
+      }, 400);
+    }
   };
 
   const handleEditStep = useCallback((stepIndex: number) => {
