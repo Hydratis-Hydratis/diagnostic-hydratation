@@ -509,7 +509,9 @@ export const DiagnosticChat = ({
                 const targetRect = target.getBoundingClientRect();
                 const relativeTop = targetRect.top - containerRect.top;
                 
-                console.log('[Scroll Debug] relativeTop:', relativeTop, 'containerScrollTop:', container.scrollTop);
+                // Debug: vérifier les dimensions du container
+                console.log('[Scroll Debug] Container scrollHeight:', container.scrollHeight, 'clientHeight:', container.clientHeight, 'scrollTop:', container.scrollTop);
+                console.log('[Scroll Debug] relativeTop:', relativeTop);
                 
                 // Positionner le ThematicScreen à ~120px du haut (laissant le message blanc visible)
                 const newScrollTop = container.scrollTop + relativeTop - 120;
@@ -523,7 +525,7 @@ export const DiagnosticChat = ({
                 
                 // Vérifier la position après le scroll
                 setTimeout(() => {
-                  console.log('[Scroll Debug] AFTER scroll - containerScrollTop:', container.scrollTop);
+                  console.log('[Scroll Debug] AFTER scroll - containerScrollTop:', container.scrollTop, 'scrollHeight:', container.scrollHeight);
                 }, 500);
               }
             }, 150);
