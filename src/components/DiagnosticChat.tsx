@@ -154,22 +154,25 @@ export const DiagnosticChat = ({
       return;
     }
     
-    // On veut que le ThematicScreen commence au milieu de l'écran
-    // pour que le message de transition soit visible au-dessus
-    const containerRect = container.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    const relativeTop = targetRect.top - containerRect.top;
+    // Trouver le dernier message bot (message de transition) pour scroller vers lui
+    const messagesContainer = container.querySelector('[data-messages-container]');
+    const allMessages = messagesContainer?.querySelectorAll('[data-message]');
+    const lastBotMessage = allMessages?.[allMessages.length - 1] as HTMLElement;
     
-    // Positionner le ThematicScreen à 40% du haut de l'écran visible
-    // Cela laisse 40% d'espace au-dessus pour les messages de transition
-    const visibleHeight = container.clientHeight;
-    const offset = visibleHeight * 0.4;
-    const newScrollTop = container.scrollTop + relativeTop - offset;
-    
-    container.scrollTo({
-      top: Math.max(0, newScrollTop),
-      behavior: 'smooth'
-    });
+    if (lastBotMessage) {
+      // Scroller pour que le message de transition soit à ~20px du haut
+      const containerRect = container.getBoundingClientRect();
+      const messageRect = lastBotMessage.getBoundingClientRect();
+      const relativeTop = messageRect.top - containerRect.top;
+      
+      // Offset fixe de 20px du haut du conteneur
+      const newScrollTop = container.scrollTop + relativeTop - 20;
+      
+      container.scrollTo({
+        top: Math.max(0, newScrollTop),
+        behavior: 'smooth'
+      });
+    }
   }, []);
 
   // Handle scroll events
@@ -677,7 +680,7 @@ export const DiagnosticChat = ({
         >
         <div data-messages-container className="space-y-0">
         {messages.map((message, index) => (
-          <div key={index} className="space-y-2">
+          <div key={index} className="space-y-2" data-message data-is-bot={message.isBot}>
             <ChatMessage
               message={message.text}
               isBot={message.isBot}
