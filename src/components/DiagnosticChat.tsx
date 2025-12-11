@@ -190,8 +190,31 @@ export const DiagnosticChat = ({
     return () => container.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // SCROLLS AUTOMATIQUES DÉSACTIVÉS - L'utilisateur scrolle manuellement
-  // Les useEffects de scroll auto ont été supprimés selon la demande utilisateur
+  // Scroll automatique vers ThematicScreen - 500ms après apparition du message blanc
+  useEffect(() => {
+    if (!showScreen) return;
+    
+    const timerId = setTimeout(() => {
+      const container = containerRef.current;
+      const target = thematicScreenRef.current;
+      
+      if (!container || !target) return;
+      
+      const containerRect = container.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const relativeTop = targetRect.top - containerRect.top;
+      
+      // Offset de ~80px pour laisser le message blanc visible au-dessus
+      const newScrollTop = container.scrollTop + relativeTop - 80;
+      
+      container.scrollTo({
+        top: Math.max(0, newScrollTop),
+        behavior: 'smooth'
+      });
+    }, 500);
+    
+    return () => clearTimeout(timerId);
+  }, [showScreen, currentGroupIndex]);
 
   // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding/transitioning state
   useEffect(() => {
