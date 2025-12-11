@@ -155,20 +155,22 @@ export const DiagnosticChat = ({
       return;
     }
     
-    // Utiliser getBoundingClientRect pour obtenir la position relative au viewport
-    const containerRect = container.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    
-    // Position actuelle de la cible par rapport au conteneur visible
-    const relativeTop = targetRect.top - containerRect.top;
-    
-    // Nouvelle position de scroll = scroll actuel + position relative - marge (100px pour laisser voir le contexte)
-    const newScrollTop = container.scrollTop + relativeTop - 100;
-    
-    container.scrollTo({
-      top: Math.max(0, newScrollTop),
-      behavior: 'smooth'
+    // Sur mobile, utiliser scrollIntoView avec block: "start" puis ajuster
+    // Cela fonctionne mieux que scrollTo sur les navigateurs mobiles
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
     });
+    
+    // Après le scroll, ajuster pour montrer plus de contexte (100px du haut)
+    setTimeout(() => {
+      if (container) {
+        container.scrollBy({
+          top: -100,
+          behavior: 'smooth'
+        });
+      }
+    }, 50);
   }, []);
 
   // Handle scroll events
