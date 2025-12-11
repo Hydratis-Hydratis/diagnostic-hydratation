@@ -13,25 +13,25 @@ export const TemperatureSelector = ({
   const [selectedTemp, setSelectedTemp] = useState<string>(value || "");
   const temperatureRanges = [{
     value: "< 10°C",
-    label: "< 10°C",
+    label: "Inférieur à 10°C",
     color: "from-blue-400 to-blue-600",
     bgColor: "bg-blue-50 dark:bg-blue-950/20",
     borderColor: "border-blue-500"
   }, {
     value: "10-18°C",
-    label: "10-18°C",
+    label: "Entre 10 et 18°C",
     color: "from-cyan-400 to-cyan-600",
     bgColor: "bg-cyan-50 dark:bg-cyan-950/20",
     borderColor: "border-cyan-500"
   }, {
     value: "18-28°C",
-    label: "18-28°C",
+    label: "Entre 18 et 28°C",
     color: "from-yellow-400 to-yellow-600",
     bgColor: "bg-yellow-50 dark:bg-yellow-950/20",
     borderColor: "border-yellow-500"
   }, {
     value: "> 28°C",
-    label: "> 28°C",
+    label: "Supérieur à 28°C",
     color: "from-red-400 to-red-600",
     bgColor: "bg-red-50 dark:bg-red-950/20",
     borderColor: "border-red-500"
