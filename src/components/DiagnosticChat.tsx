@@ -501,9 +501,11 @@ export const DiagnosticChat = ({
             setTimeout(() => {
               const container = containerRef.current;
               if (container) {
-                // Scroll de 150px depuis la position actuelle (pas vers le bas absolu)
+                // Sur mobile, scroll plus léger (80px) pour garder le message blanc visible
+                const isMobile = window.innerWidth < 640;
+                const scrollAmount = isMobile ? 80 : 150;
                 container.scrollTo({
-                  top: container.scrollTop + 150,
+                  top: container.scrollTop + scrollAmount,
                   behavior: 'smooth'
                 });
               }
