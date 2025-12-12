@@ -36,6 +36,7 @@ const Index = () => {
   }, []);
 
   const showProgress = progress && !progress.showOnboarding && !progress.isComplete && progress.current >= 0;
+  const showResults = progress?.isComplete;
   const canRestart = progress && !progress.showOnboarding && progress.current > 0 && !progress.isComplete;
 
   const handleRestartClick = () => {
@@ -54,20 +55,24 @@ const Index = () => {
         "sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50",
         "transition-all duration-300"
       )}>
-        {/* Brand Section - Ultra compact on mobile when showing progress */}
+        {/* Brand Section - Ultra compact on mobile when showing progress, minimal on results */}
         <div className={cn(
           "bg-gradient-to-b from-primary/15 to-transparent text-center transition-all duration-300",
-          showProgress ? "py-2 sm:py-3 px-4" : "py-6 sm:py-8 px-4"
+          showResults ? "py-2 px-4" :
+          showProgress ? "py-2 sm:py-3 px-4" : 
+          "py-6 sm:py-8 px-4"
         )}>
           <img 
             src={logoHydratis} 
             alt="Hydratis - Optimise l'hydratation" 
             className={cn(
               "mx-auto transition-all duration-300",
-              showProgress ? "h-8 sm:h-10" : "h-16 sm:h-20 md:h-24"
+              showResults ? "h-6 sm:h-8" :
+              showProgress ? "h-8 sm:h-10" : 
+              "h-16 sm:h-20 md:h-24"
             )}
           />
-          {!showProgress && (
+          {!showProgress && !showResults && (
             <>
               <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground mb-2 sm:mb-3">
                 Diagnostic d'Hydratation
