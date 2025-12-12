@@ -477,57 +477,64 @@ export const DiagnosticChat = ({
       },
     ]);
 
-    // Show next screen immediately without typing delay
+    // Show typing indicator first, then bot message
     const nextIndex = currentGroupIndex + 1;
     const transitionMessage = getTransitionMessage(nextIndex);
     
     if (nextIndex < questionGroups.length) {
-      // Add bot message immediately
-      addBotMessage(transitionMessage);
-      setCurrentGroupIndex(nextIndex);
+      // Show typing indicator to simulate "thinking"
+      setIsTyping(true);
+      scrollToBottom(true, true);
       
-      // Show screen immediately
+      // After delay, hide typing and show bot message
       setTimeout(() => {
-        setShowScreen(true);
-        setIsTransitioning(false);
-        triggerHaptic('light');
+        setIsTyping(false);
+        addBotMessage(transitionMessage);
+        setCurrentGroupIndex(nextIndex);
         
-        // Scroll fluide personnalisé vers le ThematicScreen
+        // Show screen after bot message appears
         setTimeout(() => {
-          const container = containerRef.current;
-          const target = thematicScreenRef.current;
+          setShowScreen(true);
+          setIsTransitioning(false);
+          triggerHaptic('light');
           
-          if (container && target) {
-            const containerRect = container.getBoundingClientRect();
-            const targetRect = target.getBoundingClientRect();
-            const relativeTop = targetRect.top - containerRect.top;
+          // Scroll fluide personnalisé vers le ThematicScreen
+          setTimeout(() => {
+            const container = containerRef.current;
+            const target = thematicScreenRef.current;
             
-            // Positionner le ThematicScreen à ~180px du haut (laissant le message bleu visible)
-            const targetScrollTop = Math.max(0, container.scrollTop + relativeTop - 180);
-            const startScrollTop = container.scrollTop;
-            const distance = targetScrollTop - startScrollTop;
-            const duration = 600;
-            let startTime: number | null = null;
-            
-            const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-            
-            const animateScroll = (currentTime: number) => {
-              if (!startTime) startTime = currentTime;
-              const elapsed = currentTime - startTime;
-              const progress = Math.min(elapsed / duration, 1);
-              const easedProgress = easeOutCubic(progress);
+            if (container && target) {
+              const containerRect = container.getBoundingClientRect();
+              const targetRect = target.getBoundingClientRect();
+              const relativeTop = targetRect.top - containerRect.top;
               
-              container.scrollTop = startScrollTop + (distance * easedProgress);
+              // Positionner le ThematicScreen à ~180px du haut (laissant le message bleu visible)
+              const targetScrollTop = Math.max(0, container.scrollTop + relativeTop - 180);
+              const startScrollTop = container.scrollTop;
+              const distance = targetScrollTop - startScrollTop;
+              const duration = 600;
+              let startTime: number | null = null;
               
-              if (progress < 1) {
-                requestAnimationFrame(animateScroll);
-              }
-            };
-            
-            requestAnimationFrame(animateScroll);
-          }
-        }, 100);
-      }, 50);
+              const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+              
+              const animateScroll = (currentTime: number) => {
+                if (!startTime) startTime = currentTime;
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = easeOutCubic(progress);
+                
+                container.scrollTop = startScrollTop + (distance * easedProgress);
+                
+                if (progress < 1) {
+                  requestAnimationFrame(animateScroll);
+                }
+              };
+              
+              requestAnimationFrame(animateScroll);
+            }
+          }, 100);
+        }, 50);
+      }, 800); // 800ms delay to show typing indicator
     } else {
       // Complete - calculate results
       const results = calculateHydration(updatedData);
