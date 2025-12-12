@@ -55,37 +55,44 @@ const Index = () => {
         "sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50",
         "transition-all duration-300"
       )}>
-        {/* Brand Section - Ultra compact on mobile when showing progress, minimal on results */}
+        {/* Brand Section - Ultra compact on mobile when showing progress, text-based on results */}
         <div className={cn(
           "bg-gradient-to-b from-primary/15 to-transparent text-center transition-all duration-300",
-          showResults ? "py-2 px-4" :
-          showProgress ? "py-2 sm:py-3 px-4" : 
-          "py-6 sm:py-8 px-4"
+          (showResults || showProgress) ? "py-2 sm:py-3 px-4" : "py-6 sm:py-8 px-4"
         )}>
-          <img 
-            src={logoHydratis} 
-            alt="Hydratis - Optimise l'hydratation" 
-            className={cn(
-              "mx-auto transition-all duration-300",
-              showResults ? "h-6 sm:h-8" :
-              showProgress ? "h-8 sm:h-10" : 
-              "h-16 sm:h-20 md:h-24"
-            )}
-          />
-          {!showProgress && !showResults && (
+          {showResults ? (
             <>
-              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground mb-2 sm:mb-3">
-                Diagnostic d'Hydratation
-              </h2>
-              <p className="text-xs sm:text-sm md:text-base text-foreground/70 max-w-md mx-auto">
-                Obtiens ton résultat d'hydratation et des conseils personnalisés en répondant à quelques questions en 3 minutes top chrono !
+              <h1 className="text-lg sm:text-xl font-bold text-primary">Hydratis</h1>
+              <p className="text-[10px] sm:text-xs text-foreground/70">
+                Diagnostic d'Hydratation 💧
               </p>
             </>
-          )}
-          {showProgress && (
-            <p className="text-[10px] sm:text-xs text-foreground/70 hidden sm:block">
-              Diagnostic d'Hydratation 💧
-            </p>
+          ) : (
+            <>
+              <img 
+                src={logoHydratis} 
+                alt="Hydratis - Optimise l'hydratation" 
+                className={cn(
+                  "mx-auto transition-all duration-300",
+                  showProgress ? "h-8 sm:h-10" : "h-16 sm:h-20 md:h-24"
+                )}
+              />
+              {!showProgress && (
+                <>
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground mb-2 sm:mb-3">
+                    Diagnostic d'Hydratation
+                  </h2>
+                  <p className="text-xs sm:text-sm md:text-base text-foreground/70 max-w-md mx-auto">
+                    Obtiens ton résultat d'hydratation et des conseils personnalisés en répondant à quelques questions en 3 minutes top chrono !
+                  </p>
+                </>
+              )}
+              {showProgress && (
+                <p className="text-[10px] sm:text-xs text-foreground/70 hidden sm:block">
+                  Diagnostic d'Hydratation 💧
+                </p>
+              )}
+            </>
           )}
         </div>
 
