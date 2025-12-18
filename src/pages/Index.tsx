@@ -5,17 +5,7 @@ import { cn } from "@/lib/utils";
 import { RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import logoHydratis from "@/assets/logo-hydratis.png";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 interface ProgressState {
   current: number;
   total: number;
@@ -23,7 +13,6 @@ interface ProgressState {
   isComplete: boolean;
   showOnboarding: boolean;
 }
-
 const Index = () => {
   const [progress, setProgress] = useState<ProgressState | null>(null);
   const [showRestartDialog, setShowRestartDialog] = useState(false);
@@ -34,109 +23,67 @@ const Index = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
   const showProgress = progress && !progress.showOnboarding && !progress.isComplete && progress.current >= 0;
   const showResults = progress?.isComplete;
   const canRestart = progress && !progress.showOnboarding && progress.current > 0 && !progress.isComplete;
-
   const handleRestartClick = () => {
     setShowRestartDialog(true);
   };
-
   const handleConfirmRestart = () => {
     setShowRestartDialog(false);
     restartHandlerRef.current?.();
   };
-
-  return (
-    <div className="h-dvh bg-background flex flex-col overflow-hidden">
+  return <div className="h-dvh bg-background flex flex-col overflow-hidden">
       {/* Header Sticky */}
-      <header className={cn(
-        "sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50",
-        "transition-all duration-300"
-      )}>
+      <header className={cn("sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50", "transition-all duration-300")}>
         {/* Brand Section - Ultra compact on mobile when showing progress, text-based on results */}
-        <div className={cn(
-          "bg-gradient-to-b from-primary/15 to-transparent text-center transition-all duration-300",
-          (showResults || showProgress) ? "py-2 sm:py-3 px-4" : "py-6 sm:py-8 px-4"
-        )}>
-          {showResults ? (
-            <>
+        <div className={cn("bg-gradient-to-b from-primary/15 to-transparent text-center transition-all duration-300", showResults || showProgress ? "py-2 sm:py-3 px-4" : "py-6 sm:py-8 px-4")}>
+          {showResults ? <>
               <h1 className="text-lg sm:text-xl font-bold text-primary">Hydratis</h1>
               <p className="text-[10px] sm:text-xs text-foreground/70">
                 Diagnostic d'Hydratation 💧
               </p>
-            </>
-          ) : (
-            <>
-              <img 
-                src={logoHydratis} 
-                alt="Hydratis - Optimise l'hydratation" 
-                className={cn(
-                  "mx-auto transition-all duration-300",
-                  showProgress ? "h-8 sm:h-10" : "h-16 sm:h-20 md:h-24"
-                )}
-              />
-              {!showProgress && (
-                <>
+            </> : <>
+              <img src={logoHydratis} alt="Hydratis - Optimise l'hydratation" className={cn("mx-auto transition-all duration-300", showProgress ? "h-8 sm:h-10" : "h-16 sm:h-20 md:h-24")} />
+              {!showProgress && <>
                   <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground mb-2 sm:mb-3">
                     Diagnostic d'Hydratation
                   </h2>
                   <p className="text-xs sm:text-sm md:text-base text-foreground/70 max-w-md mx-auto">
                     Obtiens ton résultat d'hydratation et des conseils personnalisés en répondant à quelques questions en 3 minutes top chrono !
                   </p>
-                </>
-              )}
-              {showProgress && (
-                <p className="text-[10px] sm:text-xs text-foreground/70 hidden sm:block">
-                  Diagnostic d'Hydratation 💧
-                </p>
-              )}
-            </>
-          )}
+                </>}
+              {showProgress && <p className="text-[10px] sm:text-xs text-foreground/70 hidden sm:block">Diagnostic d'Hydratation</p>}
+            </>}
         </div>
 
         {/* Progress Indicator in Header */}
-        {showProgress && (
-          <div className="border-t border-border/30">
+        {showProgress && <div className="border-t border-border/30">
             <div className="flex items-center justify-between px-4 py-1 max-w-2xl mx-auto">
               <div className="flex-1">
-                <ProgressIndicator
-                  current={progress.current}
-                  total={progress.total}
-                  steps={progress.steps}
-                  onStepClick={(index) => stepHandlerRef.current?.(index)}
-                  compact
-                />
+                <ProgressIndicator current={progress.current} total={progress.total} steps={progress.steps} onStepClick={index => stepHandlerRef.current?.(index)} compact />
               </div>
-              {canRestart && (
-                <Tooltip>
+              {canRestart && <Tooltip>
                   <TooltipTrigger asChild>
-                    <button
-                      onClick={handleRestartClick}
-                      className="p-1.5 text-muted-foreground hover:text-primary hover:bg-accent rounded-full transition-colors ml-2"
-                      aria-label="Recommencer le diagnostic"
-                    >
+                    <button onClick={handleRestartClick} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-accent rounded-full transition-colors ml-2" aria-label="Recommencer le diagnostic">
                       <RotateCcw className="w-4 h-4" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
                     <p>Recommencer</p>
                   </TooltipContent>
-                </Tooltip>
-              )}
+                </Tooltip>}
             </div>
-          </div>
-        )}
+          </div>}
       </header>
 
       {/* Chat Container */}
       <main className="flex-1 max-w-2xl w-full mx-auto flex flex-col min-h-0">
-        <DiagnosticChat
-          onProgressChange={setProgress}
-          registerStepHandler={(handler) => { stepHandlerRef.current = handler; }}
-          registerRestartHandler={(handler) => { restartHandlerRef.current = handler; }}
-        />
+        <DiagnosticChat onProgressChange={setProgress} registerStepHandler={handler => {
+        stepHandlerRef.current = handler;
+      }} registerRestartHandler={handler => {
+        restartHandlerRef.current = handler;
+      }} />
       </main>
 
       {/* Footer */}
@@ -159,8 +106,6 @@ const Index = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
