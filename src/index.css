@@ -56,7 +56,7 @@ All colors MUST be HSL.
     --card-foreground: 244 93% 32%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 230 70% 20%;
+    --popover-foreground: 244 93% 32%;
 
     --primary: 244 93% 32%;
     --primary-foreground: 0 0% 100%;
@@ -65,7 +65,7 @@ All colors MUST be HSL.
     --secondary-foreground: 244 93% 32%;
 
     --muted: 40 25% 85%;
-    --muted-foreground: 230 30% 45%;
+    --muted-foreground: 244 93% 32%;
 
     --accent: 244 93% 32%;
     --accent-foreground: 0 0% 100%;
@@ -75,7 +75,7 @@ All colors MUST be HSL.
 
     --border: 40 25% 88%;
     --input: 0 0% 100%;
-    --ring: 230 70% 45%;
+    --ring: 244 93% 32%;
 
     --radius: 1.5rem;
     
@@ -83,7 +83,7 @@ All colors MUST be HSL.
     --chat-user: 230 70% 45%;
     --chat-timestamp: 230 30% 50%;
     
-    --chart-1: 221 83% 53%;
+    --chart-1: 244 93% 32%;
     --chart-2: 30 80% 55%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
