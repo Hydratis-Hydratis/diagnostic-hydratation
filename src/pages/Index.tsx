@@ -39,7 +39,7 @@ const Index = () => {
         {/* Brand Section - Ultra compact on mobile when showing progress, text-based on results */}
         <div className={cn("bg-gradient-to-b from-primary/15 to-transparent text-center transition-all duration-300", showResults || showProgress ? "py-2 sm:py-3 px-4" : "py-6 sm:py-8 px-4")}>
           {showResults ? <>
-              <h1 className="text-lg sm:text-xl font-bold text-primary">Hydratis</h1>
+              <img src={logoHydratis} alt="Hydratis - Optimise l'hydratation" className="mx-auto h-8 sm:h-10" />
               <p className="text-[10px] sm:text-xs text-foreground/70">
                 Diagnostic d'Hydratation 💧
               </p>
