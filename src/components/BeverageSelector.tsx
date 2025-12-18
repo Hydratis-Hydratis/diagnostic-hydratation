@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
 import waterIcon from "@/assets/beverages/water.png";
-import sodaIcon from "@/assets/beverages/soda.png";
+import sodaIcon from "@/assets/beverages/hydratis-pastille.svg";
 import sodaZeroIcon from "@/assets/beverages/soda-zero.png";
 import juiceIcon from "@/assets/beverages/juice.png";
 import coffeeSweetIcon from "@/assets/beverages/coffee-sweet.png";
@@ -29,7 +29,7 @@ interface BeverageItem {
   volume: string;
   icon: string;
 }
-import hydratisIcon from "@/assets/beverages/hydratis-pastille.svg";
+import hydratisIcon from "@/assets/beverages/hydratis.png";
 const beverages: BeverageItem[] = [{
   id: "eau",
   label: "Eau",
