@@ -214,7 +214,7 @@ export default {
   			'scale-in': 'scale-in 0.5s ease-out',
   			'slide-up': 'slide-up 0.6s ease-out',
   			'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
-  			'tap': 'tap-feedback 150ms ease-out',
+  			tap: 'tap-feedback 150ms ease-out',
   			'message-in': 'message-in 0.3s ease-out both',
   			'message-in-right': 'message-in-right 0.25s ease-out both',
   			'pulse-avatar': 'pulse-avatar 1.5s ease-in-out infinite',
