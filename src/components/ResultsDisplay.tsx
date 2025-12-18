@@ -190,7 +190,8 @@ export const ResultsDisplay = ({
   return <div className="space-y-4 animate-fade-in">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-foreground mb-2">
-          Ton diagnostic est prêt, {firstName} ! 💧
+          <span className="block">{firstName},</span>
+          <span className="block">ton diagnostic est prêt !</span>
         </h2>
         <p className="text-muted-foreground">Voici tes résultats personnalisés</p>
         {results.score >= 90 && <p className="text-lg font-semibold text-primary mt-2 animate-scale-in">
