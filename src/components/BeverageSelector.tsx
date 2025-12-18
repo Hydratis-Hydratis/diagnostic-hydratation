@@ -29,7 +29,7 @@ interface BeverageItem {
   volume: string;
   icon: string;
 }
-import hydratisIcon from "@/assets/beverages/hydratis.png";
+import hydratisIcon from "@/assets/beverages/hydratis-pastille.svg";
 const beverages: BeverageItem[] = [{
   id: "eau",
   label: "Eau",
