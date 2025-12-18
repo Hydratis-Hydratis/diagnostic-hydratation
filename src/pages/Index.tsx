@@ -41,7 +41,7 @@ const Index = () => {
           {showResults ? <>
               <img src={logoHydratis} alt="Hydratis - Optimise l'hydratation" className="mx-auto h-8 sm:h-10" />
               <p className="text-[10px] sm:text-xs text-foreground/70">
-                Diagnostic d'Hydratation 💧
+                Diagnostic d'Hydratation
               </p>
             </> : <>
               <img src={logoHydratis} alt="Hydratis - Optimise l'hydratation" className={cn("mx-auto transition-all duration-300", showProgress ? "h-8 sm:h-10" : "h-16 sm:h-20 md:h-24")} />
