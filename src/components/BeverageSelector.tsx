@@ -32,7 +32,7 @@ interface BeverageItem {
 import hydratisIcon from "@/assets/beverages/hydratis.svg";
 const beverages: BeverageItem[] = [{
   id: "eau",
-  label: "Eau",
+  label: "Verre d'eau",
   volume: "25cl",
   icon: waterIcon
 }, {
