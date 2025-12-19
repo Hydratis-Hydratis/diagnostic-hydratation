@@ -51,20 +51,25 @@ const beverages: BeverageItem[] = [{
   volume: "33cl",
   icon: sodaZeroIcon
 }, {
-  id: "jus",
-  label: "Jus de fruit",
-  volume: "25cl",
-  icon: juiceIcon
+  id: "cafe_the",
+  label: "Café ou thé",
+  volume: "12.5cl",
+  icon: coffeeIcon
 }, {
   id: "cafe_sucre",
   label: "Café ou thé sucré",
   volume: "12.5cl",
   icon: coffeeSweetIcon
 }, {
-  id: "cafe_the",
-  label: "Café ou thé",
-  volume: "12.5cl",
-  icon: coffeeIcon
+  id: "jus",
+  label: "Jus de fruit",
+  volume: "25cl",
+  icon: juiceIcon
+}, {
+  id: "boisson_energisante",
+  label: "Boisson énergisante",
+  volume: "25cl",
+  icon: energyDrinkIcon
 }, {
   id: "vin",
   label: "Vin",
@@ -80,11 +85,6 @@ const beverages: BeverageItem[] = [{
   label: "Boisson pour le sport",
   volume: "50cl",
   icon: sportsDrinkIcon
-}, {
-  id: "boisson_energisante",
-  label: "Boisson énergisante",
-  volume: "25cl",
-  icon: energyDrinkIcon
 }];
 interface BeverageSelectorProps {
   quantities: BeverageQuantities;
