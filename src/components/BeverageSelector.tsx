@@ -110,23 +110,23 @@ export const BeverageSelector = ({
   };
   return <div className="w-full">
       
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        {beverages.map(beverage => <div key={beverage.id} className="flex flex-col items-center p-5 rounded-xl border border-border bg-card hover:shadow-md transition-shadow">
-            <div className="text-sm font-medium text-center mb-3 min-h-[2.5rem] flex items-center justify-center">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        {beverages.map(beverage => <div key={beverage.id} className="flex flex-col items-center p-3 sm:p-5 rounded-xl border border-border bg-card hover:shadow-md transition-shadow">
+            <div className="text-xs sm:text-sm font-medium text-center mb-2 sm:mb-3 min-h-[2rem] sm:min-h-[2.5rem] flex items-center justify-center px-1">
               <span>{beverage.label} <span className="text-muted-foreground">({beverage.volume})</span></span>
             </div>
-            <div className="flex-1 flex items-center justify-center w-full mb-4">
-              <img src={beverage.icon} alt={beverage.label} className="w-24 h-24 object-contain" />
+            <div className="flex-1 flex items-center justify-center w-full mb-2 sm:mb-4">
+              <img src={beverage.icon} alt={beverage.label} className="w-16 h-16 sm:w-24 sm:h-24 object-contain" />
             </div>
-            <div className="flex items-center gap-4 w-full justify-center">
-              <Button type="button" variant="outline" size="icon" className="h-12 w-12 rounded-full touch-target touch-active touch-manipulation" onClick={() => handleDecrement(beverage.id)} disabled={quantities[beverage.id] === 0}>
-                <Minus className="h-5 w-5" />
+            <div className="flex items-center gap-2 sm:gap-4 w-full justify-center">
+              <Button type="button" variant="outline" size="icon" className="h-9 w-9 sm:h-12 sm:w-12 rounded-full touch-target touch-active touch-manipulation" onClick={() => handleDecrement(beverage.id)} disabled={quantities[beverage.id] === 0}>
+                <Minus className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
-              <span className="text-xl font-semibold min-w-[2.5rem] text-center">
+              <span className="text-lg sm:text-xl font-semibold min-w-[1.5rem] sm:min-w-[2.5rem] text-center">
                 {quantities[beverage.id]}
               </span>
-              <Button type="button" variant="default" size="icon" className="h-12 w-12 rounded-full touch-target touch-active touch-manipulation" onClick={() => handleIncrement(beverage.id)}>
-                <Plus className="h-5 w-5" />
+              <Button type="button" variant="default" size="icon" className="h-9 w-9 sm:h-12 sm:w-12 rounded-full touch-target touch-active touch-manipulation" onClick={() => handleIncrement(beverage.id)}>
+                <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </div>
           </div>)}
