@@ -110,23 +110,23 @@ export const BeverageSelector = ({
   };
   return <div className="w-full">
       
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {beverages.map(beverage => <div key={beverage.id} className="flex flex-col items-center p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow h-full">
-            <div className="text-sm font-medium text-center mb-2 min-h-[2.5rem] flex items-center justify-center">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {beverages.map(beverage => <div key={beverage.id} className="flex flex-col items-center p-5 rounded-xl border border-border bg-card hover:shadow-md transition-shadow">
+            <div className="text-sm font-medium text-center mb-3 min-h-[2.5rem] flex items-center justify-center">
               <span>{beverage.label} <span className="text-muted-foreground">({beverage.volume})</span></span>
             </div>
-            <div className="flex-1 flex items-center justify-center w-full">
-              <img src={beverage.icon} alt={beverage.label} className="w-20 h-20 object-contain" />
+            <div className="flex-1 flex items-center justify-center w-full mb-4">
+              <img src={beverage.icon} alt={beverage.label} className="w-24 h-24 object-contain" />
             </div>
-            <div className="flex items-center gap-3 mt-3">
-              <Button type="button" variant="outline" size="icon" className="h-11 w-11 sm:h-10 sm:w-10 rounded-full touch-target touch-active touch-manipulation" onClick={() => handleDecrement(beverage.id)} disabled={quantities[beverage.id] === 0}>
-                <Minus className="h-5 w-5 sm:h-4 sm:w-4" />
+            <div className="flex items-center gap-4 w-full justify-center">
+              <Button type="button" variant="outline" size="icon" className="h-12 w-12 rounded-full touch-target touch-active touch-manipulation" onClick={() => handleDecrement(beverage.id)} disabled={quantities[beverage.id] === 0}>
+                <Minus className="h-5 w-5" />
               </Button>
-              <span className="text-lg font-semibold min-w-[2rem] text-center">
+              <span className="text-xl font-semibold min-w-[2.5rem] text-center">
                 {quantities[beverage.id]}
               </span>
-              <Button type="button" variant="default" size="icon" className="h-11 w-11 sm:h-10 sm:w-10 rounded-full touch-target touch-active touch-manipulation" onClick={() => handleIncrement(beverage.id)}>
-                <Plus className="h-5 w-5 sm:h-4 sm:w-4" />
+              <Button type="button" variant="default" size="icon" className="h-12 w-12 rounded-full touch-target touch-active touch-manipulation" onClick={() => handleIncrement(beverage.id)}>
+                <Plus className="h-5 w-5" />
               </Button>
             </div>
           </div>)}
