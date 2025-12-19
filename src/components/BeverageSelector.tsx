@@ -110,14 +110,15 @@ export const BeverageSelector = ({
   };
   return <div className="w-full">
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {beverages.map(beverage => <div key={beverage.id} className="flex flex-col items-center p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow">
-            <div className="text-sm font-medium text-center mb-2">
-              {beverage.label}
-              <span className="text-muted-foreground ml-1">({beverage.volume})</span>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {beverages.map(beverage => <div key={beverage.id} className="flex flex-col items-center p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow h-full">
+            <div className="text-sm font-medium text-center mb-2 min-h-[2.5rem] flex items-center justify-center">
+              <span>{beverage.label} <span className="text-muted-foreground">({beverage.volume})</span></span>
             </div>
-            <img src={beverage.icon} alt={beverage.label} className="w-20 h-20 object-contain mb-3" />
-            <div className="flex items-center gap-3">
+            <div className="flex-1 flex items-center justify-center w-full">
+              <img src={beverage.icon} alt={beverage.label} className="w-20 h-20 object-contain" />
+            </div>
+            <div className="flex items-center gap-3 mt-3">
               <Button type="button" variant="outline" size="icon" className="h-11 w-11 sm:h-10 sm:w-10 rounded-full touch-target touch-active touch-manipulation" onClick={() => handleDecrement(beverage.id)} disabled={quantities[beverage.id] === 0}>
                 <Minus className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
