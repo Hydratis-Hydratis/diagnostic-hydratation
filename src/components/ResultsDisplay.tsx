@@ -447,7 +447,7 @@ export const ResultsDisplay = ({
               {/* Message de progression */}
               <div className="mt-4 text-center">
                 <p className={cn("text-sm sm:text-base md:text-lg font-medium", animatedGaugePercent >= 100 ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
-                  {animatedGaugePercent >= 100 ? "🎉 Excellent ! Tu as atteint tes besoins basaux !" : <>
+                  {animatedGaugePercent >= 100 ? "🎉 Excellent ! Tu as atteint tes besoins de base !" : <>
                         Encore <span className="font-bold text-base sm:text-lg md:text-xl text-primary">{formatVolume(gaugeTarget - gaugeCurrent)}</span> à boire
                       </>}
                 </p>
