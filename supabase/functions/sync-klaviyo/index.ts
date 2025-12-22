@@ -21,6 +21,7 @@ interface DiagnosticPayload {
   nb_pastilles_total: number;
   completed_at: string;
   certificate_url: string | null;
+  status: string;
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -81,6 +82,7 @@ serve(async (req: Request): Promise<Response> => {
             hydratis_pastilles_total: payload.nb_pastilles_total,
             hydratis_completed_at: payload.completed_at,
             hydratis_certificate_url: payload.certificate_url,
+            hydratis_status: payload.status,
           },
         },
       },
@@ -138,6 +140,7 @@ serve(async (req: Request): Promise<Response> => {
                   hydratis_pastilles_total: payload.nb_pastilles_total,
                   hydratis_completed_at: payload.completed_at,
                   hydratis_certificate_url: payload.certificate_url,
+                  hydratis_status: payload.status,
                 },
               },
             },
