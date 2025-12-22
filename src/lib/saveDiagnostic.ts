@@ -2,6 +2,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { DiagnosticData } from "@/types/diagnostic";
 import { HydrationResult } from "./hydrationCalculator";
 
+// Storage key for diagnostic ID
+const DIAGNOSTIC_ID_KEY = 'hydratis_diagnostic_id';
+
 // Determine hydra_rank based on score
 const getHydraRank = (score: number): string => {
   if (score >= 90) return "Hydra'champion";
@@ -77,6 +80,93 @@ async function syncToKlaviyo(payload: {
   }
 }
 
+// Start a new diagnostic (status: started)
+export async function startDiagnostic(): Promise<{ success: boolean; diagnosticId?: string; error?: string }> {
+  try {
+    const diagnosticId = crypto.randomUUID();
+    
+    const payload = {
+      id: diagnosticId,
+      diagnostic_data: {} as any,
+      status: 'started',
+      user_agent: navigator.userAgent,
+    };
+
+    const { error } = await supabase
+      .from('diagnostics')
+      .insert(payload as any);
+    
+    if (error) {
+      console.error('Erreur création diagnostic:', error);
+      return { success: false, error: error.message };
+    }
+    
+    // Store the diagnostic ID in localStorage for later updates
+    localStorage.setItem(DIAGNOSTIC_ID_KEY, diagnosticId);
+    console.log('Diagnostic démarré avec ID:', diagnosticId);
+    
+    return { success: true, diagnosticId };
+  } catch (err) {
+    console.error('Erreur lors du démarrage:', err);
+    return { success: false, error: String(err) };
+  }
+}
+
+// Update diagnostic with partial answers at each step
+export async function updateDiagnosticProgress(
+  diagnosticData: DiagnosticData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const diagnosticId = localStorage.getItem(DIAGNOSTIC_ID_KEY);
+    
+    if (!diagnosticId) {
+      console.warn('Pas de diagnostic ID trouvé, création automatique');
+      const startResult = await startDiagnostic();
+      if (!startResult.success) {
+        return { success: false, error: startResult.error };
+      }
+    }
+    
+    const currentDiagnosticId = localStorage.getItem(DIAGNOSTIC_ID_KEY);
+    
+    if (!currentDiagnosticId) {
+      return { success: false, error: 'Impossible de créer le diagnostic ID' };
+    }
+
+    const { error } = await supabase
+      .from('diagnostics')
+      .update({
+        diagnostic_data: diagnosticData as any,
+        age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
+        sexe: diagnosticData.sexe || null,
+        email: diagnosticData.email || null,
+        first_name: diagnosticData.firstName || null,
+      } as any)
+      .eq('id', currentDiagnosticId);
+    
+    if (error) {
+      console.error('Erreur mise à jour diagnostic:', error);
+      return { success: false, error: error.message };
+    }
+    
+    console.log('Diagnostic mis à jour avec réponses partielles');
+    return { success: true };
+  } catch (err) {
+    console.error('Erreur lors de la mise à jour:', err);
+    return { success: false, error: String(err) };
+  }
+}
+
+// Get the current diagnostic ID from localStorage
+export function getCurrentDiagnosticId(): string | null {
+  return localStorage.getItem(DIAGNOSTIC_ID_KEY);
+}
+
+// Clear the diagnostic ID from localStorage
+export function clearDiagnosticId(): void {
+  localStorage.removeItem(DIAGNOSTIC_ID_KEY);
+}
+
 export async function saveDiagnosticToCloud(
   diagnosticData: DiagnosticData,
   results: HydrationResult
@@ -89,40 +179,82 @@ export async function saveDiagnosticToCloud(
 
     const hydraRank = getHydraRank(results.score);
     const completedAt = new Date().toISOString();
-    const diagnosticId = crypto.randomUUID();
-
-    const payload = {
-      id: diagnosticId,
-      email: diagnosticData.email || null,
-      first_name: diagnosticData.firstName || null,
-      diagnostic_data: diagnosticData as any,
-      results: results as any,
-      score: results.score,
-      hydration_status: results.statut,
-      user_agent: navigator.userAgent,
-      completed_at: completedAt,
-      age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
-      sexe: diagnosticData.sexe || null,
-      sport: sportValue,
-      besoin_total_ml: Math.round(results.besoin_total_ml),
-      hydratation_reelle_ml: Math.round(results.hydratation_reelle_ml),
-      ecart_hydratation_ml: Math.round(results.ecart_hydratation_ml),
-      nb_pastilles_basal: results.nb_pastilles_basal,
-      nb_pastilles_exercice: results.nb_pastilles_exercice,
-      nb_pastilles_total: results.nb_pastilles_basal + results.nb_pastilles_exercice,
-      hydra_rank: hydraRank
-    };
-
-    const { error } = await supabase
-      .from('diagnostics')
-      .insert(payload as any);
     
-    if (error) {
-      console.error('Erreur sauvegarde diagnostic:', error);
-      return { success: false, error: error.message };
+    // Check if we have an existing diagnostic ID (progressive save)
+    let diagnosticId = localStorage.getItem(DIAGNOSTIC_ID_KEY);
+    
+    if (diagnosticId) {
+      // Update existing diagnostic with final results (status: completed)
+      const payload = {
+        email: diagnosticData.email || null,
+        first_name: diagnosticData.firstName || null,
+        diagnostic_data: diagnosticData as any,
+        results: results as any,
+        score: results.score,
+        hydration_status: results.statut,
+        completed_at: completedAt,
+        age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
+        sexe: diagnosticData.sexe || null,
+        sport: sportValue,
+        besoin_total_ml: Math.round(results.besoin_total_ml),
+        hydratation_reelle_ml: Math.round(results.hydratation_reelle_ml),
+        ecart_hydratation_ml: Math.round(results.ecart_hydratation_ml),
+        nb_pastilles_basal: results.nb_pastilles_basal,
+        nb_pastilles_exercice: results.nb_pastilles_exercice,
+        nb_pastilles_total: results.nb_pastilles_basal + results.nb_pastilles_exercice,
+        hydra_rank: hydraRank,
+        status: 'completed'
+      };
+
+      const { error } = await supabase
+        .from('diagnostics')
+        .update(payload as any)
+        .eq('id', diagnosticId);
+      
+      if (error) {
+        console.error('Erreur mise à jour finale diagnostic:', error);
+        return { success: false, error: error.message };
+      }
+      
+      console.log('Diagnostic complété avec succès (update)');
+    } else {
+      // Fallback: Create new diagnostic if no ID exists (shouldn't happen normally)
+      diagnosticId = crypto.randomUUID();
+      
+      const payload = {
+        id: diagnosticId,
+        email: diagnosticData.email || null,
+        first_name: diagnosticData.firstName || null,
+        diagnostic_data: diagnosticData as any,
+        results: results as any,
+        score: results.score,
+        hydration_status: results.statut,
+        user_agent: navigator.userAgent,
+        completed_at: completedAt,
+        age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
+        sexe: diagnosticData.sexe || null,
+        sport: sportValue,
+        besoin_total_ml: Math.round(results.besoin_total_ml),
+        hydratation_reelle_ml: Math.round(results.hydratation_reelle_ml),
+        ecart_hydratation_ml: Math.round(results.ecart_hydratation_ml),
+        nb_pastilles_basal: results.nb_pastilles_basal,
+        nb_pastilles_exercice: results.nb_pastilles_exercice,
+        nb_pastilles_total: results.nb_pastilles_basal + results.nb_pastilles_exercice,
+        hydra_rank: hydraRank,
+        status: 'completed'
+      };
+
+      const { error } = await supabase
+        .from('diagnostics')
+        .insert(payload as any);
+      
+      if (error) {
+        console.error('Erreur sauvegarde diagnostic:', error);
+        return { success: false, error: error.message };
+      }
+      
+      console.log('Diagnostic sauvegardé avec succès (insert)');
     }
-    
-    console.log('Diagnostic sauvegardé avec succès');
 
     // Déterminer si population sensible (enceinte, allaitante, 70+)
     const age = diagnosticData.age ? parseInt(diagnosticData.age) : null;
@@ -164,6 +296,9 @@ export async function saveDiagnosticToCloud(
         certificate_url: certificateUrl
       });
     });
+
+    // Clear the diagnostic ID from localStorage after completion
+    clearDiagnosticId();
 
     return { success: true };
   } catch (err) {

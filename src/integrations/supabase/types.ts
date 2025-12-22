@@ -36,6 +36,7 @@ export type Database = {
           score: number | null
           sexe: string | null
           sport: string | null
+          status: string | null
           user_agent: string | null
         }
         Insert: {
@@ -59,6 +60,7 @@ export type Database = {
           score?: number | null
           sexe?: string | null
           sport?: string | null
+          status?: string | null
           user_agent?: string | null
         }
         Update: {
@@ -82,6 +84,7 @@ export type Database = {
           score?: number | null
           sexe?: string | null
           sport?: string | null
+          status?: string | null
           user_agent?: string | null
         }
         Relationships: []
