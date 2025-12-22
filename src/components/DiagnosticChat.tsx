@@ -10,7 +10,7 @@ import { DiagnosticData, Question } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
 import { toast } from "@/hooks/use-toast";
 import { calculateHydration } from "@/lib/hydrationCalculator";
-import { saveDiagnosticToCloud } from "@/lib/saveDiagnostic";
+import { saveDiagnosticToCloud, startDiagnostic, updateDiagnosticProgress, clearDiagnosticId } from "@/lib/saveDiagnostic";
 import { ChevronDown } from "lucide-react";
 import {
   AlertDialog,
@@ -462,6 +462,15 @@ export const DiagnosticChat = ({
     localStorage.setItem(STORAGE_KEYS.DIAGNOSTIC_DATA, JSON.stringify(updatedData));
     localStorage.setItem(STORAGE_KEYS.DIAGNOSTIC_STEP, nextGroupIndex.toString());
     
+    // Sauvegarder les réponses partielles dans le Cloud
+    updateDiagnosticProgress(updatedData).then(result => {
+      if (result.success) {
+        console.log('Réponses partielles sauvegardées dans le cloud');
+      } else {
+        console.error('Erreur sauvegarde partielle:', result.error);
+      }
+    });
+    
     // Create personalized summary message
     const summary = createPersonalizedSummary(answers, currentGroupIndex);
     
@@ -583,10 +592,11 @@ export const DiagnosticChat = ({
 
   const handleRestart = useCallback(() => {
     // La confirmation est gérée par le parent (Index.tsx)
-    // Nettoyer TOUTES les clés localStorage (y compris les résultats)
+    // Nettoyer TOUTES les clés localStorage (y compris les résultats et l'ID cloud)
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_DATA);
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_STEP);
     localStorage.removeItem(STORAGE_KEYS.DIAGNOSTIC_RESULTS);
+    clearDiagnosticId();
     
     setCurrentGroupIndex(0);
     setMessages([]);
@@ -599,6 +609,16 @@ export const DiagnosticChat = ({
 
   const handleStartDiagnostic = () => {
     setShowOnboarding(false);
+    
+    // Start diagnostic in Cloud (status: started)
+    startDiagnostic().then(result => {
+      if (result.success) {
+        console.log('Diagnostic démarré dans le cloud:', result.diagnosticId);
+      } else {
+        console.error('Erreur démarrage diagnostic:', result.error);
+      }
+    });
+    
     setTimeout(() => {
       setIsTyping(true);
       setTimeout(() => {
