@@ -63,6 +63,7 @@ async function syncToKlaviyo(payload: {
   nb_pastilles_total: number;
   completed_at: string;
   certificate_url: string | null;
+  status: string;
 }): Promise<void> {
   try {
     const { error } = await supabase.functions.invoke('sync-klaviyo', {
@@ -293,7 +294,8 @@ export async function saveDiagnosticToCloud(
         nb_pastilles_exercice: results.nb_pastilles_exercice,
         nb_pastilles_total: results.nb_pastilles_basal + results.nb_pastilles_exercice,
         completed_at: completedAt,
-        certificate_url: certificateUrl
+        certificate_url: certificateUrl,
+        status: 'completed'
       });
     });
 
