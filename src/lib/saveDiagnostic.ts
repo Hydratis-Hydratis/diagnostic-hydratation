@@ -18,11 +18,12 @@ async function generateCertificate(payload: {
   firstName: string | null;
   score: number;
   hydraRank: string;
-  besoinTotalMl: number;
+  besoinTotalMl: number; // besoins_basals_net_ml - ce qu'il faut boire quotidiennement
   hydratationReelleMl: number;
   diagnosticId: string;
   nbPastillesTotal: number;
   isSensitivePopulation: boolean;
+  besoinsExerciceMl: number; // besoins supplémentaires pour l'exercice
 }): Promise<string | null> {
   try {
     const { data, error } = await supabase.functions.invoke('generate-certificate', {
@@ -266,15 +267,17 @@ export async function saveDiagnosticToCloud(
       (age !== null && age >= 70);
 
     // Générer le certificat en arrière-plan - l'Edge Function se charge de sauvegarder l'URL
+    // On utilise besoins_basals_net_ml (ce qu'il faut boire) pour correspondre à ResultsDisplay
     generateCertificate({
       firstName: diagnosticData.firstName || null,
       score: results.score,
       hydraRank: hydraRank,
-      besoinTotalMl: Math.round(results.besoin_total_ml),
+      besoinTotalMl: Math.round(results.besoins_basals_net_ml), // Quantité à boire quotidiennement
       hydratationReelleMl: Math.round(results.hydratation_reelle_ml),
       diagnosticId: diagnosticId,
       nbPastillesTotal: results.nb_pastilles_basal + results.nb_pastilles_exercice,
-      isSensitivePopulation: isSensitivePopulation
+      isSensitivePopulation: isSensitivePopulation,
+      besoinsExerciceMl: Math.round(results.besoins_exercice_ml) // Besoins supplémentaires pour le sport
     }).then((certificateUrl) => {
       console.log('Certificat généré et sauvegardé par Edge Function:', certificateUrl);
       
