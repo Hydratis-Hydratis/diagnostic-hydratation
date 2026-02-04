@@ -10,11 +10,12 @@ interface CertificateData {
   firstName: string;
   score: number;
   hydraRank: string;
-  besoinTotalMl: number;
+  besoinTotalMl: number; // besoins_basals_net_ml - ce qu'il faut boire
   hydratationReelleMl: number;
   diagnosticId: string;
   nbPastillesTotal?: number;
   isSensitivePopulation?: boolean;
+  besoinsExerciceMl?: number; // besoins supplémentaires pour l'exercice
 }
 
 function getHydraEmoji(rank: string): string {
@@ -66,11 +67,12 @@ function generateSVG(data: {
   ecartL: string;
   gaugePercent: number;
   isExcellent: boolean;
+  besoinsExerciceL: string;
 }): string {
   const { 
     displayName, score, hydraRank, emoji, scoreColor, badgeColor,
     besoinL, hydratationL, today, nbPastilles, isSensitive,
-    ecartL, gaugePercent, isExcellent
+    ecartL, gaugePercent, isExcellent, besoinsExerciceL
   } = data;
   
   // Calculate score bar width (max 280px)
@@ -146,16 +148,16 @@ function generateSVG(data: {
   
   <!-- Card 2: Quantité d'eau à boire -->
   <rect x="425" y="130" width="350" height="220" rx="16" fill="white" filter="url(#cardShadow)"/>
-  <rect x="425" y="130" width="350" height="6" rx="3" fill="#f59e0b"/>
+  <rect x="425" y="130" width="350" height="6" rx="3" fill="#0ea5e9"/>
   
-  <text x="600" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#64748b">Besoin en eau par jour</text>
+  <text x="600" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#64748b">Quantité d'eau à boire par jour</text>
   
   <!-- Water icon -->
-  <text x="600" y="220" text-anchor="middle" font-size="36">🥤</text>
+  <text x="600" y="220" text-anchor="middle" font-size="36">💧</text>
   
   <!-- Volume display -->
   <text x="600" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#0369a1">${besoinL}</text>
-  <text x="600" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#64748b">litres à boire</text>
+  <text x="600" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#64748b">litres à boire${besoinsExerciceL !== "0.0" ? ` (+ ${besoinsExerciceL}L les jours de sport)` : ""}</text>
   
   <!-- Card 3: Pastilles recommandées -->
   <rect x="800" y="130" width="350" height="220" rx="16" fill="white" filter="url(#cardShadow)"/>
@@ -258,9 +260,9 @@ serve(async (req) => {
 
   try {
     const data: CertificateData = await req.json();
-    const { firstName, score, hydraRank, besoinTotalMl, hydratationReelleMl, diagnosticId, nbPastillesTotal, isSensitivePopulation } = data;
+    const { firstName, score, hydraRank, besoinTotalMl, hydratationReelleMl, diagnosticId, nbPastillesTotal, isSensitivePopulation, besoinsExerciceMl } = data;
 
-    console.log("Generating certificate for:", firstName, "Score:", score, "DiagnosticId:", diagnosticId);
+    console.log("Generating certificate for:", firstName, "Score:", score, "BesoinTotalMl:", besoinTotalMl, "DiagnosticId:", diagnosticId);
 
     const today = new Date().toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -274,8 +276,9 @@ serve(async (req) => {
     const besoinL = (besoinTotalMl / 1000).toFixed(1);
     const hydratationL = (hydratationReelleMl / 1000).toFixed(1);
     const displayName = firstName || "Utilisateur";
+    const besoinsExerciceL = ((besoinsExerciceMl || 0) / 1000).toFixed(1);
     
-    // Calculate gauge values
+    // Calculate gauge values - comparing real hydration vs daily needs (besoins_basals_net_ml)
     const ecart = Math.max(0, besoinTotalMl - hydratationReelleMl);
     const ecartL = (ecart / 1000).toFixed(1);
     const gaugePercent = besoinTotalMl > 0 ? (hydratationReelleMl / besoinTotalMl) * 100 : 0;
@@ -300,7 +303,8 @@ serve(async (req) => {
       isSensitive,
       ecartL,
       gaugePercent,
-      isExcellent
+      isExcellent,
+      besoinsExerciceL
     });
 
     // Convert SVG to base64 for storage
