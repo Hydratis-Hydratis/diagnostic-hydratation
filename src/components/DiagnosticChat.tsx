@@ -549,9 +549,13 @@ export const DiagnosticChat = ({
       const results = calculateHydration(updatedData);
       
       // Sauvegarder dans Lovable Cloud (anonyme, analytics + marketing)
-      saveDiagnosticToCloud(updatedData, results).catch(err => {
-        console.error('Erreur sauvegarde Cloud:', err);
-        // Ne pas bloquer l'utilisateur en cas d'erreur
+      // NOTE: saveDiagnosticToCloud retourne {success:false} en cas d'erreur (ne throw pas)
+      // donc on doit gérer explicitement le résultat (sinon l'échec est silencieux).
+      saveDiagnosticToCloud(updatedData, results).then((res) => {
+        if (!res.success) {
+          console.error('Erreur sauvegarde Cloud:', res.error);
+          // Ne pas bloquer l'utilisateur en cas d'erreur
+        }
       });
       
       // Sauvegarder les résultats pour persistance après refresh navigateur
