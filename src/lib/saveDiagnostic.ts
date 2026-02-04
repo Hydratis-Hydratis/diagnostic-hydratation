@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DiagnosticData } from "@/types/diagnostic";
 import { HydrationResult } from "./hydrationCalculator";
 import { clearDiagnosticId, ensureDiagnosticId, getCurrentDiagnosticId } from "./diagnosticSession";
+import { upsertDiagnosticCompletion, upsertDiagnosticProgress } from "./diagnosticsRepo";
 
 // Backward-compatible re-exports
 export { clearDiagnosticId, getCurrentDiagnosticId };
@@ -100,26 +101,12 @@ export async function updateDiagnosticProgress(
   diagnosticData: DiagnosticData
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const currentDiagnosticId = await ensureDiagnosticId();
-
-    const { error } = await supabase
-      .from('diagnostics')
-      .update({
-        diagnostic_data: diagnosticData as any,
-        age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
-        sexe: diagnosticData.sexe || null,
-        email: diagnosticData.email || null,
-        first_name: diagnosticData.firstName || null,
-      } as any)
-      .eq('id', currentDiagnosticId);
-    
-    if (error) {
-      console.error('Erreur mise à jour diagnostic:', error);
-      return { success: false, error: error.message };
+    const diagnosticId = await ensureDiagnosticId();
+    const res = await upsertDiagnosticProgress({ diagnosticId, diagnosticData });
+    if (!res.success) {
+      console.error('Erreur mise à jour diagnostic:', res.error);
     }
-    
-    console.log('Diagnostic mis à jour avec réponses partielles');
-    return { success: true };
+    return res;
   } catch (err) {
     console.error('Erreur lors de la mise à jour:', err);
     return { success: false, error: String(err) };
@@ -147,39 +134,21 @@ export async function saveDiagnosticToCloud(
     }
 
     if (diagnosticId) {
-      // Update existing diagnostic with final results (status: completed)
-      const payload = {
-        email: diagnosticData.email || null,
-        first_name: diagnosticData.firstName || null,
-        diagnostic_data: diagnosticData as any,
-        results: results as any,
-        score: results.score,
-        hydration_status: results.statut,
-        completed_at: completedAt,
-        age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
-        sexe: diagnosticData.sexe || null,
-        sport: sportValue,
-        besoin_total_ml: Math.round(results.besoin_total_ml),
-        hydratation_reelle_ml: Math.round(results.hydratation_reelle_ml),
-        ecart_hydratation_ml: Math.round(results.ecart_hydratation_ml),
-        nb_pastilles_basal: results.nb_pastilles_basal,
-        nb_pastilles_exercice: results.nb_pastilles_exercice,
-        nb_pastilles_total: results.nb_pastilles_basal + results.nb_pastilles_exercice,
-        hydra_rank: hydraRank,
-        status: 'completed'
-      };
+      const res = await upsertDiagnosticCompletion({
+        diagnosticId,
+        diagnosticData,
+        results,
+        completedAt,
+        sportValue,
+        hydraRank,
+      });
 
-      const { error } = await supabase
-        .from('diagnostics')
-        .update(payload as any)
-        .eq('id', diagnosticId);
-      
-      if (error) {
-        console.error('Erreur mise à jour finale diagnostic:', error);
-        return { success: false, error: error.message };
+      if (!res.success) {
+        console.error('Erreur mise à jour finale diagnostic:', res.error);
+        return { success: false, error: res.error };
       }
-      
-      console.log('Diagnostic complété avec succès (update)');
+
+      console.log('Diagnostic complété avec succès (upsert)');
     }
 
     // Déterminer si population sensible (enceinte, allaitante, 70+)
