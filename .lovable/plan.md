@@ -1,109 +1,50 @@
 
 
-# Audit: Pourquoi les diagnostics ne sont pas sauvegardés dans le Cloud
+# Plan de corrections
 
-## Diagnostic du probleme
+## 1. Transpiration : pre-selection de la valeur 5
 
-### Ce que j'ai observe
+**Probleme** : Le slider est visuellement positionne sur 5 mais `onSelect` n'est jamais appele tant que l'utilisateur ne touche pas le curseur. Le bouton "Continuer" reste donc desactive.
 
-1. **INSERT fonctionne (HTTP 201)** - La creation initiale du diagnostic dans la base reussit
-2. **UPDATE via upsert echoue (HTTP 401)** - Toutes les mises a jour subsequentes echouent avec l'erreur RLS `42501`
-3. **Tous les diagnostics restent en status "started"** avec des valeurs `null` pour email, first_name, score, etc.
+**Solution** : Appeler `onSelect("5")` automatiquement au montage du composant si aucune valeur n'est deja selectionnee.
 
-### Cause racine identifiee
+**Fichier** : `src/components/TranspirationScale.tsx`
+- Ajouter un `useEffect` qui appelle `onSelect(initialValue.toString())` au premier rendu si `value` est vide.
 
-Le probleme vient de l'interaction entre **upsert()** et les **politiques RLS de SELECT**.
+---
 
-Quand le code appelle `.upsert(row, { onConflict: "id" })`, Supabase:
-1. Tente d'inserer ou mettre a jour la ligne
-2. **Par defaut, retourne la ligne inseree/mise a jour** (comportement RETURNING)
-3. Ce RETURNING necessite une permission **SELECT** sur la ligne
+## 2. Deplacer prenom et email juste apres le profil physique
 
-Or, nos politiques RLS bloquent explicitement SELECT pour le role `anon`:
+**Probleme** : Prenom et email sont demandes a la toute fin du formulaire (etape "Informations"). Beaucoup d'utilisateurs abandonnent avant, ce qui genere des `null` dans la base.
 
-```text
-Politique: "Deny anon select on diagnostics"
-Commande: SELECT
-USING: false  <-- Bloque toute lecture
-```
+**Solution** : 
+- Deplacer les questions `firstName` et `email` dans l'etape "Profil" (elles apparaitront sur le meme ecran que les infos physiques).
+- Adapter le texte pour une transition naturelle : "D'ailleurs, apprenons a faire connaissance !"
+- Comme `updateDiagnosticProgress` sauvegarde deja email et first_name a chaque etape, ces donnees seront capturees des la premiere soumission.
 
-Meme si INSERT et UPDATE sont autorises, l'operation echoue car PostgreSQL ne peut pas retourner la ligne.
+**Fichiers modifies** :
 
-## Solution proposee
+### `src/data/questions.ts`
+- Ajouter `step: "Profil"` aux questions `firstName` et `email`
+- Mettre a jour les textes :
+  - firstName : "D'ailleurs, quel est ton prenom ?"
+  - email : "Et ton adresse email ? (pour recevoir ton diagnostic)"
 
-Modifier le code pour utiliser l'option `{ returning: 'minimal' }` dans tous les appels upsert. Cette option indique a Supabase de ne pas retourner les donnees apres l'operation, evitant ainsi le besoin de permission SELECT.
+### `src/components/DiagnosticChat.tsx`
+- Supprimer l'etape "Informations" de `stepOrder` et `stepIcons` (plus de questions dans cette categorie)
+- Mettre a jour le message de transition si necessaire
 
-### Fichiers a modifier
+### Verification Klaviyo
+- Le code actuel dans `saveDiagnostic.ts` envoie deja `email` et `first_name` vers Klaviyo via `syncToKlaviyo()` - aucun changement necessaire.
+- `upsertDiagnosticProgress` dans `diagnosticsRepo.ts` sauvegarde deja `email` et `first_name` a chaque mise a jour partielle - les donnees seront collectees meme si l'utilisateur abandonne apres l'etape Profil.
 
-#### 1. `src/lib/diagnosticsRepo.ts`
+---
 
-Ajouter `count: 'exact'` aux appels upsert pour eviter le RETURNING:
+## Resume des changements
 
-```typescript
-// Ligne 43-45 - upsertDiagnosticProgress
-const { error } = await supabase
-  .from("diagnostics")
-  .upsert(row as any, { onConflict: "id", count: 'exact' });
-
-// Ligne 90-92 - upsertDiagnosticCompletion  
-const { error } = await supabase
-  .from("diagnostics")
-  .upsert(row as any, { onConflict: "id", count: 'exact' });
-```
-
-**Note**: L'option `count: 'exact'` modifie le comportement de retour pour ne retourner que le compte de lignes affectees, pas les donnees.
-
-Alternativement, on peut utiliser un **UPDATE explicite** au lieu d'upsert pour les mises a jour (puisque la ligne existe deja apres l'INSERT initial).
-
-### Approche recommandee: Separer INSERT et UPDATE
-
-Plutot que d'utiliser upsert partout, le flux devient:
-1. **INSERT initial** (dans `ensureDiagnosticId`) - Cree la ligne avec status "started"
-2. **UPDATE explicite** (dans `upsertDiagnosticProgress` et `upsertDiagnosticCompletion`) - Met a jour la ligne existante
-
-Cette approche est plus claire et evite les ambiguites RLS.
-
-## Changements de code detailles
-
-### `src/lib/diagnosticsRepo.ts`
-
-Remplacer les appels `.upsert()` par `.update().eq('id', ...)`:
-
-```typescript
-// Pour upsertDiagnosticProgress (ligne 43-45)
-const { error } = await supabase
-  .from("diagnostics")
-  .update(row as any)
-  .eq('id', diagnosticId);
-
-// Pour upsertDiagnosticCompletion (ligne 90-92)  
-const { error } = await supabase
-  .from("diagnostics")
-  .update(row as any)
-  .eq('id', diagnosticId);
-```
-
-**Important**: Retirer le champ `id` de l'objet `row` lors des updates pour eviter les erreurs.
-
-## Flux apres correction
-
-```text
-1. Utilisateur clique "Commencer"
-   -> ensureDiagnosticId() fait INSERT -> 201 OK
-   
-2. Utilisateur complete une etape  
-   -> upsertDiagnosticProgress() fait UPDATE -> 200 OK (plus d'erreur RLS)
-   
-3. Utilisateur termine le diagnostic
-   -> upsertDiagnosticCompletion() fait UPDATE -> 200 OK
-   -> status passe a "completed", score/email/first_name sont remplis
-```
-
-## Resume technique
-
-| Element | Avant | Apres |
-|---------|-------|-------|
-| Methode | `.upsert({ onConflict: "id" })` | `.update().eq('id', id)` |
-| Probleme RLS | Necessite SELECT (bloque) | Ne necessite que UPDATE (autorise) |
-| Resultat | 401 Unauthorized | 200 OK |
+| Fichier | Modification |
+|---------|-------------|
+| `TranspirationScale.tsx` | Ajouter useEffect pour pre-valider la valeur 5 |
+| `data/questions.ts` | Deplacer firstName/email dans step "Profil", adapter les textes |
+| `DiagnosticChat.tsx` | Retirer l'etape "Informations" du stepOrder |
 
