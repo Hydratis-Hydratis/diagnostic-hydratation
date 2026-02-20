@@ -30,8 +30,7 @@ export async function upsertDiagnosticProgress(params: {
 }): Promise<{ success: boolean; error?: string }> {
   const { diagnosticId, diagnosticData } = params;
 
-  const row: DiagnosticsRowUpsert = {
-    id: diagnosticId,
+  const updateData: Omit<DiagnosticsRowUpsert, 'id'> = {
     diagnostic_data: diagnosticData as any,
     age: diagnosticData.age ? parseInt(diagnosticData.age) : null,
     sexe: diagnosticData.sexe || null,
@@ -42,7 +41,8 @@ export async function upsertDiagnosticProgress(params: {
 
   const { error } = await supabase
     .from("diagnostics")
-    .upsert(row as any, { onConflict: "id" });
+    .update(updateData as any)
+    .eq('id', diagnosticId);
 
   if (error) return { success: false, error: error.message };
   return { success: true };
@@ -65,8 +65,7 @@ export async function upsertDiagnosticCompletion(params: {
     hydraRank,
   } = params;
 
-  const row: DiagnosticsRowUpsert = {
-    id: diagnosticId,
+  const updateData: Omit<DiagnosticsRowUpsert, 'id'> = {
     email: diagnosticData.email || null,
     first_name: diagnosticData.firstName || null,
     diagnostic_data: diagnosticData as any,
@@ -89,7 +88,8 @@ export async function upsertDiagnosticCompletion(params: {
 
   const { error } = await supabase
     .from("diagnostics")
-    .upsert(row as any, { onConflict: "id" });
+    .update(updateData as any)
+    .eq('id', diagnosticId);
 
   if (error) return { success: false, error: error.message };
   return { success: true };
