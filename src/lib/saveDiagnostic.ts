@@ -20,12 +20,24 @@ async function generateCertificate(payload: {
   firstName: string | null;
   score: number;
   hydraRank: string;
-  besoinTotalMl: number; // besoins_basals_net_ml - ce qu'il faut boire quotidiennement
+  besoinTotalMl: number;
   hydratationReelleMl: number;
   diagnosticId: string;
   nbPastillesTotal: number;
   isSensitivePopulation: boolean;
-  besoinsExerciceMl: number; // besoins supplémentaires pour l'exercice
+  besoinsExerciceMl: number;
+  sportsSelectionnes?: Array<{ name: string; category: string }>;
+  frequence?: string;
+  dureeMinutes?: string;
+  transpiration?: string;
+  situationParticuliere?: string;
+  age?: number | null;
+  urineCouleur?: string;
+  crampes?: string;
+  temperatureExt?: string;
+  besoinsBasalsBrutMl?: number;
+  nbPastillesBasal?: number;
+  nbPastillesExercice?: number;
 }): Promise<string | null> {
   try {
     const { data, error } = await supabase.functions.invoke('generate-certificate', {
@@ -165,12 +177,25 @@ export async function saveDiagnosticToCloud(
       firstName: diagnosticData.firstName || null,
       score: results.score,
       hydraRank: hydraRank,
-      besoinTotalMl: Math.round(results.besoins_basals_net_ml), // Quantité à boire quotidiennement
+      besoinTotalMl: Math.round(results.besoins_basals_net_ml),
       hydratationReelleMl: Math.round(results.hydratation_reelle_ml),
       diagnosticId: diagnosticId,
       nbPastillesTotal: results.nb_pastilles_basal + results.nb_pastilles_exercice,
       isSensitivePopulation: isSensitivePopulation,
-      besoinsExerciceMl: Math.round(results.besoins_exercice_ml) // Besoins supplémentaires pour le sport
+      besoinsExerciceMl: Math.round(results.besoins_exercice_ml),
+      // Données supplémentaires pour le certificat enrichi
+      sportsSelectionnes: diagnosticData.sports_selectionnes?.map(s => ({ name: s.name, category: s.category })),
+      frequence: diagnosticData.frequence || undefined,
+      dureeMinutes: diagnosticData.duree_minutes || undefined,
+      transpiration: diagnosticData.transpiration || undefined,
+      situationParticuliere: diagnosticData.situation_particuliere || undefined,
+      age: age,
+      urineCouleur: diagnosticData.urine_couleur || undefined,
+      crampes: diagnosticData.crampes || undefined,
+      temperatureExt: diagnosticData.temperature_ext || undefined,
+      besoinsBasalsBrutMl: Math.round(results.besoins_basals_brut_ml),
+      nbPastillesBasal: results.nb_pastilles_basal,
+      nbPastillesExercice: results.nb_pastilles_exercice,
     }).then((certificateUrl) => {
       console.log('Certificat généré et sauvegardé par Edge Function:', certificateUrl);
       
