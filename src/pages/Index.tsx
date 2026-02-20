@@ -6,6 +6,7 @@ import { RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import logoHydratis from "@/assets/logo-hydratis.png";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { HelpChatWidget } from "@/components/HelpChatWidget";
 interface ProgressState {
   current: number;
   total: number;
@@ -106,6 +107,7 @@ const Index = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <HelpChatWidget />
     </div>;
 };
 export default Index;
