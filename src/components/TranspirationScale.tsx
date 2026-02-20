@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 
@@ -11,6 +11,13 @@ export const TranspirationScale = ({ value, onSelect }: TranspirationScaleProps)
   // Initialize with value if provided
   const initialValue = value ? parseInt(value) : 5;
   const [selectedValue, setSelectedValue] = useState<number>(initialValue);
+
+  // Pre-validate default value on mount so "Continuer" is enabled
+  useEffect(() => {
+    if (!value) {
+      onSelect(initialValue.toString());
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const transpirationLabels: Record<number, string> = {
     0: "Pas du tout (peau sèche)",
