@@ -1,72 +1,95 @@
 
 
-# Corrections admin : donnees completes, analyses ameliorees, export
+# Corrections coordonnees Hydratis + Certificat fidele au rendu
 
-## 1. Probleme des donnees manquantes
+## 1. Coordonnees Hydratis a corriger
 
-La base de donnees contient **1 233 diagnostics** mais le dashboard n'en affiche que **1 000** a cause de la limite par defaut des requetes (plafond a 1000 lignes). De plus, toutes les politiques RLS de la table `diagnostics` sont en mode **RESTRICTIVE** au lieu de **PERMISSIVE**, ce qui devrait normalement bloquer tout acces.
+Le certificat SVG affiche actuellement **hydratis.fr** au lieu de **hydratis.co**. Les coordonnees completes doivent etre ajoutees partout.
 
-### Corrections
+### Fichiers concernes
 
-**a) Politiques RLS** : Remplacer la politique admin SELECT restrictive par une politique **permissive** pour que l'admin puisse reellement lire les donnees.
+| Fichier | Probleme | Correction |
+|---------|----------|------------|
+| `supabase/functions/generate-certificate/index.ts` | "hydratis.fr" dans le footer SVG | Remplacer par "hydratis.co" + ajouter tel et email |
 
-```sql
-DROP POLICY IF EXISTS "admin_select_diagnostics" ON public.diagnostics;
-DROP POLICY IF EXISTS "Deny authenticated select on diagnostics" ON public.diagnostics;
+Les liens dans `ResultsDisplay.tsx` sont deja corrects (hydratis.co).
 
-CREATE POLICY "admin_select_diagnostics"
-  ON public.diagnostics
-  FOR SELECT
-  TO authenticated
-  USING (has_role(auth.uid(), 'admin'::app_role));
-```
+---
 
-Meme correction pour `support_requests` et `user_roles`.
+## 2. Certificat fidele au compte rendu
 
-**b) Depassement de la limite 1000 lignes** : Modifier `AdminOverview.tsx` et `AnalyticsCharts.tsx` pour utiliser une edge function qui agrege les donnees cote serveur avec la cle service_role (pas de limite de lignes).
+Le certificat actuel est un SVG simplifie (3 cartes + jauge). Le compte rendu reel contient beaucoup plus de sections :
 
-### Nouvelle edge function : `admin-analytics`
+- Tableau de bord (score + badge + percentile, eau a boire, pastilles)
+- Jauge d'hydratation animee avec comparaison
+- CTA Decouvrir Hydratis
+- Plan d'hydratation quotidien (besoins de base + besoins sport)
+- Avertissements personnalises (grossesse, age, crampes, chaleur)
+- Accordeons educatifs
+- Defis hydratation
+- CTA Commander
 
-- Utilise la cle `service_role` pour bypasser la limite de 1000 lignes
-- Retourne les statistiques pre-calculees (totaux, moyennes, distributions)
-- Necessite un token admin valide (verification du role)
+### Approche : SVG enrichi multi-sections
 
-## 2. Analyses ameliorees
+Le certificat SVG sera reecrit pour reproduire fidelement toutes les sections visibles du compte rendu. Le SVG passera de 800px de hauteur a ~1800px pour tout inclure :
 
-Ajout de nouveaux graphiques et indicateurs dans l'onglet Analyses :
+**Section 1 - Header** : "Ton diagnostic est pret, [Prenom] !" + sous-titre
 
-| Graphique | Type | Description |
-|-----------|------|-------------|
-| Taux de completion par jour | Ligne | Evolution du ratio completes/demarres |
-| Heatmap horaire | Barres groupees | Heures de la journee les plus actives |
-| Score moyen par sport | Barres horizontales | Comparaison des scores entre sports |
-| Score moyen par tranche d'age | Barres | Correlation age/hydratation |
-| Entonnoir de conversion | Barres horizontales | Demarres -> Completes -> Avec email |
-| Boissons les plus consommees | Barres | Extraction depuis diagnostic_data |
+**Section 2 - Tableau de bord (3 cartes)** :
+- Score d'hydratation avec badge (Hydra'debutant/initie/avance/champion)
+- Quantite d'eau a boire par jour (+ mention sport si applicable)
+- Pastilles recommandees (ou message population sensible)
 
-## 3. Fonction d'export
+**Section 3 - Jauge de comparaison** :
+- Barre horizontale avec remplissage proportionnel
+- Labels "Ton hydratation quotidienne" et "Ton ideal"
+- Pourcentage affiche
+- Message de progression ("Encore X.XL a boire" ou "Excellent !")
 
-Ajout d'un bouton d'export CSV dans l'onglet Diagnostics :
+**Section 4 - Plan d'hydratation quotidien** :
+- Colonne gauche : Besoin en eau/jour, pastilles basales, detail (besoin total, alimentation, boisson)
+- Colonne droite : Si sportif -> besoins additionnels + sport pratique + frequence/duree/transpiration
 
-- Bouton "Exporter CSV" dans la barre de filtres
-- Exporte **tous** les diagnostics (pas seulement la page courante)
-- Utilise l'edge function `admin-analytics` pour recuperer toutes les donnees
-- Colonnes exportees : date, prenom, email, age, sexe, sport, score, rang, besoin_total_ml, hydratation_reelle_ml, ecart_hydratation_ml, pastilles, status
-- Telechargement automatique du fichier CSV
+**Section 5 - Avertissements** (conditionnel) :
+- Messages pour grossesse, allaitement, personnes agees, enfants, crampes, chaleur
 
-## 4. Fichiers a creer/modifier
+**Section 6 - Defis hydratation** :
+- 3 cartes de defis personnalises
 
-| Fichier | Action |
-|---------|--------|
-| `supabase/migrations/...` | Corriger les politiques RLS (PERMISSIVE) |
-| `supabase/functions/admin-analytics/index.ts` | Nouvelle edge function pour aggregation |
-| `src/components/admin/AdminOverview.tsx` | Utiliser l'edge function |
-| `src/components/admin/AnalyticsCharts.tsx` | Nouveaux graphiques + utiliser edge function |
-| `src/components/admin/DiagnosticsTable.tsx` | Bouton export CSV |
+**Section 7 - Footer** :
+- Logo HYDRATIS
+- Coordonnees : hydratis.co | 01 89 71 32 00 | contact@hydratis.co
+- Date du diagnostic
 
-## 5. Securite
+### Donnees supplementaires a transmettre
 
-- L'edge function `admin-analytics` verifie le token JWT et le role admin avant de retourner les donnees
-- Les politiques RLS permissives pour l'admin restent securisees (seuls les utilisateurs avec le role `admin` dans `user_roles` ont acces)
-- L'export CSV passe par la meme verification d'authentification
+L'edge function recevra des donnees additionnelles depuis le client pour reproduire le rendu complet :
+
+- `sports_selectionnes` : liste des sports avec noms et categories
+- `frequence` : frequence d'entrainement
+- `duree_minutes` : duree des seances
+- `transpiration` : niveau de transpiration (1-10)
+- `situation_particuliere` : enceinte/allaitante/etc
+- `age` : pour les messages d'avertissement
+- `urine_couleur` : pour les defis
+- `crampes` : pour les avertissements et defis
+- `temperature_ext` : pour les avertissements chaleur
+- `besoins_basals_brut_ml` : besoin total avant deduction alimentation
+- `nb_pastilles_basal` : pastilles quotidiennes
+- `nb_pastilles_exercice` : pastilles sport
+- `socialComparison` : percentile (recupere via l'edge function get-score-percentile)
+
+### Fichiers a modifier
+
+| Fichier | Modification |
+|---------|-------------|
+| `supabase/functions/generate-certificate/index.ts` | Reecrite complete du SVG : toutes les sections du compte rendu + coordonnees hydratis.co |
+| `src/lib/saveDiagnostic.ts` | Transmettre les donnees supplementaires (sports, frequence, situation, age, etc.) a l'edge function |
+
+### Securite et performance
+
+- Le SVG reste genere cote serveur (pas de dependance navigateur)
+- La taille du fichier augmentera mais restera legere (~15-20 KB en SVG)
+- Le stockage et l'URL publique restent identiques
+- Aucune modification de base de donnees necessaire
 
