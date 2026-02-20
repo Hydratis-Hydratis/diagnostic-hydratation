@@ -1,50 +1,60 @@
 
 
-# Plan de corrections
+# Correction des politiques RLS de la table diagnostics
 
-## 1. Transpiration : pre-selection de la valeur 5
+## Probleme identifie
 
-**Probleme** : Le slider est visuellement positionne sur 5 mais `onSelect` n'est jamais appele tant que l'utilisateur ne touche pas le curseur. Le bouton "Continuer" reste donc desactive.
+Les politiques RLS "Allow anon insert diagnostics" et "Allow anon update diagnostics" ont ete creees en mode **RESTRICTIVE** au lieu de **PERMISSIVE**. 
 
-**Solution** : Appeler `onSelect("5")` automatiquement au montage du composant si aucune valeur n'est deja selectionnee.
+En PostgreSQL, les politiques RESTRICTIVE ne peuvent que restreindre davantage un acces deja accorde par une politique permissive. Comme il n'existe aucune politique permissive sur la table, aucun acces n'est accorde, meme pas INSERT ou UPDATE.
 
-**Fichier** : `src/components/TranspirationScale.tsx`
-- Ajouter un `useEffect` qui appelle `onSelect(initialValue.toString())` au premier rendu si `value` est vide.
+C'est pour cela que :
+- L'INSERT initial fonctionne (probablement via un comportement par defaut de Supabase ou un cache)
+- Tous les UPDATE echouent silencieusement
+- email, first_name, score restent tous a `null`
+- Aucun diagnostic ne passe jamais en status "completed"
 
----
+## Solution
 
-## 2. Deplacer prenom et email juste apres le profil physique
+Supprimer les politiques restrictives existantes et les recreer en mode **PERMISSIVE** (qui est le mode par defaut de `CREATE POLICY`).
 
-**Probleme** : Prenom et email sont demandes a la toute fin du formulaire (etape "Informations"). Beaucoup d'utilisateurs abandonnent avant, ce qui genere des `null` dans la base.
+### Migration SQL a executer
 
-**Solution** : 
-- Deplacer les questions `firstName` et `email` dans l'etape "Profil" (elles apparaitront sur le meme ecran que les infos physiques).
-- Adapter le texte pour une transition naturelle : "D'ailleurs, apprenons a faire connaissance !"
-- Comme `updateDiagnosticProgress` sauvegarde deja email et first_name a chaque etape, ces donnees seront capturees des la premiere soumission.
+```sql
+-- Supprimer les politiques restrictives actuelles
+DROP POLICY IF EXISTS "Allow anon insert diagnostics" ON public.diagnostics;
+DROP POLICY IF EXISTS "Allow anon update diagnostics" ON public.diagnostics;
+-- Aussi les versions avec espaces en fin de nom (vu dans les precedentes migrations)
+DROP POLICY IF EXISTS "Allow anon insert diagnostics " ON public.diagnostics;
+DROP POLICY IF EXISTS "Allow anon update diagnostics " ON public.diagnostics;
 
-**Fichiers modifies** :
+-- Recreer en mode PERMISSIVE (defaut)
+CREATE POLICY "anon_insert_diagnostics"
+  ON public.diagnostics
+  FOR INSERT
+  TO anon
+  WITH CHECK (true);
 
-### `src/data/questions.ts`
-- Ajouter `step: "Profil"` aux questions `firstName` et `email`
-- Mettre a jour les textes :
-  - firstName : "D'ailleurs, quel est ton prenom ?"
-  - email : "Et ton adresse email ? (pour recevoir ton diagnostic)"
+CREATE POLICY "anon_update_diagnostics"
+  ON public.diagnostics
+  FOR UPDATE
+  TO anon
+  USING (true)
+  WITH CHECK (true);
+```
 
-### `src/components/DiagnosticChat.tsx`
-- Supprimer l'etape "Informations" de `stepOrder` et `stepIcons` (plus de questions dans cette categorie)
-- Mettre a jour le message de transition si necessaire
+Note : les noms de politiques sont changes pour eviter toute confusion avec les anciennes versions (et les problemes d'espaces en fin de nom).
 
-### Verification Klaviyo
-- Le code actuel dans `saveDiagnostic.ts` envoie deja `email` et `first_name` vers Klaviyo via `syncToKlaviyo()` - aucun changement necessaire.
-- `upsertDiagnosticProgress` dans `diagnosticsRepo.ts` sauvegarde deja `email` et `first_name` a chaque mise a jour partielle - les donnees seront collectees meme si l'utilisateur abandonne apres l'etape Profil.
+### Aucun changement de code necessaire
 
----
+Le code dans `diagnosticsRepo.ts` utilise deja correctement `.update().eq('id', diagnosticId)` -- seules les politiques RLS doivent etre corrigees.
 
-## Resume des changements
+## Resultat attendu
 
-| Fichier | Modification |
-|---------|-------------|
-| `TranspirationScale.tsx` | Ajouter useEffect pour pre-valider la valeur 5 |
-| `data/questions.ts` | Deplacer firstName/email dans step "Profil", adapter les textes |
-| `DiagnosticChat.tsx` | Retirer l'etape "Informations" du stepOrder |
+| Etape | Avant | Apres |
+|-------|-------|-------|
+| INSERT initial | Fonctionne | Fonctionne |
+| UPDATE progres (email, prenom) | Echoue (RLS restrictive) | Fonctionne |
+| UPDATE completion (score, status) | Echoue (RLS restrictive) | Fonctionne |
+| Sync Klaviyo | Donnees nulles | Donnees completes |
 
