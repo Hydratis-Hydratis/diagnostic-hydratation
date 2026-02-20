@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.save-diagnostic-progress]
 verify_jwt = false
+
+[functions.admin-analytics]
+verify_jwt = false
