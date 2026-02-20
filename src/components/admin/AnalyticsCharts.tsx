@@ -7,94 +7,120 @@ import {
 } from "recharts";
 
 const COLORS = [
-  "hsl(244, 93%, 32%)",
-  "hsl(30, 80%, 55%)",
-  "hsl(197, 37%, 24%)",
-  "hsl(43, 74%, 66%)",
-  "hsl(27, 87%, 67%)",
-  "hsl(160, 50%, 40%)",
+  "hsl(244, 93%, 32%)", "hsl(30, 80%, 55%)", "hsl(197, 37%, 24%)",
+  "hsl(43, 74%, 66%)", "hsl(27, 87%, 67%)", "hsl(160, 50%, 40%)",
 ];
 
-type D = {
-  score: number | null;
-  sexe: string | null;
-  age: number | null;
-  sport: string | null;
-  hydra_rank: string | null;
-  created_at: string;
-  status: string | null;
-};
+interface AnalyticsData {
+  scoreBuckets: number[];
+  genderMap: Record<string, number>;
+  ageBuckets: number[];
+  sportMap: Record<string, { count: number; totalScore: number }>;
+  dailyMap: Record<string, { total: number; completed: number }>;
+  rankMap: Record<string, number>;
+  hourlyMap: Record<number, number>;
+  scoreByAge: { name: string; avg: number; count: number }[];
+  beverageMap: Record<string, number>;
+  funnel: { started: number; completed: number; withEmail: number };
+}
 
 export function AnalyticsCharts() {
-  const [data, setData] = useState<D[]>([]);
+  const [data, setData] = useState<AnalyticsData | null>(null);
 
   useEffect(() => {
-    supabase
-      .from("diagnostics")
-      .select("score, sexe, age, sport, hydra_rank, created_at, status")
-      .then(({ data: rows }) => setData(rows || []));
+    const fetch = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data: result } = await supabase.functions.invoke("admin-analytics", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (result && !result.error) setData(result);
+    };
+    fetch();
   }, []);
 
-  const completed = data.filter(d => d.status === "completed");
+  if (!data) return <p className="text-muted-foreground">Chargement des analyses...</p>;
 
-  // Score distribution
-  const scoreBuckets = [
-    { name: "0-25", count: 0 }, { name: "26-50", count: 0 },
-    { name: "51-75", count: 0 }, { name: "76-100", count: 0 },
+  const scoreBucketData = [
+    { name: "0-25", count: data.scoreBuckets[0] },
+    { name: "26-50", count: data.scoreBuckets[1] },
+    { name: "51-75", count: data.scoreBuckets[2] },
+    { name: "76-100", count: data.scoreBuckets[3] },
   ];
-  completed.forEach(d => {
-    if (d.score == null) return;
-    if (d.score <= 25) scoreBuckets[0].count++;
-    else if (d.score <= 50) scoreBuckets[1].count++;
-    else if (d.score <= 75) scoreBuckets[2].count++;
-    else scoreBuckets[3].count++;
-  });
 
-  // Gender
-  const genderMap: Record<string, number> = {};
-  completed.forEach(d => { const s = d.sexe || "Non renseigné"; genderMap[s] = (genderMap[s] || 0) + 1; });
-  const genderData = Object.entries(genderMap).map(([name, value]) => ({ name, value }));
+  const genderData = Object.entries(data.genderMap).map(([name, value]) => ({ name, value }));
 
-  // Age
-  const ageBuckets = [
-    { name: "<18", count: 0 }, { name: "18-25", count: 0 }, { name: "26-35", count: 0 },
-    { name: "36-50", count: 0 }, { name: "51-65", count: 0 }, { name: "65+", count: 0 },
+  const ageBucketData = [
+    { name: "<18", count: data.ageBuckets[0] },
+    { name: "18-25", count: data.ageBuckets[1] },
+    { name: "26-35", count: data.ageBuckets[2] },
+    { name: "36-50", count: data.ageBuckets[3] },
+    { name: "51-65", count: data.ageBuckets[4] },
+    { name: "65+", count: data.ageBuckets[5] },
   ];
-  completed.forEach(d => {
-    if (d.age == null) return;
-    if (d.age < 18) ageBuckets[0].count++;
-    else if (d.age <= 25) ageBuckets[1].count++;
-    else if (d.age <= 35) ageBuckets[2].count++;
-    else if (d.age <= 50) ageBuckets[3].count++;
-    else if (d.age <= 65) ageBuckets[4].count++;
-    else ageBuckets[5].count++;
-  });
 
-  // Sports
-  const sportMap: Record<string, number> = {};
-  completed.forEach(d => { if (d.sport) sportMap[d.sport] = (sportMap[d.sport] || 0) + 1; });
-  const sportData = Object.entries(sportMap)
+  const sportData = Object.entries(data.sportMap)
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 10)
+    .map(([name, v]) => ({ name, count: v.count }));
+
+  const sportScoreData = Object.entries(data.sportMap)
+    .filter(([, v]) => v.count >= 3)
+    .map(([name, v]) => ({ name, avg: Math.round(v.totalScore / v.count) }))
+    .sort((a, b) => b.avg - a.avg)
+    .slice(0, 10);
+
+  const dailyData = Object.entries(data.dailyMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, v]) => ({
+      date: date.slice(5),
+      total: v.total,
+      completed: v.completed,
+      rate: v.total ? Math.round((v.completed / v.total) * 100) : 0,
+    }));
+
+  const rankData = Object.entries(data.rankMap).map(([name, value]) => ({ name, value }));
+
+  const hourlyData = Array.from({ length: 24 }, (_, i) => ({
+    hour: `${i}h`,
+    count: data.hourlyMap[i] || 0,
+  }));
+
+  const funnelData = [
+    { name: "Démarrés", value: data.funnel.started },
+    { name: "Complétés", value: data.funnel.completed },
+    { name: "Avec email", value: data.funnel.withEmail },
+  ];
+
+  const beverageData = Object.entries(data.beverageMap)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
     .map(([name, count]) => ({ name, count }));
 
-  // Daily evolution
-  const dailyMap: Record<string, number> = {};
-  data.forEach(d => { const day = d.created_at.split("T")[0]; dailyMap[day] = (dailyMap[day] || 0) + 1; });
-  const dailyData = Object.entries(dailyMap).sort().map(([date, count]) => ({ date, count }));
-
-  // Hydra rank
-  const rankMap: Record<string, number> = {};
-  completed.forEach(d => { if (d.hydra_rank) rankMap[d.hydra_rank] = (rankMap[d.hydra_rank] || 0) + 1; });
-  const rankData = Object.entries(rankMap).map(([name, value]) => ({ name, value }));
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Funnel */}
+      <Card>
+        <CardHeader><CardTitle className="text-base">Entonnoir de conversion</CardTitle></CardHeader>
+        <CardContent className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={funnelData} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" />
+              <YAxis type="category" dataKey="name" width={100} />
+              <Tooltip />
+              <Bar dataKey="value" fill={COLORS[0]} radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Score distribution */}
       <Card>
         <CardHeader><CardTitle className="text-base">Répartition des scores</CardTitle></CardHeader>
         <CardContent className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={scoreBuckets}>
+            <BarChart data={scoreBucketData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
@@ -105,6 +131,43 @@ export function AnalyticsCharts() {
         </CardContent>
       </Card>
 
+      {/* Daily evolution with completion rate */}
+      <Card className="lg:col-span-2">
+        <CardHeader><CardTitle className="text-base">Évolution quotidienne & taux de complétion</CardTitle></CardHeader>
+        <CardContent className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={dailyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis yAxisId="left" allowDecimals={false} />
+              <YAxis yAxisId="right" orientation="right" domain={[0, 100]} unit="%" />
+              <Tooltip />
+              <Legend />
+              <Line yAxisId="left" type="monotone" dataKey="total" stroke={COLORS[0]} strokeWidth={2} dot={false} name="Total" />
+              <Line yAxisId="left" type="monotone" dataKey="completed" stroke={COLORS[5]} strokeWidth={2} dot={false} name="Complétés" />
+              <Line yAxisId="right" type="monotone" dataKey="rate" stroke={COLORS[1]} strokeWidth={2} dot={false} name="Taux %" />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Hourly heatmap */}
+      <Card>
+        <CardHeader><CardTitle className="text-base">Activité par heure</CardTitle></CardHeader>
+        <CardContent className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={hourlyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="hour" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="count" fill={COLORS[2]} radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Gender */}
       <Card>
         <CardHeader><CardTitle className="text-base">Répartition par sexe</CardTitle></CardHeader>
         <CardContent className="h-64">
@@ -120,11 +183,12 @@ export function AnalyticsCharts() {
         </CardContent>
       </Card>
 
+      {/* Age */}
       <Card>
         <CardHeader><CardTitle className="text-base">Répartition par âge</CardTitle></CardHeader>
         <CardContent className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={ageBuckets}>
+            <BarChart data={ageBucketData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
@@ -135,6 +199,23 @@ export function AnalyticsCharts() {
         </CardContent>
       </Card>
 
+      {/* Score by age */}
+      <Card>
+        <CardHeader><CardTitle className="text-base">Score moyen par tranche d'âge</CardTitle></CardHeader>
+        <CardContent className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data.scoreByAge}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis domain={[0, 100]} />
+              <Tooltip />
+              <Bar dataKey="avg" fill={COLORS[3]} radius={[4, 4, 0, 0]} name="Score moyen" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Sports */}
       <Card>
         <CardHeader><CardTitle className="text-base">Sports les plus pratiqués</CardTitle></CardHeader>
         <CardContent className="h-64">
@@ -150,21 +231,25 @@ export function AnalyticsCharts() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">Évolution quotidienne</CardTitle></CardHeader>
-        <CardContent className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={dailyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" stroke={COLORS[0]} strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      {/* Score by sport */}
+      {sportScoreData.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle className="text-base">Score moyen par sport (min. 3)</CardTitle></CardHeader>
+          <CardContent className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={sportScoreData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, 100]} />
+                <YAxis type="category" dataKey="name" width={100} />
+                <Tooltip />
+                <Bar dataKey="avg" fill={COLORS[4]} radius={[0, 4, 4, 0]} name="Score moyen" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
 
+      {/* Hydra rank */}
       <Card>
         <CardHeader><CardTitle className="text-base">Répartition Hydra Rank</CardTitle></CardHeader>
         <CardContent className="h-64">
@@ -179,6 +264,24 @@ export function AnalyticsCharts() {
           </ResponsiveContainer>
         </CardContent>
       </Card>
+
+      {/* Beverages */}
+      {beverageData.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle className="text-base">Boissons les plus consommées</CardTitle></CardHeader>
+          <CardContent className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={beverageData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" allowDecimals={false} />
+                <YAxis type="category" dataKey="name" width={120} />
+                <Tooltip />
+                <Bar dataKey="count" fill={COLORS[5]} radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

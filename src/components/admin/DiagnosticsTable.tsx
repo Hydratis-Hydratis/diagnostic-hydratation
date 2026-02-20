@@ -4,6 +4,7 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Download } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -29,6 +30,7 @@ export function DiagnosticsTable() {
   const [filter, setFilter] = useState<"all" | "completed" | "started">("all");
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Diagnostic | null>(null);
+  const [exporting, setExporting] = useState(false);
   const perPage = 20;
 
   useEffect(() => {
@@ -46,14 +48,52 @@ export function DiagnosticsTable() {
     fetch();
   }, [filter, page]);
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data: result } = await supabase.functions.invoke("admin-analytics?action=export", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (!result?.diagnostics) return;
+
+      const headers = ["Date", "Prénom", "Email", "Âge", "Sexe", "Sport", "Score", "Rang", "Besoin (ml)", "Hydratation (ml)", "Écart (ml)", "Pastilles", "Status"];
+      const rows = result.diagnostics.map((d: any) => [
+        d.created_at ? format(new Date(d.created_at), "dd/MM/yyyy HH:mm") : "",
+        d.first_name || "", d.email || "", d.age ?? "", d.sexe || "", d.sport || "",
+        d.score ?? "", d.hydra_rank || "", d.besoin_total_ml ?? "", d.hydratation_reelle_ml ?? "",
+        d.ecart_hydratation_ml ?? "", d.nb_pastilles_total ?? "", d.status || "",
+      ]);
+
+      const csv = [headers, ...rows].map(r => r.map((v: any) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `diagnostics_${format(new Date(), "yyyy-MM-dd")}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap items-center">
         {(["all", "completed", "started"] as const).map((f) => (
           <Button key={f} variant={filter === f ? "default" : "outline"} size="sm" onClick={() => { setFilter(f); setPage(0); }}>
             {f === "all" ? "Tous" : f === "completed" ? "Complétés" : "Démarrés"}
           </Button>
         ))}
+        <div className="flex-1" />
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
+          <Download className="w-4 h-4 mr-2" />
+          {exporting ? "Export..." : "Exporter CSV"}
+        </Button>
       </div>
 
       <div className="rounded-lg border bg-card overflow-auto">
