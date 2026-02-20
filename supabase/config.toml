@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.get-score-percentile]
 verify_jwt = false
+
+[functions.save-diagnostic-progress]
+verify_jwt = false
