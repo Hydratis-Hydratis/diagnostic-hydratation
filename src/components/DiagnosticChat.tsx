@@ -58,7 +58,6 @@ const groupQuestionsByStep = (): { step: string; questions: Question[]; icon: st
     "Activité physique",
     "Santé & Conditions",
     "Habitudes",
-    "Informations"
   ];
   
   const stepIcons: { [key: string]: string } = {
@@ -66,7 +65,6 @@ const groupQuestionsByStep = (): { step: string; questions: Question[]; icon: st
     "Activité physique": "🏃",
     "Santé & Conditions": "🩺",
     "Habitudes": "☕",
-    "Informations": "📋"
   };
   
   // Créer les groupes dans l'ordre défini
@@ -318,8 +316,7 @@ export const DiagnosticChat = ({
     const transitionMessages: { [key: string]: string } = {
       "Activité physique": "C'est noté 🙂 Passons maintenant à l'activité physique !",
       "Santé & Conditions": "Super, c'est noté ! 💪 Parlons maintenant de ta santé.",
-      "Habitudes": "Parfait ! ☕ Passons à tes habitudes quotidiennes.",
-      "Informations": "On y est presque ! 📋 Plus que quelques informations."
+      "Habitudes": "Parfait ! ☕ Passons à tes habitudes quotidiennes."
     };
     return transitionMessages[nextGroup.step] || `${nextGroup.icon} ${nextGroup.step}\n\nPassons maintenant à la suite.`;
   };
@@ -433,8 +430,6 @@ export const DiagnosticChat = ({
       return "Mes informations de santé sont enregistrées 🩺";
     } else if (stepName === "Habitudes") {
       return "J'ai complété mes boissons quotidiennes habituelles ☕";
-    } else if (stepName === "Informations") {
-      return "J'ai complété mes informations pour recevoir mes résultats 📋";
     }
     
     return `✓ ${stepName} complété`;

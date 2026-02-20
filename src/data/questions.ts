@@ -153,19 +153,21 @@ export const questions: Question[] = [
     step: "Habitudes",
   },
   
-  // ===== INFOS FINALES =====
+  // ===== INFOS FINALES (dans l'étape Profil pour capturer tôt) =====
   {
     id: "firstName",
-    text: "Super ! On arrive bientôt au bout.\n\nQuel est ton prénom ?",
+    text: "D'ailleurs, apprenons à faire connaissance !\n\nQuel est ton prénom ?",
     type: "input",
     inputType: "text",
     placeholder: "Ton prénom",
+    step: "Profil",
   },
   {
     id: "email",
-    text: "Merci d'avoir pris le temps de répondre !\n\nPeux-tu nous indiquer l'adresse e-mail à laquelle envoyer ton diagnostic personnalisé ?",
+    text: "Et ton adresse email ? (pour recevoir ton diagnostic)",
     type: "input",
     inputType: "email",
     placeholder: "ton.email@exemple.com",
+    step: "Profil",
   },
 ];
