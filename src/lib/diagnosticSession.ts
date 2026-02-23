@@ -26,9 +26,18 @@ export async function ensureDiagnosticId(): Promise<string> {
   startInFlight = (async () => {
     const diagnosticId = crypto.randomUUID();
 
+    // Capture UTM params and referrer for traffic sourcing
+    const params = new URLSearchParams(window.location.search);
+    const trackingData: Record<string, string> = {};
+    for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
+      const val = params.get(key);
+      if (val) trackingData[key] = val;
+    }
+    if (document.referrer) trackingData.referrer = document.referrer;
+
     const payload = {
       id: diagnosticId,
-      diagnostic_data: {} as any,
+      diagnostic_data: trackingData as any,
       status: "started",
       user_agent: navigator.userAgent,
     };
