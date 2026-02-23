@@ -19,7 +19,9 @@ interface AnalyticsData {
   genderMap: Record<string, number>;
   sourceMap: Record<string, number>;
   deviceMap: Record<string, number>;
-  recentDiagnostics: { created_at: string; first_name: string; score: number; hydra_rank: string; sport: string }[];
+  pastillesDistribution: Record<string, number>;
+  pastillesByRank: Record<string, number>;
+  recentDiagnostics: { created_at: string; first_name: string; score: number; hydra_rank: string; sport: string; nb_pastilles_total: number | string }[];
 }
 
 export function AdminOverview() {
@@ -86,6 +88,15 @@ export function AdminOverview() {
 
   // Device pie
   const deviceData = Object.entries(data.deviceMap).map(([name, value]) => ({ name, value }));
+
+  // Pastilles distribution
+  const pastillesDistData = Object.entries(data.pastillesDistribution)
+    .map(([name, value]) => ({ name: `${name} pastilles`, value, raw: Number(name) }))
+    .sort((a, b) => a.raw - b.raw);
+
+  // Pastilles by rank
+  const pastillesByRankData = Object.entries(data.pastillesByRank)
+    .map(([name, value]) => ({ name: name.replace("Hydra'", ""), value }));
 
   const kpiCards = [
     { title: "Total diagnostics", value: stats.total, icon: Activity, desc: `${stats.completed} complétés` },
@@ -212,7 +223,42 @@ export function AdminOverview() {
         </Card>
       </div>
 
-      {/* Row 4: Sources + Devices */}
+      {/* Row 4: Pastilles analytics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Répartition des pastilles recommandées</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={pastillesDistData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#8884d8" name="Utilisateurs" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Pastilles moyennes par Hydra Rank</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={pastillesByRankData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#00C49F" name="Moy. pastilles" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -262,6 +308,7 @@ export function AdminOverview() {
                 <TableHead>Score</TableHead>
                 <TableHead>Rang</TableHead>
                 <TableHead>Sport</TableHead>
+                <TableHead>Pastilles</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -272,10 +319,11 @@ export function AdminOverview() {
                   <TableCell className="font-semibold">{d.score}/100</TableCell>
                   <TableCell>{d.hydra_rank}</TableCell>
                   <TableCell>{d.sport}</TableCell>
+                  <TableCell>{d.nb_pastilles_total}</TableCell>
                 </TableRow>
               ))}
               {data.recentDiagnostics.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">Aucun diagnostic complété</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Aucun diagnostic complété</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
