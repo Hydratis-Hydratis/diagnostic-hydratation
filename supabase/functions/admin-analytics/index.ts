@@ -189,6 +189,27 @@ Deno.serve(async (req) => {
       }
     });
 
+    // Pastilles distribution
+    const pastillesDistribution: Record<string, number> = {};
+    completed.forEach((d: any) => {
+      if (d.nb_pastilles_total == null) return;
+      const key = String(d.nb_pastilles_total);
+      pastillesDistribution[key] = (pastillesDistribution[key] || 0) + 1;
+    });
+
+    // Pastilles by rank
+    const pastillesByRankAcc: Record<string, { total: number; count: number }> = {};
+    completed.forEach((d: any) => {
+      if (d.nb_pastilles_total == null || !d.hydra_rank) return;
+      if (!pastillesByRankAcc[d.hydra_rank]) pastillesByRankAcc[d.hydra_rank] = { total: 0, count: 0 };
+      pastillesByRankAcc[d.hydra_rank].total += d.nb_pastilles_total;
+      pastillesByRankAcc[d.hydra_rank].count++;
+    });
+    const pastillesByRank: Record<string, number> = {};
+    for (const [rank, v] of Object.entries(pastillesByRankAcc)) {
+      pastillesByRank[rank] = Math.round((v.total / v.count) * 10) / 10;
+    }
+
     // === NEW AGGREGATIONS ===
 
     // Device map from user_agent
@@ -240,6 +261,7 @@ Deno.serve(async (req) => {
         score: d.score,
         hydra_rank: d.hydra_rank || "—",
         sport: d.sport || "—",
+        nb_pastilles_total: d.nb_pastilles_total ?? "—",
       }));
 
     const result = {
@@ -261,6 +283,8 @@ Deno.serve(async (req) => {
       campaignMap,
       referrerMap,
       recentDiagnostics,
+      pastillesDistribution,
+      pastillesByRank,
     };
 
     return new Response(JSON.stringify(result), {
