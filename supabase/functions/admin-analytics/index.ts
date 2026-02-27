@@ -56,24 +56,41 @@ Deno.serve(async (req) => {
 
     const url = new URL(req.url);
     const action = url.searchParams.get("action") || "stats";
+    const dateFrom = url.searchParams.get("date_from");
+    const dateTo = url.searchParams.get("date_to");
+
+    // Helper: paginated fetch to bypass 1000-row PostgREST limit
+    async function fetchAll(selectColumns: string, orderCol = "created_at") {
+      const PAGE_SIZE = 1000;
+      let allRows: any[] = [];
+      let from = 0;
+      while (true) {
+        let query = supabase
+          .from("diagnostics")
+          .select(selectColumns)
+          .order(orderCol, { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+        if (dateFrom) query = query.gte("created_at", dateFrom);
+        if (dateTo) query = query.lte("created_at", dateTo + "T23:59:59.999Z");
+        const { data: rows, error } = await query;
+        if (error) throw error;
+        if (!rows || rows.length === 0) break;
+        allRows = allRows.concat(rows);
+        if (rows.length < PAGE_SIZE) break;
+        from += PAGE_SIZE;
+      }
+      return allRows;
+    }
 
     if (action === "export") {
-      const { data: allDiags } = await supabase
-        .from("diagnostics")
-        .select("created_at, first_name, email, age, sexe, sport, score, hydra_rank, besoin_total_ml, hydratation_reelle_ml, ecart_hydratation_ml, nb_pastilles_total, status")
-        .order("created_at", { ascending: false });
-
-      return new Response(JSON.stringify({ diagnostics: allDiags || [] }), {
+      const allDiags = await fetchAll("created_at, first_name, email, age, sexe, sport, score, hydra_rank, besoin_total_ml, hydratation_reelle_ml, ecart_hydratation_ml, nb_pastilles_total, status");
+      return new Response(JSON.stringify({ diagnostics: allDiags }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Fetch ALL diagnostics
-    const { data: allData } = await supabase
-      .from("diagnostics")
-      .select("score, sexe, age, sport, hydra_rank, created_at, status, diagnostic_data, user_agent, first_name, email, ecart_hydratation_ml, nb_pastilles_total");
-
-    const data = allData || [];
+    // Fetch ALL diagnostics with pagination
+    const data = await fetchAll("score, sexe, age, sport, hydra_rank, created_at, status, diagnostic_data, user_agent, first_name, email, ecart_hydratation_ml, nb_pastilles_total");
     const now = new Date();
     const todayStr = now.toISOString().split("T")[0];
     const weekAgo = new Date(now.getTime() - 7 * 86400000);
