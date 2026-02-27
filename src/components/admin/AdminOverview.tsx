@@ -1,14 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { format, subDays } from "date-fns";
+import { fr } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { Activity, CheckCircle, TrendingUp, Calendar, Mail, Droplets, Pill } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Activity, CheckCircle, TrendingUp, Calendar as CalendarLucide, Mail, Droplets, Pill } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d", "#ffc658", "#d0ed57"];
+
+type Preset = "7d" | "30d" | "90d" | "all" | "custom";
 
 interface AnalyticsData {
   overview: { total: number; completed: number; avgScore: number; today: number; thisWeek: number; withEmail: number; avgHydrationGap: number; avgPastilles: number };
@@ -27,22 +36,67 @@ interface AnalyticsData {
 export function AdminOverview() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [preset, setPreset] = useState<Preset>("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
+
+  const fetchStats = useCallback(async (from?: string, to?: string) => {
+    setLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { setLoading(false); return; }
+
+    const params: Record<string, string> = {};
+    if (from) params.date_from = from;
+    if (to) params.date_to = to;
+
+    const queryString = new URLSearchParams(params).toString();
+    const { data: result, error } = await supabase.functions.invoke(
+      `admin-analytics${queryString ? `?${queryString}` : ""}`,
+      { headers: { Authorization: `Bearer ${session.access_token}` } }
+    );
+
+    if (error || !result?.overview) { setLoading(false); return; }
+    setData(result);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { setLoading(false); return; }
-
-      const { data: result, error } = await supabase.functions.invoke("admin-analytics", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
-      if (error || !result?.overview) { setLoading(false); return; }
-      setData(result);
-      setLoading(false);
-    };
     fetchStats();
-  }, []);
+  }, [fetchStats]);
+
+  const applyPreset = (p: Preset) => {
+    setPreset(p);
+    if (p === "all") {
+      setDateFrom(undefined);
+      setDateTo(undefined);
+      fetchStats();
+    } else if (p === "7d") {
+      const from = subDays(new Date(), 7);
+      setDateFrom(from);
+      setDateTo(new Date());
+      fetchStats(format(from, "yyyy-MM-dd"), format(new Date(), "yyyy-MM-dd"));
+    } else if (p === "30d") {
+      const from = subDays(new Date(), 30);
+      setDateFrom(from);
+      setDateTo(new Date());
+      fetchStats(format(from, "yyyy-MM-dd"), format(new Date(), "yyyy-MM-dd"));
+    } else if (p === "90d") {
+      const from = subDays(new Date(), 90);
+      setDateFrom(from);
+      setDateTo(new Date());
+      fetchStats(format(from, "yyyy-MM-dd"), format(new Date(), "yyyy-MM-dd"));
+    }
+  };
+
+  const applyCustomDate = (from?: Date, to?: Date) => {
+    setPreset("custom");
+    setDateFrom(from);
+    setDateTo(to);
+    fetchStats(
+      from ? format(from, "yyyy-MM-dd") : undefined,
+      to ? format(to, "yyyy-MM-dd") : undefined
+    );
+  };
 
   if (loading) return <p className="text-muted-foreground">Chargement...</p>;
   if (!data) return <p className="text-muted-foreground">Erreur de chargement.</p>;
@@ -53,7 +107,8 @@ export function AdminOverview() {
   const dailyChartData = (() => {
     const days: { date: string; total: number; completed: number; taux: number }[] = [];
     const now = new Date();
-    for (let i = 29; i >= 0; i--) {
+    const numDays = preset === "7d" ? 7 : preset === "90d" ? 90 : 30;
+    for (let i = numDays - 1; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 86400000);
       const key = d.toISOString().split("T")[0];
       const entry = data.dailyMap[key] || { total: 0, completed: 0 };
@@ -62,54 +117,100 @@ export function AdminOverview() {
     return days;
   })();
 
-  // Funnel data
   const funnelData = [
     { name: "Démarrés", value: data.funnel.started },
     { name: "Complétés", value: data.funnel.completed },
     { name: "Avec email", value: data.funnel.withEmail },
   ];
 
-  // Score distribution
   const scoreDistData = Object.entries(data.scoreDistribution)
     .map(([name, value]) => ({ name, value }))
     .filter(d => d.value > 0 || ["0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", "90-99", "100"].includes(d.name));
 
-  // Rank pie
   const rankData = Object.entries(data.rankMap).map(([name, value]) => ({ name, value }));
-
-  // Gender pie
   const genderData = Object.entries(data.genderMap).map(([name, value]) => ({ name, value }));
-
-  // Source bar
-  const sourceData = Object.entries(data.sourceMap)
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 8);
-
-  // Device pie
+  const sourceData = Object.entries(data.sourceMap).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
   const deviceData = Object.entries(data.deviceMap).map(([name, value]) => ({ name, value }));
-
-  // Pastilles distribution
-  const pastillesDistData = Object.entries(data.pastillesDistribution)
-    .map(([name, value]) => ({ name: `${name} pastilles`, value, raw: Number(name) }))
-    .sort((a, b) => a.raw - b.raw);
-
-  // Pastilles by rank
-  const pastillesByRankData = Object.entries(data.pastillesByRank)
-    .map(([name, value]) => ({ name: name.replace("Hydra'", ""), value }));
+  const pastillesDistData = Object.entries(data.pastillesDistribution).map(([name, value]) => ({ name: `${name} pastilles`, value, raw: Number(name) })).sort((a, b) => a.raw - b.raw);
+  const pastillesByRankData = Object.entries(data.pastillesByRank).map(([name, value]) => ({ name: name.replace("Hydra'", ""), value }));
 
   const kpiCards = [
     { title: "Total diagnostics", value: stats.total, icon: Activity, desc: `${stats.completed} complétés` },
     { title: "Taux de complétion", value: stats.total ? `${Math.round((stats.completed / stats.total) * 100)}%` : "0%", icon: CheckCircle, desc: `${stats.total - stats.completed} abandonnés` },
     { title: "Score moyen", value: `${stats.avgScore}/100`, icon: TrendingUp, desc: `Écart moy. ${stats.avgHydrationGap} ml` },
-    { title: "Cette semaine", value: stats.thisWeek, icon: Calendar, desc: `${stats.today} aujourd'hui` },
+    { title: "Cette semaine", value: stats.thisWeek, icon: CalendarLucide, desc: `${stats.today} aujourd'hui` },
     { title: "Avec email", value: stats.withEmail, icon: Mail, desc: `${stats.completed ? Math.round((stats.withEmail / stats.completed) * 100) : 0}% des complétés` },
     { title: "Écart hydratation", value: `${stats.avgHydrationGap} ml`, icon: Droplets, desc: "écart moyen besoin vs réel" },
     { title: "Pastilles moy.", value: stats.avgPastilles, icon: Pill, desc: "pastilles recommandées" },
   ];
 
+  const presets: { label: string; value: Preset }[] = [
+    { label: "7 jours", value: "7d" },
+    { label: "30 jours", value: "30d" },
+    { label: "90 jours", value: "90d" },
+    { label: "Tout", value: "all" },
+  ];
+
   return (
     <div className="space-y-6">
+      {/* Date Filters */}
+      <Card>
+        <CardContent className="p-3 flex flex-wrap items-center gap-2">
+          {presets.map((p) => (
+            <Button
+              key={p.value}
+              variant={preset === p.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => applyPreset(p.value)}
+            >
+              {p.label}
+            </Button>
+          ))}
+
+          <div className="h-6 w-px bg-border mx-1" />
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("text-xs", preset === "custom" && dateFrom && "border-primary")}>
+                <CalendarIcon className="w-3.5 h-3.5 mr-1" />
+                {dateFrom ? format(dateFrom, "dd/MM/yy") : "Début"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateFrom}
+                onSelect={(d) => applyCustomDate(d, dateTo)}
+                locale={fr}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+
+          <span className="text-xs text-muted-foreground">→</span>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("text-xs", preset === "custom" && dateTo && "border-primary")}>
+                <CalendarIcon className="w-3.5 h-3.5 mr-1" />
+                {dateTo ? format(dateTo, "dd/MM/yy") : "Fin"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateTo}
+                onSelect={(d) => applyCustomDate(dateFrom, d)}
+                locale={fr}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </CardContent>
+      </Card>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         {kpiCards.map((c) => (
@@ -130,7 +231,7 @@ export function AdminOverview() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Évolution quotidienne (30 jours)</CardTitle>
+            <CardTitle className="text-sm">Évolution quotidienne</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
@@ -174,9 +275,7 @@ export function AdminOverview() {
       {/* Row 3: Score distribution + Hydra Rank + Gender */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Répartition des scores</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition des scores</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={scoreDistData}>
@@ -191,9 +290,7 @@ export function AdminOverview() {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Hydra Rank</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Hydra Rank</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
@@ -207,9 +304,7 @@ export function AdminOverview() {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Répartition par sexe</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition par sexe</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
@@ -226,9 +321,7 @@ export function AdminOverview() {
       {/* Row 4: Pastilles analytics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Répartition des pastilles recommandées</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition des pastilles recommandées</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={pastillesDistData}>
@@ -243,9 +336,7 @@ export function AdminOverview() {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Pastilles moyennes par Hydra Rank</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Pastilles moyennes par Hydra Rank</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={pastillesByRankData}>
@@ -259,11 +350,11 @@ export function AdminOverview() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Row 5: Sources + Devices */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Sources de trafic</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Sources de trafic</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={sourceData} layout="vertical">
@@ -278,9 +369,7 @@ export function AdminOverview() {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Répartition par device</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition par device</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
@@ -294,11 +383,9 @@ export function AdminOverview() {
         </Card>
       </div>
 
-      {/* Row 5: Recent diagnostics */}
+      {/* Row 6: Recent diagnostics */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Derniers diagnostics complétés</CardTitle>
-        </CardHeader>
+        <CardHeader className="pb-2"><CardTitle className="text-sm">Derniers diagnostics complétés</CardTitle></CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
