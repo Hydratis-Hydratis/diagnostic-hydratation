@@ -1,37 +1,25 @@
 
 
-# Fix des vues totales et du graphique d'evolution
+# Fix du graphique d'évolution quotidienne
 
-## Problemes identifies
+## Problèmes
 
-1. **"Vues totales = 3"** : La table `page_views` ne contient que 4 lignes car le tracking vient d'etre deploye. Il n'y a aucune donnee historique. Le taux de conversion 37900% est absurde.
+1. Le graphique en mode "Tout" remonte jusqu'au 28 novembre avec des mois de données vides
+2. La courbe "Vues" est affichée alors qu'elle est insignifiante et écrase visuellement les autres courbes
 
-2. **Graphique commence a 0 pendant 20 jours** : En mode "Tout", le code affiche toujours les 30 derniers jours (hardcode ligne 111), meme si les premiers diagnostics datent du ~19 fevrier. Resultat : 20 jours de zeros inutiles.
+## Corrections dans `src/components/admin/AdminOverview.tsx`
 
-## Corrections prevues
+### 1. Plage par défaut : commencer au 17 février 2026
 
-### 1. Graphique : plage dynamique basee sur les donnees reelles
+En mode "Tout", au lieu de partir de la première date dans `dailyMap`, forcer la date de début au **17 février 2026** (ou la première date avec données si elle est postérieure). Cela évite d'afficher 3 mois de zéros.
 
-**Fichier** : `src/components/admin/AdminOverview.tsx`
+### 2. Masquer la courbe "Vues" tant que le volume est trop faible
 
-- En mode "Tout" et "custom", calculer la plage du graphique a partir de la **premiere date presente dans `dailyMap`** (et non 30 jours en dur)
-- En mode 7d/30d/90d, garder le comportement actuel (N jours glissants)
-- Cela eliminera les jours vides en debut de graphique
+Relever le seuil de `showVuesLine` (actuellement >= 5) à un seuil beaucoup plus élevé, ou simplement la masquer par défaut en hardcodant `showVuesLine = false` jusqu'à ce que le tracking ait accumulé suffisamment de données. Option recommandée : ne pas afficher la ligne "Vues" du tout pour le moment (seuil à >= 50 par exemple).
 
-### 2. Vues totales : afficher un message contextuel quand le tracking est recent
-
-**Fichier** : `src/components/admin/AdminOverview.tsx`
-
-- Si `totalViews < 10`, afficher "Tracking recent" au lieu du taux de conversion absurde
-- Cela evite d'induire en erreur avec un taux de conversion de 37900%
-
-### 3. Ligne "Vues" sur le graphique : masquer si donnees insuffisantes
-
-- Ne pas afficher la courbe "Vues" sur le LineChart si la somme des vues est < 5, pour eviter une ligne plate a 0 qui ecrase les autres courbes
-
-## Fichiers a modifier
+### Fichier concerné
 
 | Fichier | Modification |
 |---------|-------------|
-| `src/components/admin/AdminOverview.tsx` | Plage dynamique du graphique + gestion vues faibles |
+| `src/components/admin/AdminOverview.tsx` | Date de début par défaut + masquer courbe Vues |
 
