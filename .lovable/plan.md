@@ -1,56 +1,37 @@
 
 
-# Tracking des vues de page et provenance du trafic
+# Fix des vues totales et du graphique d'evolution
 
-## Constat
+## Problemes identifies
 
-Actuellement, les données de sourcing (UTM, referrer) ne sont capturées que lorsqu'un utilisateur **démarre un diagnostic**. Les simples visiteurs qui arrivent sur la page sans commencer le diagnostic ne sont pas trackés. Il n'y a pas de table `page_views`.
+1. **"Vues totales = 3"** : La table `page_views` ne contient que 4 lignes car le tracking vient d'etre deploye. Il n'y a aucune donnee historique. Le taux de conversion 37900% est absurde.
 
-## Plan
+2. **Graphique commence a 0 pendant 20 jours** : En mode "Tout", le code affiche toujours les 30 derniers jours (hardcode ligne 111), meme si les premiers diagnostics datent du ~19 fevrier. Resultat : 20 jours de zeros inutiles.
 
-### 1. Nouvelle table `page_views`
+## Corrections prevues
 
-Migration SQL pour créer une table légère :
+### 1. Graphique : plage dynamique basee sur les donnees reelles
 
-| Colonne | Type | Description |
-|---------|------|-------------|
-| `id` | uuid PK | Identifiant |
-| `created_at` | timestamptz | Horodatage |
-| `page_path` | text | Route visitée (/, /admin, etc.) |
-| `utm_source` | text | Source UTM |
-| `utm_medium` | text | Medium UTM |
-| `utm_campaign` | text | Campagne UTM |
-| `referrer` | text | Document referrer |
-| `user_agent` | text | User agent |
+**Fichier** : `src/components/admin/AdminOverview.tsx`
 
-RLS : INSERT anonyme autorisé, SELECT réservé aux admins, pas d'UPDATE/DELETE.
+- En mode "Tout" et "custom", calculer la plage du graphique a partir de la **premiere date presente dans `dailyMap`** (et non 30 jours en dur)
+- En mode 7d/30d/90d, garder le comportement actuel (N jours glissants)
+- Cela eliminera les jours vides en debut de graphique
 
-### 2. Tracking côté frontend
+### 2. Vues totales : afficher un message contextuel quand le tracking est recent
 
-Créer `src/lib/trackPageView.ts` : une fonction appelée une fois au montage de `App.tsx` qui insère une ligne dans `page_views` avec les UTM params, referrer et user_agent. Dedupe avec `sessionStorage` pour ne pas recompter les reloads.
+**Fichier** : `src/components/admin/AdminOverview.tsx`
 
-### 3. Edge function `admin-analytics` enrichie
+- Si `totalViews < 10`, afficher "Tracking recent" au lieu du taux de conversion absurde
+- Cela evite d'induire en erreur avec un taux de conversion de 37900%
 
-Ajouter une requête paginée sur `page_views` (avec les mêmes filtres date) pour agréger :
-- `totalViews` : nombre total de vues
-- `viewsByDay` : vues par jour (pour le graphique d'évolution)
-- `viewSourceMap` : top sources de trafic (toutes vues, pas seulement diagnostics)
-- `viewDeviceMap` : répartition device des visiteurs
-- `conversionRate` : ratio vues → diagnostics démarrés
+### 3. Ligne "Vues" sur le graphique : masquer si donnees insuffisantes
 
-### 4. Dashboard `AdminOverview.tsx`
+- Ne pas afficher la courbe "Vues" sur le LineChart si la somme des vues est < 5, pour eviter une ligne plate a 0 qui ecrase les autres courbes
 
-- Ajouter une carte KPI "Vues totales" avec le taux de conversion vues→diagnostics
-- Superposer les vues sur le LineChart d'évolution quotidienne existant (3e courbe)
-- Ajouter un BarChart "Sources de trafic (toutes vues)" pour voir d'où viennent **tous** les visiteurs, pas seulement ceux qui démarrent un diagnostic
+## Fichiers a modifier
 
-### Fichiers concernés
-
-| Fichier | Action |
-|---------|--------|
-| Migration SQL | Créer table `page_views` + RLS |
-| `src/lib/trackPageView.ts` | Nouveau : enregistrer une vue |
-| `src/App.tsx` | Appeler `trackPageView()` au montage |
-| `supabase/functions/admin-analytics/index.ts` | Agréger les page views |
-| `src/components/admin/AdminOverview.tsx` | Afficher vues + sources + conversion |
+| Fichier | Modification |
+|---------|-------------|
+| `src/components/admin/AdminOverview.tsx` | Plage dynamique du graphique + gestion vues faibles |
 
