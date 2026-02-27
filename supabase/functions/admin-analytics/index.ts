@@ -60,13 +60,13 @@ Deno.serve(async (req) => {
     const dateTo = url.searchParams.get("date_to");
 
     // Helper: paginated fetch to bypass 1000-row PostgREST limit
-    async function fetchAll(selectColumns: string, orderCol = "created_at") {
+    async function fetchAll(tableName: string, selectColumns: string, orderCol = "created_at") {
       const PAGE_SIZE = 1000;
       let allRows: any[] = [];
       let from = 0;
       while (true) {
         let query = supabase
-          .from("diagnostics")
+          .from(tableName)
           .select(selectColumns)
           .order(orderCol, { ascending: false })
           .range(from, from + PAGE_SIZE - 1);
@@ -83,14 +83,14 @@ Deno.serve(async (req) => {
     }
 
     if (action === "export") {
-      const allDiags = await fetchAll("created_at, first_name, email, age, sexe, sport, score, hydra_rank, besoin_total_ml, hydratation_reelle_ml, ecart_hydratation_ml, nb_pastilles_total, status");
+      const allDiags = await fetchAll("diagnostics", "created_at, first_name, email, age, sexe, sport, score, hydra_rank, besoin_total_ml, hydratation_reelle_ml, ecart_hydratation_ml, nb_pastilles_total, status");
       return new Response(JSON.stringify({ diagnostics: allDiags }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Fetch ALL diagnostics with pagination
-    const data = await fetchAll("score, sexe, age, sport, hydra_rank, created_at, status, diagnostic_data, user_agent, first_name, email, ecart_hydratation_ml, nb_pastilles_total");
+    const data = await fetchAll("diagnostics", "score, sexe, age, sport, hydra_rank, created_at, status, diagnostic_data, user_agent, first_name, email, ecart_hydratation_ml, nb_pastilles_total");
     const now = new Date();
     const todayStr = now.toISOString().split("T")[0];
     const weekAgo = new Date(now.getTime() - 7 * 86400000);
@@ -281,6 +281,24 @@ Deno.serve(async (req) => {
         nb_pastilles_total: d.nb_pastilles_total ?? "—",
       }));
 
+    // ===== PAGE VIEWS AGGREGATION =====
+    const pageViews = await fetchAll("page_views", "created_at, page_path, utm_source, utm_medium, utm_campaign, referrer, user_agent");
+    const totalViews = pageViews.length;
+
+    const viewsByDay: Record<string, number> = {};
+    const viewSourceMap: Record<string, number> = {};
+    const viewDeviceMap: Record<string, number> = {};
+    pageViews.forEach((pv: any) => {
+      const day = pv.created_at?.split("T")[0];
+      if (day) viewsByDay[day] = (viewsByDay[day] || 0) + 1;
+      const src = pv.utm_source || (pv.referrer ? (() => { try { return new URL(pv.referrer).hostname; } catch { return pv.referrer; } })() : "Direct");
+      viewSourceMap[src] = (viewSourceMap[src] || 0) + 1;
+      const dev = detectDevice(pv.user_agent);
+      viewDeviceMap[dev] = (viewDeviceMap[dev] || 0) + 1;
+    });
+
+    const conversionRate = totalViews > 0 ? Math.round((data.length / totalViews) * 1000) / 10 : 0;
+
     const result = {
       overview: { total: data.length, completed: completed.length, avgScore, today, thisWeek, withEmail, avgHydrationGap, avgPastilles },
       scoreBuckets,
@@ -302,6 +320,7 @@ Deno.serve(async (req) => {
       recentDiagnostics,
       pastillesDistribution,
       pastillesByRank,
+      pageViews: { totalViews, viewsByDay, viewSourceMap, viewDeviceMap, conversionRate },
     };
 
     return new Response(JSON.stringify(result), {
