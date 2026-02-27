@@ -1,50 +1,36 @@
 
 
-# Ajout d'un point detaille sur les pastilles dans le dashboard admin
+# Fix de la limite 1000 lignes + Ajout filtre par date
 
-## Constat actuel
+## Probleme identifie
 
-Le dashboard affiche uniquement une carte KPI "Pastilles moy." avec la moyenne globale. Aucun graphique ne permet de visualiser la repartition ou de croiser les pastilles avec d'autres donnees.
+La requete Supabase dans l'edge function `admin-analytics` (ligne 72-74) utilise `.select()` sans pagination, ce qui est plafonne a **1000 lignes** par defaut par PostgREST. Le chiffre "1000 Total diagnostics" est donc tronque.
 
-Donnees actuelles en base (169 diagnostics completes avec pastilles) :
-- 0 pastilles : 23 utilisateurs (les Hydra'champions bien hydrates)
-- 2 pastilles : 66 utilisateurs
-- 3 pastilles : 78 utilisateurs (la majorite)
-- 4 pastilles : 2 utilisateurs
+## Modifications
 
-## Modifications prevues
+### 1. Edge function : pagination complete + filtre date
 
-### 1. Edge function `admin-analytics` : nouvelles agregations pastilles
+**Fichier** : `supabase/functions/admin-analytics/index.ts`
 
-Ajout de 2 nouvelles donnees dans la reponse :
+- Remplacer la requete simple par une boucle de pagination qui recupere **toutes les lignes** par tranches de 1000 (en utilisant `.range(from, to)`)
+- Accepter les parametres `date_from` et `date_to` en query string pour filtrer par periode
+- Appliquer le filtre `.gte("created_at", date_from)` et `.lte("created_at", date_to)` quand les parametres sont presents
+- Meme logique de pagination pour l'export CSV
 
-| Donnee | Description |
-|--------|-------------|
-| `pastillesDistribution` | Nombre d'utilisateurs par quantite de pastilles (0, 2, 3, 4) |
-| `pastillesByRank` | Moyenne de pastilles recommandees par Hydra Rank (champion, avance, initie, debutant) |
+### 2. Frontend : selecteur de periode
 
-### 2. Frontend `AdminOverview.tsx` : nouvelle ligne de graphiques
+**Fichier** : `src/components/admin/AdminOverview.tsx`
 
-Ajout d'une ligne dediee aux pastilles entre les graphiques actuels (ligne 3 scores/rank/genre) et la ligne sourcing :
+- Ajouter une barre de filtres en haut du dashboard avec :
+  - Boutons rapides : "7 jours", "30 jours", "90 jours", "Tout"
+  - Deux DatePickers (date debut / date fin) pour une periode personnalisee
+- Passer `date_from` et `date_to` en query params a l'appel de l'edge function
+- Re-fetcher les donnees quand le filtre change
 
-**Colonne gauche** - BarChart "Repartition des pastilles recommandees" :
-- Axe X : nombre de pastilles (0, 2, 3, 4)
-- Axe Y : nombre d'utilisateurs
-- Couleur : violet/bleu pour rester coherent avec le reste du dashboard
+### Fichiers concernes
 
-**Colonne droite** - BarChart "Pastilles moyennes par Hydra Rank" :
-- Axe X : les 4 rangs (Champion, Avance, Initie, Debutant)
-- Axe Y : moyenne de pastilles
-- Permet de voir la correlation entre le score d'hydratation et les besoins en pastilles
-
-### 3. Tableau des derniers diagnostics enrichi
-
-Ajout d'une colonne "Pastilles" dans le tableau des 10 derniers diagnostics pour voir le nombre recommande a chaque utilisateur.
-
-## Fichiers a modifier
-
-| Fichier | Modification |
-|---------|-------------|
-| `supabase/functions/admin-analytics/index.ts` | Ajouter `pastillesDistribution` et `pastillesByRank` dans la reponse |
-| `src/components/admin/AdminOverview.tsx` | Ajouter la ligne de graphiques pastilles + colonne tableau |
+| Fichier | Action |
+|---------|--------|
+| `supabase/functions/admin-analytics/index.ts` | Pagination + filtres date |
+| `src/components/admin/AdminOverview.tsx` | UI filtres + passage des params |
 
