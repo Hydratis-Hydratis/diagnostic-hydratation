@@ -158,7 +158,6 @@ export function AdminOverview() {
 
   const pv = data.pageViews;
   const kpiCards = [
-    { title: "Vues totales", value: pv?.totalViews ?? "—", icon: Eye, desc: (pv?.totalViews ?? 0) < 10 ? "Tracking récent" : `Taux conv. ${pv?.conversionRate ?? 0}%` },
     { title: "Total diagnostics", value: stats.total, icon: Activity, desc: `${stats.completed} complétés` },
     { title: "Taux de complétion", value: stats.total ? `${Math.round((stats.completed / stats.total) * 100)}%` : "0%", icon: CheckCircle, desc: `${stats.total - stats.completed} abandonnés` },
     { title: "Score moyen", value: `${stats.avgScore}/100`, icon: TrendingUp, desc: `Écart moy. ${stats.avgHydrationGap} ml` },
