@@ -1,36 +1,56 @@
 
 
-# Fix de la limite 1000 lignes + Ajout filtre par date
+# Tracking des vues de page et provenance du trafic
 
-## Probleme identifie
+## Constat
 
-La requete Supabase dans l'edge function `admin-analytics` (ligne 72-74) utilise `.select()` sans pagination, ce qui est plafonne a **1000 lignes** par defaut par PostgREST. Le chiffre "1000 Total diagnostics" est donc tronque.
+Actuellement, les données de sourcing (UTM, referrer) ne sont capturées que lorsqu'un utilisateur **démarre un diagnostic**. Les simples visiteurs qui arrivent sur la page sans commencer le diagnostic ne sont pas trackés. Il n'y a pas de table `page_views`.
 
-## Modifications
+## Plan
 
-### 1. Edge function : pagination complete + filtre date
+### 1. Nouvelle table `page_views`
 
-**Fichier** : `supabase/functions/admin-analytics/index.ts`
+Migration SQL pour créer une table légère :
 
-- Remplacer la requete simple par une boucle de pagination qui recupere **toutes les lignes** par tranches de 1000 (en utilisant `.range(from, to)`)
-- Accepter les parametres `date_from` et `date_to` en query string pour filtrer par periode
-- Appliquer le filtre `.gte("created_at", date_from)` et `.lte("created_at", date_to)` quand les parametres sont presents
-- Meme logique de pagination pour l'export CSV
+| Colonne | Type | Description |
+|---------|------|-------------|
+| `id` | uuid PK | Identifiant |
+| `created_at` | timestamptz | Horodatage |
+| `page_path` | text | Route visitée (/, /admin, etc.) |
+| `utm_source` | text | Source UTM |
+| `utm_medium` | text | Medium UTM |
+| `utm_campaign` | text | Campagne UTM |
+| `referrer` | text | Document referrer |
+| `user_agent` | text | User agent |
 
-### 2. Frontend : selecteur de periode
+RLS : INSERT anonyme autorisé, SELECT réservé aux admins, pas d'UPDATE/DELETE.
 
-**Fichier** : `src/components/admin/AdminOverview.tsx`
+### 2. Tracking côté frontend
 
-- Ajouter une barre de filtres en haut du dashboard avec :
-  - Boutons rapides : "7 jours", "30 jours", "90 jours", "Tout"
-  - Deux DatePickers (date debut / date fin) pour une periode personnalisee
-- Passer `date_from` et `date_to` en query params a l'appel de l'edge function
-- Re-fetcher les donnees quand le filtre change
+Créer `src/lib/trackPageView.ts` : une fonction appelée une fois au montage de `App.tsx` qui insère une ligne dans `page_views` avec les UTM params, referrer et user_agent. Dedupe avec `sessionStorage` pour ne pas recompter les reloads.
 
-### Fichiers concernes
+### 3. Edge function `admin-analytics` enrichie
+
+Ajouter une requête paginée sur `page_views` (avec les mêmes filtres date) pour agréger :
+- `totalViews` : nombre total de vues
+- `viewsByDay` : vues par jour (pour le graphique d'évolution)
+- `viewSourceMap` : top sources de trafic (toutes vues, pas seulement diagnostics)
+- `viewDeviceMap` : répartition device des visiteurs
+- `conversionRate` : ratio vues → diagnostics démarrés
+
+### 4. Dashboard `AdminOverview.tsx`
+
+- Ajouter une carte KPI "Vues totales" avec le taux de conversion vues→diagnostics
+- Superposer les vues sur le LineChart d'évolution quotidienne existant (3e courbe)
+- Ajouter un BarChart "Sources de trafic (toutes vues)" pour voir d'où viennent **tous** les visiteurs, pas seulement ceux qui démarrent un diagnostic
+
+### Fichiers concernés
 
 | Fichier | Action |
 |---------|--------|
-| `supabase/functions/admin-analytics/index.ts` | Pagination + filtres date |
-| `src/components/admin/AdminOverview.tsx` | UI filtres + passage des params |
+| Migration SQL | Créer table `page_views` + RLS |
+| `src/lib/trackPageView.ts` | Nouveau : enregistrer une vue |
+| `src/App.tsx` | Appeler `trackPageView()` au montage |
+| `supabase/functions/admin-analytics/index.ts` | Agréger les page views |
+| `src/components/admin/AdminOverview.tsx` | Afficher vues + sources + conversion |
 
