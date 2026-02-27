@@ -120,8 +120,10 @@ export function AdminOverview() {
       }
     } else {
       // "all" or "custom": start from first date with data
+      const minDate = new Date("2026-02-17");
       const allDates = [...Object.keys(data.dailyMap), ...Object.keys(data.pageViews?.viewsByDay || {})].sort();
-      const startDate = allDates.length > 0 ? new Date(allDates[0]) : now;
+      const firstDataDate = allDates.length > 0 ? new Date(allDates[0]) : now;
+      const startDate = firstDataDate > minDate ? firstDataDate : minDate;
       const endDate = now;
       for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
         const key = d.toISOString().split("T")[0];
@@ -134,7 +136,7 @@ export function AdminOverview() {
   })();
 
   const totalVues = dailyChartData.reduce((s, d) => s + d.vues, 0);
-  const showVuesLine = totalVues >= 5;
+  const showVuesLine = totalVues >= 50;
 
   const funnelData = [
     { name: "Démarrés", value: data.funnel.started },
