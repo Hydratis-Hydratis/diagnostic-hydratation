@@ -108,16 +108,33 @@ export function AdminOverview() {
   const dailyChartData = (() => {
     const days: { date: string; total: number; completed: number; taux: number; vues: number }[] = [];
     const now = new Date();
-    const numDays = preset === "7d" ? 7 : preset === "90d" ? 90 : 30;
-    for (let i = numDays - 1; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 86400000);
-      const key = d.toISOString().split("T")[0];
-      const entry = data.dailyMap[key] || { total: 0, completed: 0 };
-      const vues = data.pageViews?.viewsByDay?.[key] || 0;
-      days.push({ date: key.slice(5), total: entry.total, completed: entry.completed, taux: entry.total ? Math.round((entry.completed / entry.total) * 100) : 0, vues });
+
+    if (preset === "7d" || preset === "30d" || preset === "90d") {
+      const numDays = preset === "7d" ? 7 : preset === "90d" ? 90 : 30;
+      for (let i = numDays - 1; i >= 0; i--) {
+        const d = new Date(now.getTime() - i * 86400000);
+        const key = d.toISOString().split("T")[0];
+        const entry = data.dailyMap[key] || { total: 0, completed: 0 };
+        const vues = data.pageViews?.viewsByDay?.[key] || 0;
+        days.push({ date: key.slice(5), total: entry.total, completed: entry.completed, taux: entry.total ? Math.round((entry.completed / entry.total) * 100) : 0, vues });
+      }
+    } else {
+      // "all" or "custom": start from first date with data
+      const allDates = [...Object.keys(data.dailyMap), ...Object.keys(data.pageViews?.viewsByDay || {})].sort();
+      const startDate = allDates.length > 0 ? new Date(allDates[0]) : now;
+      const endDate = now;
+      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const key = d.toISOString().split("T")[0];
+        const entry = data.dailyMap[key] || { total: 0, completed: 0 };
+        const vues = data.pageViews?.viewsByDay?.[key] || 0;
+        days.push({ date: key.slice(5), total: entry.total, completed: entry.completed, taux: entry.total ? Math.round((entry.completed / entry.total) * 100) : 0, vues });
+      }
     }
     return days;
   })();
+
+  const totalVues = dailyChartData.reduce((s, d) => s + d.vues, 0);
+  const showVuesLine = totalVues >= 5;
 
   const funnelData = [
     { name: "Démarrés", value: data.funnel.started },
@@ -139,7 +156,7 @@ export function AdminOverview() {
 
   const pv = data.pageViews;
   const kpiCards = [
-    { title: "Vues totales", value: pv?.totalViews ?? "—", icon: Eye, desc: `Taux conv. ${pv?.conversionRate ?? 0}%` },
+    { title: "Vues totales", value: pv?.totalViews ?? "—", icon: Eye, desc: (pv?.totalViews ?? 0) < 10 ? "Tracking récent" : `Taux conv. ${pv?.conversionRate ?? 0}%` },
     { title: "Total diagnostics", value: stats.total, icon: Activity, desc: `${stats.completed} complétés` },
     { title: "Taux de complétion", value: stats.total ? `${Math.round((stats.completed / stats.total) * 100)}%` : "0%", icon: CheckCircle, desc: `${stats.total - stats.completed} abandonnés` },
     { title: "Score moyen", value: `${stats.avgScore}/100`, icon: TrendingUp, desc: `Écart moy. ${stats.avgHydrationGap} ml` },
@@ -247,7 +264,7 @@ export function AdminOverview() {
                 <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} unit="%" />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line yAxisId="left" type="monotone" dataKey="vues" stroke="#FF8042" name="Vues" strokeWidth={2} dot={false} />
+                {showVuesLine && <Line yAxisId="left" type="monotone" dataKey="vues" stroke="#FF8042" name="Vues" strokeWidth={2} dot={false} />}
                 <Line yAxisId="left" type="monotone" dataKey="total" stroke="#8884d8" name="Diagnostics" strokeWidth={2} dot={false} />
                 <Line yAxisId="left" type="monotone" dataKey="completed" stroke="#82ca9d" name="Complétés" strokeWidth={2} dot={false} />
                 <Line yAxisId="right" type="monotone" dataKey="taux" stroke="#ffc658" name="Taux %" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
