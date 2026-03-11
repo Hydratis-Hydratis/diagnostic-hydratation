@@ -441,7 +441,6 @@ export function AdminOverview() {
           </CardContent>
         </Card>
       </div>
-      </div>
 
       {/* Row 6: Recent diagnostics */}
       <Card>
