@@ -393,7 +393,7 @@ export function AdminOverview() {
         return (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Abandons par question ({Object.values(data.abandonMap).reduce((a, b) => a + b, 0)} abandons)</CardTitle>
+              <CardTitle className="text-sm">Abandons par question ({Object.values(data.abandonMap!).reduce((a: number, b: number) => a + b, 0)} abandons)</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={Math.max(200, abandonData.length * 32)}>
