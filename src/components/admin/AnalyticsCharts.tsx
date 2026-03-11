@@ -101,17 +101,10 @@ export function AnalyticsCharts() {
 
   const abandonData = (() => {
     if (!data.abandonMap || Object.keys(data.abandonMap).length === 0) return [];
-    const labels = data.questionLabels || {};
-    const questionOrder = [
-      "_before_start", "sexe", "situation_particuliere", "age", "taille_cm", "poids_kg",
-      "temperature_ext", "sport_pratique", "metier_physique",
-      "sports_selectionnes", "frequence", "duree_minutes", "transpiration",
-      "crampes", "courbatures", "urine_couleur", "boissons_journalieres",
-      "firstName", "email"
-    ];
-    return questionOrder
-      .filter(q => data.abandonMap![q])
-      .map(q => ({ name: labels[q] || q, value: data.abandonMap![q] }));
+    const stepOrder = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes", "Avant 1ère question"];
+    return stepOrder
+      .filter(s => data.abandonMap![s])
+      .map(s => ({ name: s, value: data.abandonMap![s] }));
   })();
 
   return (
