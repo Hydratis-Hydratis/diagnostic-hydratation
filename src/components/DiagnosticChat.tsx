@@ -191,6 +191,16 @@ export const DiagnosticChat = ({
   }, [handleScroll]);
 
 
+  // Track last seen step for abandon analytics
+  useEffect(() => {
+    if (!showOnboarding && !isComplete && currentGroupIndex < questionGroups.length) {
+      const stepName = questionGroups[currentGroupIndex].step;
+      updateLastSeenStep(stepName).then(res => {
+        if (res.success) console.log('last_seen_step mis à jour:', stepName);
+      });
+    }
+  }, [showOnboarding, isComplete, currentGroupIndex]);
+
   // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding/transitioning state
   useEffect(() => {
     if (!showOnboarding && !isComplete && !isTyping && !isTransitioning && currentGroupIndex < questionGroups.length && !showScreen) {
