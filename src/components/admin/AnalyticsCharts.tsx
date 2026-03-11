@@ -107,7 +107,7 @@ export function AnalyticsCharts() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Abandons par question */}
-      {abandonData.length > 0 && (
+      {(
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base">

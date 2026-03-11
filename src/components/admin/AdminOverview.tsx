@@ -377,30 +377,22 @@ export function AdminOverview() {
         </Card>
       </div>
 
-      {/* Row 5: Abandons par question */}
-      {data.abandonMap && Object.keys(data.abandonMap).length > 0 && (() => {
-        const labels = data.questionLabels || {};
-        const questionOrder = [
-          "_before_start", "sexe", "situation_particuliere", "age", "taille_cm", "poids_kg",
-          "temperature_ext", "sport_pratique", "metier_physique",
-          "sports_selectionnes", "frequence", "duree_minutes", "transpiration",
-          "crampes", "courbatures", "urine_couleur", "boissons_journalieres",
-          "firstName", "email"
-        ];
-        const abandonData = questionOrder
-          .filter(q => data.abandonMap![q])
-          .map(q => ({ name: labels[q] || q, value: data.abandonMap![q] }));
+      {/* Row 5: Abandons par écran */}
+      {(() => {
+        const stepOrder = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes", "Coordonnées"];
+        const abandonData = stepOrder.map(s => ({ name: s, value: data.abandonMap?.[s] || 0 }));
+        const totalAbandons = abandonData.reduce((a, b) => a + b.value, 0);
         return (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Abandons par question ({Object.values(data.abandonMap!).reduce((a: number, b: number) => a + b, 0)} abandons)</CardTitle>
+              <CardTitle className="text-sm">Abandons par écran ({totalAbandons} abandons)</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={Math.max(200, abandonData.length * 32)}>
+              <ResponsiveContainer width="100%" height={Math.max(200, abandonData.length * 40)}>
                 <BarChart data={abandonData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={120} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={140} />
                   <Tooltip />
                   <Bar dataKey="value" fill="#FF8042" name="Abandons" />
                 </BarChart>
