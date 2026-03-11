@@ -154,9 +154,13 @@ export function AdminOverview() {
   const genderData = Object.entries(data.genderMap).map(([name, value]) => ({ name, value }));
   const sourceData = Object.entries(data.sourceMap).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
   const deviceData = Object.entries(data.deviceMap).map(([name, value]) => ({ name, value }));
-  const utmSourceData = data.pageViews?.viewByUtmSource ? Object.entries(data.pageViews.viewByUtmSource).map(([name, value]) => ({ name, value: value as number })).sort((a, b) => b.value - a.value).slice(0, 10) : [];
-  const utmMediumData = data.pageViews?.viewByUtmMedium ? Object.entries(data.pageViews.viewByUtmMedium).map(([name, value]) => ({ name, value: value as number })).sort((a, b) => b.value - a.value).slice(0, 10) : [];
-  const utmSourceMediumData = data.pageViews?.viewByUtmSourceMedium ? Object.entries(data.pageViews.viewByUtmSourceMedium).map(([name, value]) => ({ name, value: value as number })).sort((a, b) => b.value - a.value).slice(0, 10) : [];
+  const utmCombinedData = (() => {
+    const smMap = data.pageViews?.viewByUtmSourceMedium || {};
+    return Object.entries(smMap)
+      .map(([name, value]) => ({ name, vues: value as number }))
+      .sort((a, b) => b.vues - a.vues)
+      .slice(0, 12);
+  })();
   const pastillesDistData = Object.entries(data.pastillesDistribution).map(([name, value]) => ({ name: `${name} pastilles`, value, raw: Number(name) })).sort((a, b) => a.raw - b.raw);
   const pastillesByRankData = Object.entries(data.pastillesByRank).map(([name, value]) => ({ name: name.replace("Hydra'", ""), value }));
 
