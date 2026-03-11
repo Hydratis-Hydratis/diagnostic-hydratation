@@ -154,9 +154,13 @@ export function AdminOverview() {
   const genderData = Object.entries(data.genderMap).map(([name, value]) => ({ name, value }));
   const sourceData = Object.entries(data.sourceMap).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
   const deviceData = Object.entries(data.deviceMap).map(([name, value]) => ({ name, value }));
-  const utmSourceData = data.pageViews?.viewByUtmSource ? Object.entries(data.pageViews.viewByUtmSource).map(([name, value]) => ({ name, value: value as number })).sort((a, b) => b.value - a.value).slice(0, 10) : [];
-  const utmMediumData = data.pageViews?.viewByUtmMedium ? Object.entries(data.pageViews.viewByUtmMedium).map(([name, value]) => ({ name, value: value as number })).sort((a, b) => b.value - a.value).slice(0, 10) : [];
-  const utmSourceMediumData = data.pageViews?.viewByUtmSourceMedium ? Object.entries(data.pageViews.viewByUtmSourceMedium).map(([name, value]) => ({ name, value: value as number })).sort((a, b) => b.value - a.value).slice(0, 10) : [];
+  const utmCombinedData = (() => {
+    const smMap = data.pageViews?.viewByUtmSourceMedium || {};
+    return Object.entries(smMap)
+      .map(([name, value]) => ({ name, vues: value as number }))
+      .sort((a, b) => b.vues - a.vues)
+      .slice(0, 12);
+  })();
   const pastillesDistData = Object.entries(data.pastillesDistribution).map(([name, value]) => ({ name: `${name} pastilles`, value, raw: Number(name) })).sort((a, b) => a.raw - b.raw);
   const pastillesByRankData = Object.entries(data.pastillesByRank).map(([name, value]) => ({ name: name.replace("Hydra'", ""), value }));
 
@@ -404,36 +408,19 @@ export function AdminOverview() {
         );
       })()}
 
-      {/* Row 6: UTM Sources + UTM Medium + Source/Medium combo */}
+      {/* Row 6: UTM Source/Medium + Diagnostic Sources + Devices */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {utmSourceData.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">Trafic par UTM Source</CardTitle></CardHeader>
+        {utmCombinedData.length > 0 && (
+          <Card className="md:col-span-2">
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Trafic par Source / Medium (UTM)</CardTitle></CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={utmSourceData} layout="vertical">
+              <ResponsiveContainer width="100%" height={Math.max(240, utmCombinedData.length * 28)}>
+                <BarChart data={utmCombinedData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={100} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={160} />
                   <Tooltip />
-                  <Bar dataKey="value" fill="#FF8042" name="Vues" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-
-        {utmMediumData.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">Trafic par UTM Medium</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={utmMediumData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={100} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#00C49F" name="Vues" />
+                  <Bar dataKey="vues" fill="#FF8042" name="Vues" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -450,41 +437,6 @@ export function AdminOverview() {
                 </Pie>
                 <Tooltip />
               </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Row 6b: Source / Medium combo + Diagnostic sources */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {utmSourceMediumData.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">Trafic par Source / Medium</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={Math.max(220, utmSourceMediumData.length * 28)}>
-                <BarChart data={utmSourceMediumData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={140} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#8884d8" name="Vues" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Sources (diagnostics)</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={sourceData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" tick={{ fontSize: 10 }} />
-                <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={80} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#00C49F" name="Diagnostics" />
-              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
