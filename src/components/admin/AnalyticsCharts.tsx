@@ -101,7 +101,7 @@ export function AnalyticsCharts() {
 
   const abandonData = (() => {
     if (!data.abandonMap || Object.keys(data.abandonMap).length === 0) return [];
-    const stepOrder = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes", "Avant 1ère question"];
+    const stepOrder = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes", "Coordonnées", "Avant 1ère question"];
     return stepOrder
       .filter(s => data.abandonMap![s])
       .map(s => ({ name: s, value: data.abandonMap![s] }));

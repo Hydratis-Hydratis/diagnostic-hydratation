@@ -58,6 +58,7 @@ const groupQuestionsByStep = (): { step: string; questions: Question[]; icon: st
     "Activité physique",
     "Santé & Conditions",
     "Habitudes",
+    "Coordonnées",
   ];
   
   const stepIcons: { [key: string]: string } = {
@@ -65,6 +66,7 @@ const groupQuestionsByStep = (): { step: string; questions: Question[]; icon: st
     "Activité physique": "🏃",
     "Santé & Conditions": "🩺",
     "Habitudes": "☕",
+    "Coordonnées": "📧",
   };
   
   // Créer les groupes dans l'ordre défini

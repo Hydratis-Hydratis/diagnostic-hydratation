@@ -153,14 +153,14 @@ export const questions: Question[] = [
     step: "Habitudes",
   },
   
-  // ===== INFOS FINALES (dans l'étape Profil pour capturer tôt) =====
+  // ===== INFOS FINALES (étape séparée pour tracker les abandons) =====
   {
     id: "firstName",
     text: "D'ailleurs, apprenons à faire connaissance !\n\nQuel est ton prénom ?",
     type: "input",
     inputType: "text",
     placeholder: "Ton prénom",
-    step: "Profil",
+    step: "Coordonnées",
   },
   {
     id: "email",
@@ -168,6 +168,6 @@ export const questions: Question[] = [
     type: "input",
     inputType: "email",
     placeholder: "ton.email@exemple.com",
-    step: "Profil",
+    step: "Coordonnées",
   },
 ];
