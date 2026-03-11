@@ -1,20 +1,25 @@
 
 
-# Ajouter le rôle admin pour pierre@hydratis.co
+# Fix du graphique d'évolution quotidienne
 
-## Problème
+## Problèmes
 
-Le compte `pierre@hydratis.co` s'authentifie avec succès mais est redirigé vers la page de login car il ne possède pas le rôle `admin` dans la table `user_roles`. Seul `anatole@hydratis.co` a ce rôle actuellement.
+1. Le graphique en mode "Tout" remonte jusqu'au 28 novembre avec des mois de données vides
+2. La courbe "Vues" est affichée alors qu'elle est insignifiante et écrase visuellement les autres courbes
 
-## Correction
+## Corrections dans `src/components/admin/AdminOverview.tsx`
 
-Une seule migration SQL pour insérer le rôle admin :
+### 1. Plage par défaut : commencer au 17 février 2026
 
-```sql
-INSERT INTO public.user_roles (user_id, role)
-VALUES ('a10f832d-4c20-476d-9387-8bce9d738089', 'admin')
-ON CONFLICT (user_id, role) DO NOTHING;
-```
+En mode "Tout", au lieu de partir de la première date dans `dailyMap`, forcer la date de début au **17 février 2026** (ou la première date avec données si elle est postérieure). Cela évite d'afficher 3 mois de zéros.
 
-Aucun fichier code à modifier.
+### 2. Masquer la courbe "Vues" tant que le volume est trop faible
+
+Relever le seuil de `showVuesLine` (actuellement >= 5) à un seuil beaucoup plus élevé, ou simplement la masquer par défaut en hardcodant `showVuesLine = false` jusqu'à ce que le tracking ait accumulé suffisamment de données. Option recommandée : ne pas afficher la ligne "Vues" du tout pour le moment (seuil à >= 50 par exemple).
+
+### Fichier concerné
+
+| Fichier | Modification |
+|---------|-------------|
+| `src/components/admin/AdminOverview.tsx` | Date de début par défaut + masquer courbe Vues |
 
