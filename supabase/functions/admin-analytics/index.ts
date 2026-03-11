@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch ALL diagnostics with pagination
-    const data = await fetchAll("diagnostics", "score, sexe, age, sport, hydra_rank, created_at, status, diagnostic_data, user_agent, first_name, email, ecart_hydratation_ml, nb_pastilles_total");
+    const data = await fetchAll("diagnostics", "score, sexe, age, sport, hydra_rank, created_at, status, diagnostic_data, user_agent, first_name, email, ecart_hydratation_ml, nb_pastilles_total, last_seen_step");
     const now = new Date();
     const todayStr = now.toISOString().split("T")[0];
     const weekAgo = new Date(now.getTime() - 7 * 86400000);
