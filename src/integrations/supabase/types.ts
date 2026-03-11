@@ -29,6 +29,7 @@ export type Database = {
           hydratation_reelle_ml: number | null
           hydration_status: string | null
           id: string
+          last_seen_step: string | null
           nb_pastilles_basal: number | null
           nb_pastilles_exercice: number | null
           nb_pastilles_total: number | null
@@ -53,6 +54,7 @@ export type Database = {
           hydratation_reelle_ml?: number | null
           hydration_status?: string | null
           id?: string
+          last_seen_step?: string | null
           nb_pastilles_basal?: number | null
           nb_pastilles_exercice?: number | null
           nb_pastilles_total?: number | null
@@ -77,6 +79,7 @@ export type Database = {
           hydratation_reelle_ml?: number | null
           hydration_status?: string | null
           id?: string
+          last_seen_step?: string | null
           nb_pastilles_basal?: number | null
           nb_pastilles_exercice?: number | null
           nb_pastilles_total?: number | null

@@ -1,0 +1,1 @@
+ALTER TABLE public.diagnostics ADD COLUMN last_seen_step text;

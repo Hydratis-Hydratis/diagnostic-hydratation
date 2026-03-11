@@ -1,42 +1,25 @@
 
 
-# Tracking précis de l'abandon dans le questionnaire
+# Fix du graphique d'évolution quotidienne
 
-## Constat actuel
+## Problèmes
 
-Les questions sont groupées par **écran thématique** (pas une par une) :
-1. **Profil** — sexe, situation, âge, taille, poids, prénom, email
-2. **Activité physique** — sport, métier physique, sports sélectionnés, fréquence, durée, transpiration
-3. **Santé & Conditions** — température, crampes, courbatures, couleur urine
-4. **Habitudes** — boissons journalières
+1. Le graphique en mode "Tout" remonte jusqu'au 28 novembre avec des mois de données vides
+2. La courbe "Vues" est affichée alors qu'elle est insignifiante et écrase visuellement les autres courbes
 
-Actuellement, les réponses ne sont sauvegardées dans la base qu'**après validation d'un écran** (`updateDiagnosticProgress`). On ne sait donc pas quel écran l'utilisateur regardait quand il est parti — seulement quel écran il a terminé en dernier.
+## Corrections dans `src/components/admin/AdminOverview.tsx`
 
-## Solution : sauvegarder l'écran actuellement affiché
+### 1. Plage par défaut : commencer au 17 février 2026
 
-### 1. Ajouter une colonne `last_seen_step` à la table `diagnostics`
+En mode "Tout", au lieu de partir de la première date dans `dailyMap`, forcer la date de début au **17 février 2026** (ou la première date avec données si elle est postérieure). Cela évite d'afficher 3 mois de zéros.
 
-Colonne texte nullable qui stocke le nom du dernier écran affiché (ex: `"Profil"`, `"Activité physique"`).
+### 2. Masquer la courbe "Vues" tant que le volume est trop faible
 
-### 2. Mettre à jour `last_seen_step` à chaque changement d'écran
+Relever le seuil de `showVuesLine` (actuellement >= 5) à un seuil beaucoup plus élevé, ou simplement la masquer par défaut en hardcodant `showVuesLine = false` jusqu'à ce que le tracking ait accumulé suffisamment de données. Option recommandée : ne pas afficher la ligne "Vues" du tout pour le moment (seuil à >= 50 par exemple).
 
-Dans `DiagnosticChat.tsx`, quand `currentGroupIndex` change et qu'un nouvel écran s'affiche, faire un appel léger à la base pour mettre à jour `last_seen_step` avec le nom de l'étape courante. Cela inclut aussi le premier écran affiché après l'onboarding.
-
-### 3. Modifier l'edge function `admin-analytics`
-
-Utiliser `last_seen_step` (au lieu de deviner depuis `diagnostic_data`) pour calculer `abandonMap`. Résultat : un objet `{ "Profil": 120, "Activité physique": 45, ... }` montrant précisément à quel écran les utilisateurs quittent.
-
-### 4. Mettre à jour le graphique dans `AnalyticsCharts.tsx`
-
-Adapter le graphique existant pour afficher les abandons par écran thématique (4-5 barres claires) au lieu des 18 questions individuelles.
-
-## Fichiers concernés
+### Fichier concerné
 
 | Fichier | Modification |
 |---------|-------------|
-| Migration SQL | Ajouter colonne `last_seen_step` à `diagnostics` |
-| `src/lib/saveDiagnostic.ts` | Nouvelle fonction `updateLastSeenStep(stepName)` |
-| `src/components/DiagnosticChat.tsx` | Appeler `updateLastSeenStep` à chaque changement d'écran |
-| `supabase/functions/admin-analytics/index.ts` | Utiliser `last_seen_step` pour `abandonMap` |
-| `src/components/admin/AnalyticsCharts.tsx` | Adapter le graphique aux noms d'écrans |
+| `src/components/admin/AdminOverview.tsx` | Date de début par défaut + masquer courbe Vues |
 

@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!mode || !["progress", "completion"].includes(mode)) {
+    if (!mode || !["progress", "completion", "step_update"].includes(mode)) {
       return new Response(JSON.stringify({ error: "Invalid mode" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -37,7 +37,12 @@ Deno.serve(async (req) => {
 
     let updateData: Record<string, unknown>;
 
-    if (mode === "progress") {
+    if (mode === "step_update") {
+      // Lightweight update: only last_seen_step
+      updateData = {
+        last_seen_step: data.last_seen_step ?? null,
+      };
+    } else if (mode === "progress") {
       updateData = {
         diagnostic_data: data.diagnostic_data,
         age: data.age ?? null,

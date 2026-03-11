@@ -10,7 +10,7 @@ import { DiagnosticData, Question } from "@/types/diagnostic";
 import pharmacistAvatar from "@/assets/pharmacist-avatar.jpg";
 import { toast } from "@/hooks/use-toast";
 import { calculateHydration } from "@/lib/hydrationCalculator";
-import { saveDiagnosticToCloud, startDiagnostic, updateDiagnosticProgress, clearDiagnosticId } from "@/lib/saveDiagnostic";
+import { saveDiagnosticToCloud, startDiagnostic, updateDiagnosticProgress, updateLastSeenStep, clearDiagnosticId } from "@/lib/saveDiagnostic";
 import { ChevronDown } from "lucide-react";
 import {
   AlertDialog,
@@ -190,6 +190,16 @@ export const DiagnosticChat = ({
     return () => container.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
+
+  // Track last seen step for abandon analytics
+  useEffect(() => {
+    if (!showOnboarding && !isComplete && currentGroupIndex < questionGroups.length) {
+      const stepName = questionGroups[currentGroupIndex].step;
+      updateLastSeenStep(stepName).then(res => {
+        if (res.success) console.log('last_seen_step mis à jour:', stepName);
+      });
+    }
+  }, [showOnboarding, isComplete, currentGroupIndex]);
 
   // Fix: Ensure showScreen is true when we have a valid group and are not in typing/onboarding/transitioning state
   useEffect(() => {

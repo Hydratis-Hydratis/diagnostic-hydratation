@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DiagnosticData } from "@/types/diagnostic";
 import { HydrationResult } from "./hydrationCalculator";
 import { clearDiagnosticId, ensureDiagnosticId, getCurrentDiagnosticId } from "./diagnosticSession";
-import { upsertDiagnosticCompletion, upsertDiagnosticProgress } from "./diagnosticsRepo";
+import { upsertDiagnosticCompletion, upsertDiagnosticProgress, updateLastSeenStep as repoUpdateLastSeenStep } from "./diagnosticsRepo";
 
 // Backward-compatible re-exports
 export { clearDiagnosticId, getCurrentDiagnosticId };
@@ -93,6 +93,24 @@ async function syncToKlaviyo(payload: {
   } catch (err) {
     // Ne pas bloquer le flux principal si la sync échoue
     console.error('Erreur appel sync Klaviyo:', err);
+  }
+}
+
+// Update the last seen step (screen) for abandon tracking
+export async function updateLastSeenStep(stepName: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const diagnosticId = getCurrentDiagnosticId();
+    if (!diagnosticId) {
+      return { success: false, error: "No diagnostic ID" };
+    }
+    const res = await repoUpdateLastSeenStep({ diagnosticId, stepName });
+    if (!res.success) {
+      console.error('Erreur mise à jour last_seen_step:', res.error);
+    }
+    return res;
+  } catch (err) {
+    console.error('Erreur updateLastSeenStep:', err);
+    return { success: false, error: String(err) };
   }
 }
 
