@@ -230,15 +230,25 @@ Deno.serve(async (req) => {
     // === ABANDON MAP (by thematic screen) ===
     const stepLabels = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes", "Coordonnées"];
     const abandonMap: Record<string, number> = {};
+    // Initialize all steps to 0
+    stepLabels.forEach(s => { abandonMap[s] = 0; });
     const abandoned = data.filter((d: any) => d.status !== "completed");
     abandoned.forEach((d: any) => {
-      const step = (d as any).last_seen_step;
-      if (step && stepLabels.includes(step)) {
-        abandonMap[step] = (abandonMap[step] || 0) + 1;
-      } else {
-        // Fallback: no last_seen_step recorded (old data)
-        abandonMap["Avant 1ère question"] = (abandonMap["Avant 1ère question"] || 0) + 1;
+      let step = (d as any).last_seen_step;
+      // Infer step from diagnostic_data for old records without last_seen_step
+      if (!step || !stepLabels.includes(step)) {
+        const dd = d.diagnostic_data;
+        if (dd && typeof dd === "object") {
+          if ((dd as any).boissons_journalieres) step = "Coordonnées";
+          else if ((dd as any).crampes || (dd as any).urine_couleur || (dd as any).temperature_ext) step = "Habitudes";
+          else if ((dd as any).sport_pratique || (dd as any).metier_physique) step = "Santé & Conditions";
+          else if ((dd as any).sexe || (dd as any).age) step = "Activité physique";
+          else step = "Profil";
+        } else {
+          step = "Profil";
+        }
       }
+      abandonMap[step] = (abandonMap[step] || 0) + 1;
     });
     const questionLabels: Record<string, string> = {};
 
