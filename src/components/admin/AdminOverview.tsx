@@ -33,7 +33,7 @@ interface AnalyticsData {
   abandonMap?: Record<string, number>;
   questionLabels?: Record<string, string>;
   recentDiagnostics: { created_at: string; first_name: string; score: number; hydra_rank: string; sport: string; nb_pastilles_total: number | string }[];
-  pageViews?: { totalViews: number; viewsByDay: Record<string, number>; viewSourceMap: Record<string, number>; viewDeviceMap: Record<string, number>; conversionRate: number };
+  pageViews?: { totalViews: number; viewsByDay: Record<string, number>; viewSourceMap: Record<string, number>; viewDeviceMap: Record<string, number>; conversionRate: number; viewByUtmSource?: Record<string, number>; viewByUtmMedium?: Record<string, number>; viewByUtmSourceMedium?: Record<string, number> };
 }
 
 export function AdminOverview() {
