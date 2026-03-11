@@ -100,11 +100,8 @@ export function AnalyticsCharts() {
     .map(([name, count]) => ({ name, count }));
 
   const abandonData = (() => {
-    if (!data.abandonMap || Object.keys(data.abandonMap).length === 0) return [];
-    const stepOrder = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes", "Coordonnées", "Avant 1ère question"];
-    return stepOrder
-      .filter(s => data.abandonMap![s])
-      .map(s => ({ name: s, value: data.abandonMap![s] }));
+    const stepOrder = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes", "Coordonnées"];
+    return stepOrder.map(s => ({ name: s, value: data.abandonMap?.[s] || 0 }));
   })();
 
   return (
