@@ -22,6 +22,8 @@ interface AnalyticsData {
   scoreByAge: { name: string; avg: number; count: number }[];
   beverageMap: Record<string, number>;
   funnel: { started: number; completed: number; withEmail: number };
+  abandonMap?: Record<string, number>;
+  questionLabels?: Record<string, string>;
 }
 
 export function AnalyticsCharts() {
