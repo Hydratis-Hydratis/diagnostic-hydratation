@@ -228,7 +228,7 @@ Deno.serve(async (req) => {
     }
 
     // === ABANDON MAP (by thematic screen) ===
-    const stepLabels = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes"];
+    const stepLabels = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes", "Coordonnées"];
     const abandonMap: Record<string, number> = {};
     const abandoned = data.filter((d: any) => d.status !== "completed");
     abandoned.forEach((d: any) => {
