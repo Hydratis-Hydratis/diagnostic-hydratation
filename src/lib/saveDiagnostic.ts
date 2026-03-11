@@ -96,6 +96,24 @@ async function syncToKlaviyo(payload: {
   }
 }
 
+// Update the last seen step (screen) for abandon tracking
+export async function updateLastSeenStep(stepName: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const diagnosticId = getCurrentDiagnosticId();
+    if (!diagnosticId) {
+      return { success: false, error: "No diagnostic ID" };
+    }
+    const res = await repoUpdateLastSeenStep({ diagnosticId, stepName });
+    if (!res.success) {
+      console.error('Erreur mise à jour last_seen_step:', res.error);
+    }
+    return res;
+  } catch (err) {
+    console.error('Erreur updateLastSeenStep:', err);
+    return { success: false, error: String(err) };
+  }
+}
+
 // Start a new diagnostic (status: started)
 export async function startDiagnostic(): Promise<{ success: boolean; diagnosticId?: string; error?: string }> {
   try {
