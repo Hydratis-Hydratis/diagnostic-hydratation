@@ -313,11 +313,21 @@ Deno.serve(async (req) => {
     const viewsByDay: Record<string, number> = {};
     const viewSourceMap: Record<string, number> = {};
     const viewDeviceMap: Record<string, number> = {};
+    const viewByUtmSource: Record<string, number> = {};
+    const viewByUtmMedium: Record<string, number> = {};
+    const viewByUtmSourceMedium: Record<string, number> = {};
     pageViews.forEach((pv: any) => {
       const day = pv.created_at?.split("T")[0];
       if (day) viewsByDay[day] = (viewsByDay[day] || 0) + 1;
       const src = pv.utm_source || (pv.referrer ? (() => { try { return new URL(pv.referrer).hostname; } catch { return pv.referrer; } })() : "Direct");
       viewSourceMap[src] = (viewSourceMap[src] || 0) + 1;
+      // UTM breakdowns
+      const utmSrc = pv.utm_source || "(non défini)";
+      viewByUtmSource[utmSrc] = (viewByUtmSource[utmSrc] || 0) + 1;
+      const utmMed = pv.utm_medium || "(non défini)";
+      viewByUtmMedium[utmMed] = (viewByUtmMedium[utmMed] || 0) + 1;
+      const combo = `${pv.utm_source || "(none)"} / ${pv.utm_medium || "(none)"}`;
+      viewByUtmSourceMedium[combo] = (viewByUtmSourceMedium[combo] || 0) + 1;
       const dev = detectDevice(pv.user_agent);
       viewDeviceMap[dev] = (viewDeviceMap[dev] || 0) + 1;
     });
