@@ -1,25 +1,34 @@
 
 
-# Fix du graphique d'évolution quotidienne
+# Afficher toutes les étapes dans le graphique d'abandons
 
-## Problèmes
+## Problème
 
-1. Le graphique en mode "Tout" remonte jusqu'au 28 novembre avec des mois de données vides
-2. La courbe "Vues" est affichée alors qu'elle est insignifiante et écrase visuellement les autres courbes
+La colonne `last_seen_step` vient d'etre ajoutee. Tous les anciens diagnostics ont cette valeur a NULL, donc ils tombent dans "Avant 1ere question". Seuls les nouveaux diagnostics auront une valeur. De plus, le code filtre les etapes a 0, donc les barres vides n'apparaissent pas.
 
-## Corrections dans `src/components/admin/AdminOverview.tsx`
+## Solution en 2 parties
 
-### 1. Plage par défaut : commencer au 17 février 2026
+### 1. Toujours afficher les 5 etapes (meme a 0)
 
-En mode "Tout", au lieu de partir de la première date dans `dailyMap`, forcer la date de début au **17 février 2026** (ou la première date avec données si elle est postérieure). Cela évite d'afficher 3 mois de zéros.
+Dans `AnalyticsCharts.tsx` et `AdminOverview.tsx`, ne plus filtrer les etapes sans donnees : afficher une barre a 0 pour chaque etape du `stepOrder`.
 
-### 2. Masquer la courbe "Vues" tant que le volume est trop faible
+### 2. Inferer le step pour les anciennes donnees (sans `last_seen_step`)
 
-Relever le seuil de `showVuesLine` (actuellement >= 5) à un seuil beaucoup plus élevé, ou simplement la masquer par défaut en hardcodant `showVuesLine = false` jusqu'à ce que le tracking ait accumulé suffisamment de données. Option recommandée : ne pas afficher la ligne "Vues" du tout pour le moment (seuil à >= 50 par exemple).
+Dans l'edge function `admin-analytics`, pour les diagnostics abandonnes qui n'ont pas de `last_seen_step`, deduire l'etape a partir des cles presentes dans `diagnostic_data` :
 
-### Fichier concerné
+- Si contient `boissons_journalieres` → abandon a **Coordonnees**
+- Si contient `crampes` ou `urine_couleur` ou `temperature_ext` → abandon a **Habitudes**
+- Si contient `sport_pratique` ou `metier_physique` → abandon a **Sante & Conditions**
+- Si contient `sexe` ou `age` → abandon a **Activite physique**
+- Sinon → **Avant 1ere question**
+
+Cela repartit les ~670 anciens abandons dans les bonnes etapes au lieu de tout mettre dans "Avant 1ere question".
+
+## Fichiers concernes
 
 | Fichier | Modification |
 |---------|-------------|
-| `src/components/admin/AdminOverview.tsx` | Date de début par défaut + masquer courbe Vues |
+| `supabase/functions/admin-analytics/index.ts` | Ajouter inference du step depuis `diagnostic_data` pour les anciens enregistrements |
+| `src/components/admin/AnalyticsCharts.tsx` | Afficher toutes les etapes meme a 0 |
+| `src/components/admin/AdminOverview.tsx` | Idem |
 
