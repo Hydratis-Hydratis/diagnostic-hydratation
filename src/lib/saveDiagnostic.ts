@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DiagnosticData } from "@/types/diagnostic";
 import { HydrationResult } from "./hydrationCalculator";
 import { clearDiagnosticId, ensureDiagnosticId, getCurrentDiagnosticId } from "./diagnosticSession";
-import { upsertDiagnosticCompletion, upsertDiagnosticProgress } from "./diagnosticsRepo";
+import { upsertDiagnosticCompletion, upsertDiagnosticProgress, updateLastSeenStep as repoUpdateLastSeenStep } from "./diagnosticsRepo";
 
 // Backward-compatible re-exports
 export { clearDiagnosticId, getCurrentDiagnosticId };

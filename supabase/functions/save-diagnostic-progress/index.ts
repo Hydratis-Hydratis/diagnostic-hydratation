@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!mode || !["progress", "completion"].includes(mode)) {
+    if (!mode || !["progress", "completion", "step_update"].includes(mode)) {
       return new Response(JSON.stringify({ error: "Invalid mode" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
