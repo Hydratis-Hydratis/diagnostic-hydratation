@@ -357,7 +357,7 @@ Deno.serve(async (req) => {
       pastillesByRank,
       abandonMap,
       questionLabels,
-      pageViews: { totalViews, viewsByDay, viewSourceMap, viewDeviceMap, conversionRate },
+      pageViews: { totalViews, viewsByDay, viewSourceMap, viewDeviceMap, conversionRate, viewByUtmSource, viewByUtmMedium, viewByUtmSourceMedium },
     };
 
     return new Response(JSON.stringify(result), {

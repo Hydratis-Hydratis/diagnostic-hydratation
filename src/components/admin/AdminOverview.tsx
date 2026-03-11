@@ -404,19 +404,70 @@ export function AdminOverview() {
         );
       })()}
 
-      {/* Row 6: Page View Sources + Diagnostic Sources + Devices */}
+      {/* Row 6: UTM Sources + UTM Medium + Source/Medium combo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {viewSourceData.length > 0 && (
+        {utmSourceData.length > 0 && (
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">Sources de trafic (toutes vues)</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Trafic par UTM Source</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={viewSourceData} layout="vertical">
+                <BarChart data={utmSourceData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={80} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={100} />
                   <Tooltip />
                   <Bar dataKey="value" fill="#FF8042" name="Vues" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {utmMediumData.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Trafic par UTM Medium</CardTitle></CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={utmMediumData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" tick={{ fontSize: 10 }} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={100} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#00C49F" name="Vues" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition par device</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={deviceData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                  {deviceData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 6b: Source / Medium combo + Diagnostic sources */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {utmSourceMediumData.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Trafic par Source / Medium</CardTitle></CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={Math.max(220, utmSourceMediumData.length * 28)}>
+                <BarChart data={utmSourceMediumData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" tick={{ fontSize: 10 }} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={140} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#8884d8" name="Vues" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -434,20 +485,6 @@ export function AdminOverview() {
                 <Tooltip />
                 <Bar dataKey="value" fill="#00C49F" name="Diagnostics" />
               </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition par device</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={deviceData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {deviceData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip />
-              </PieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
