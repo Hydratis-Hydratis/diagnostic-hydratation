@@ -45,7 +45,7 @@ const Index = () => {
                 Diagnostic d'Hydratation
               </p>
             </> : <>
-              <img src={logoHydratis} alt="Hydratis - Optimise l'hydratation" className={cn("mx-auto transition-all duration-300", showProgress ? "h-8 sm:h-10" : "h-16 sm:h-20 md:h-24")} />
+              
               {!showProgress && <>
                   <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground mb-2 sm:mb-3">
                     Diagnostic d'Hydratation
@@ -62,7 +62,7 @@ const Index = () => {
         {showProgress && <div className="border-t border-border/30">
             <div className="flex items-center justify-between px-4 py-1 max-w-2xl mx-auto">
               <div className="flex-1">
-                <ProgressIndicator current={progress.current} total={progress.total} steps={progress.steps} onStepClick={index => stepHandlerRef.current?.(index)} compact />
+                <ProgressIndicator current={progress.current} total={progress.total} steps={progress.steps} onStepClick={(index) => stepHandlerRef.current?.(index)} compact />
               </div>
               {canRestart && <Tooltip>
                   <TooltipTrigger asChild>
@@ -80,9 +80,9 @@ const Index = () => {
 
       {/* Chat Container */}
       <main className="flex-1 max-w-2xl w-full mx-auto flex flex-col min-h-0">
-        <DiagnosticChat onProgressChange={setProgress} registerStepHandler={handler => {
+        <DiagnosticChat onProgressChange={setProgress} registerStepHandler={(handler) => {
         stepHandlerRef.current = handler;
-      }} registerRestartHandler={handler => {
+      }} registerRestartHandler={(handler) => {
         restartHandlerRef.current = handler;
       }} />
       </main>
