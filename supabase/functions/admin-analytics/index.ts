@@ -227,6 +227,51 @@ Deno.serve(async (req) => {
       pastillesByRank[rank] = Math.round((v.total / v.count) * 10) / 10;
     }
 
+    // === ABANDON MAP ===
+    const questionOrder = [
+      "sexe", "situation_particuliere", "age", "taille_cm", "poids_kg",
+      "temperature_ext", "sport_pratique", "metier_physique",
+      "sports_selectionnes", "frequence", "duree_minutes", "transpiration",
+      "crampes", "courbatures", "urine_couleur", "boissons_journalieres",
+      "firstName", "email"
+    ];
+    const questionLabels: Record<string, string> = {
+      sexe: "Sexe", situation_particuliere: "Situation", age: "Âge",
+      taille_cm: "Taille", poids_kg: "Poids", temperature_ext: "Température",
+      sport_pratique: "Sport ?", metier_physique: "Métier physique",
+      sports_selectionnes: "Sports", frequence: "Fréquence",
+      duree_minutes: "Durée séance", transpiration: "Transpiration",
+      crampes: "Crampes", courbatures: "Courbatures",
+      urine_couleur: "Couleur urine", boissons_journalieres: "Boissons",
+      firstName: "Prénom", email: "Email",
+      "_before_start": "Avant 1ère question"
+    };
+    const abandonMap: Record<string, number> = {};
+    const abandoned = data.filter((d: any) => d.status !== "completed");
+    abandoned.forEach((d: any) => {
+      const dd = d.diagnostic_data;
+      if (!dd || typeof dd !== "object") {
+        abandonMap["_before_start"] = (abandonMap["_before_start"] || 0) + 1;
+        return;
+      }
+      let lastAnswered = -1;
+      for (let i = 0; i < questionOrder.length; i++) {
+        const key = questionOrder[i];
+        if ((dd as any)[key] !== undefined && (dd as any)[key] !== null && (dd as any)[key] !== "") {
+          lastAnswered = i;
+        }
+      }
+      // The question they abandoned ON is the next one after lastAnswered
+      const abandonedAt = lastAnswered + 1 < questionOrder.length
+        ? questionOrder[lastAnswered + 1]
+        : questionOrder[questionOrder.length - 1];
+      if (lastAnswered === -1) {
+        abandonMap["_before_start"] = (abandonMap["_before_start"] || 0) + 1;
+      } else {
+        abandonMap[abandonedAt] = (abandonMap[abandonedAt] || 0) + 1;
+      }
+    });
+
     // === NEW AGGREGATIONS ===
 
     // Device map from user_agent
@@ -320,6 +365,8 @@ Deno.serve(async (req) => {
       recentDiagnostics,
       pastillesDistribution,
       pastillesByRank,
+      abandonMap,
+      questionLabels,
       pageViews: { totalViews, viewsByDay, viewSourceMap, viewDeviceMap, conversionRate },
     };
 

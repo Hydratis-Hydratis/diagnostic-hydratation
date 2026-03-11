@@ -30,6 +30,8 @@ interface AnalyticsData {
   deviceMap: Record<string, number>;
   pastillesDistribution: Record<string, number>;
   pastillesByRank: Record<string, number>;
+  abandonMap?: Record<string, number>;
+  questionLabels?: Record<string, string>;
   recentDiagnostics: { created_at: string; first_name: string; score: number; hydra_rank: string; sport: string; nb_pastilles_total: number | string }[];
   pageViews?: { totalViews: number; viewsByDay: Record<string, number>; viewSourceMap: Record<string, number>; viewDeviceMap: Record<string, number>; conversionRate: number };
 }
@@ -375,7 +377,40 @@ export function AdminOverview() {
         </Card>
       </div>
 
-      {/* Row 5: Page View Sources + Diagnostic Sources + Devices */}
+      {/* Row 5: Abandons par question */}
+      {data.abandonMap && Object.keys(data.abandonMap).length > 0 && (() => {
+        const labels = data.questionLabels || {};
+        const questionOrder = [
+          "_before_start", "sexe", "situation_particuliere", "age", "taille_cm", "poids_kg",
+          "temperature_ext", "sport_pratique", "metier_physique",
+          "sports_selectionnes", "frequence", "duree_minutes", "transpiration",
+          "crampes", "courbatures", "urine_couleur", "boissons_journalieres",
+          "firstName", "email"
+        ];
+        const abandonData = questionOrder
+          .filter(q => data.abandonMap![q])
+          .map(q => ({ name: labels[q] || q, value: data.abandonMap![q] }));
+        return (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Abandons par question ({Object.values(data.abandonMap!).reduce((a: number, b: number) => a + b, 0)} abandons)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={Math.max(200, abandonData.length * 32)}>
+                <BarChart data={abandonData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" tick={{ fontSize: 10 }} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={120} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#FF8042" name="Abandons" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
+      {/* Row 6: Page View Sources + Diagnostic Sources + Devices */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {viewSourceData.length > 0 && (
           <Card>

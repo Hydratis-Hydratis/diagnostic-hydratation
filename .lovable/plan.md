@@ -1,31 +1,25 @@
 
 
-# Analyse des abandons par question dans le dashboard admin
+# Fix du graphique d'évolution quotidienne
 
-## Principe
+## Problèmes
 
-Les réponses partielles sont déjà sauvegardées progressivement dans `diagnostic_data` (JSONB). Pour les diagnostics avec `status = 'started'` (non terminés), on peut déterminer la dernière question répondue en vérifiant quelles clés sont présentes dans ce JSONB, en suivant l'ordre des questions défini dans `questions.ts`.
+1. Le graphique en mode "Tout" remonte jusqu'au 28 novembre avec des mois de données vides
+2. La courbe "Vues" est affichée alors qu'elle est insignifiante et écrase visuellement les autres courbes
 
-## Ordre des questions (IDs)
+## Corrections dans `src/components/admin/AdminOverview.tsx`
 
-`sexe` → `situation_particuliere` (conditionnel) → `age` → `taille_cm` → `poids_kg` → `temperature_ext` → `sport_pratique` → `metier_physique` → `sports_selectionnes` (conditionnel) → `frequence` (conditionnel) → `duree_minutes` (conditionnel) → `transpiration` (conditionnel) → `crampes` → `courbatures` → `urine_couleur` → `boissons_journalieres` → `firstName` → `email`
+### 1. Plage par défaut : commencer au 17 février 2026
 
-## Modifications
+En mode "Tout", au lieu de partir de la première date dans `dailyMap`, forcer la date de début au **17 février 2026** (ou la première date avec données si elle est postérieure). Cela évite d'afficher 3 mois de zéros.
 
-### 1. Edge Function `admin-analytics/index.ts`
+### 2. Masquer la courbe "Vues" tant que le volume est trop faible
 
-Ajouter une agrégation `abandonMap` pour les diagnostics non terminés (`status !== 'completed'`). Pour chaque diagnostic abandonné, parcourir la liste ordonnée des clés de questions et trouver la dernière clé présente dans `diagnostic_data` — la question suivante est celle où l'utilisateur a abandonné.
+Relever le seuil de `showVuesLine` (actuellement >= 5) à un seuil beaucoup plus élevé, ou simplement la masquer par défaut en hardcodant `showVuesLine = false` jusqu'à ce que le tracking ait accumulé suffisamment de données. Option recommandée : ne pas afficher la ligne "Vues" du tout pour le moment (seuil à >= 50 par exemple).
 
-Retourner un objet `abandonMap: Record<string, number>` mappant chaque question à son nombre d'abandons.
-
-### 2. Composant `AdminOverview.tsx`
-
-Ajouter un graphique en barres horizontales "Abandons par question" dans l'onglet Vue d'ensemble, montrant à quelle question les utilisateurs décrochent. Chaque barre = nombre d'utilisateurs ayant abandonné à cette étape.
-
-### Fichiers concernés
+### Fichier concerné
 
 | Fichier | Modification |
 |---------|-------------|
-| `supabase/functions/admin-analytics/index.ts` | Calcul de `abandonMap` sur les diagnostics non terminés |
-| `src/components/admin/AdminOverview.tsx` | Nouveau graphique barres horizontales "Abandons par question" |
+| `src/components/admin/AdminOverview.tsx` | Date de début par défaut + masquer courbe Vues |
 
