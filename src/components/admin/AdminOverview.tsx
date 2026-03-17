@@ -122,7 +122,7 @@ export function AdminOverview() {
       }
     } else {
       // "all" or "custom": start from first date with data
-      const minDate = new Date("2026-02-17");
+      const minDate = new Date("2026-02-04");
       const allDates = [...Object.keys(data.dailyMap), ...Object.keys(data.pageViews?.viewsByDay || {})].sort();
       const firstDataDate = allDates.length > 0 ? new Date(allDates[0]) : now;
       const startDate = firstDataDate > minDate ? firstDataDate : minDate;
