@@ -39,9 +39,9 @@ interface AnalyticsData {
 export function AdminOverview() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [preset, setPreset] = useState<Preset>("all");
-  const [dateFrom, setDateFrom] = useState<Date | undefined>();
-  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [preset, setPreset] = useState<Preset>("custom");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(new Date("2026-02-04"));
+  const [dateTo, setDateTo] = useState<Date | undefined>(new Date());
 
   const fetchStats = useCallback(async (from?: string, to?: string) => {
     setLoading(true);
