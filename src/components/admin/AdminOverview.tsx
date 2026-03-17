@@ -39,9 +39,9 @@ interface AnalyticsData {
 export function AdminOverview() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [preset, setPreset] = useState<Preset>("all");
-  const [dateFrom, setDateFrom] = useState<Date | undefined>();
-  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [preset, setPreset] = useState<Preset>("custom");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(new Date("2026-02-04"));
+  const [dateTo, setDateTo] = useState<Date | undefined>(new Date());
 
   const fetchStats = useCallback(async (from?: string, to?: string) => {
     setLoading(true);
@@ -64,7 +64,7 @@ export function AdminOverview() {
   }, []);
 
   useEffect(() => {
-    fetchStats();
+    fetchStats(format(new Date("2026-02-04"), "yyyy-MM-dd"), format(new Date(), "yyyy-MM-dd"));
   }, [fetchStats]);
 
   const applyPreset = (p: Preset) => {
@@ -122,7 +122,7 @@ export function AdminOverview() {
       }
     } else {
       // "all" or "custom": start from first date with data
-      const minDate = new Date("2026-02-17");
+      const minDate = new Date("2026-02-04");
       const allDates = [...Object.keys(data.dailyMap), ...Object.keys(data.pageViews?.viewsByDay || {})].sort();
       const firstDataDate = allDates.length > 0 ? new Date(allDates[0]) : now;
       const startDate = firstDataDate > minDate ? firstDataDate : minDate;
