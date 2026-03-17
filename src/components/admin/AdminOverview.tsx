@@ -64,7 +64,7 @@ export function AdminOverview() {
   }, []);
 
   useEffect(() => {
-    fetchStats();
+    fetchStats(format(new Date("2026-02-04"), "yyyy-MM-dd"), format(new Date(), "yyyy-MM-dd"));
   }, [fetchStats]);
 
   const applyPreset = (p: Preset) => {
