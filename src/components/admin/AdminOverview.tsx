@@ -151,8 +151,8 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
   const showVuesLine = totalVues >= 50;
 
   const funnelData = [
-    { name: "Vues page", value: data.funnel.views || data.pageViews?.totalViews || 0 },
-    { name: "Diag. démarrés", value: data.funnel.started },
+    { name: "Vues", value: data.funnel.views || data.pageViews?.totalViews || 0 },
+    { name: "Commencés", value: data.funnel.started },
     { name: "Sexe validé", value: data.funnel.withSexe || 0 },
     { name: "Complétés", value: data.funnel.completed },
     { name: "Avec email", value: data.funnel.withEmail },
@@ -247,8 +247,8 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 {showVuesLine && <Line yAxisId="left" type="monotone" dataKey="vues" stroke="#FF8042" name="Vues" strokeWidth={2} dot={false} />}
-                <Line yAxisId="left" type="monotone" dataKey="total" stroke="#8884d8" name="Commencés" strokeWidth={2} dot={false} />
-                <Line yAxisId="left" type="monotone" dataKey="completed" stroke="#82ca9d" name="Complétés" strokeWidth={2} dot={false} />
+                <Line yAxisId="left" type="monotone" dataKey="total" stroke="#10069F" name="Commencés" strokeWidth={2} dot={false} />
+                <Line yAxisId="left" type="monotone" dataKey="completed" stroke="#5EACA3" name="Complétés" strokeWidth={2} dot={false} />
                 <Line yAxisId="right" type="monotone" dataKey="taux" stroke="#ffc658" name="Taux %" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -267,8 +267,8 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
                   const rate = props.payload.rate;
                   return [`${value}${rate !== null ? ` (${rate}%)` : ''}`, 'Utilisateurs'];
                 }} />
-                <Bar dataKey="value" fill="#8884d8">
-                  {funnelWithRates.map((_, i) => <Cell key={i} fill={["#FF8042", "#8884d8", "#ffc658", "#82ca9d", "#a78bfa"][i]} />)}
+                <Bar dataKey="value" fill="#10069F">
+                  {funnelWithRates.map((_, i) => <Cell key={i} fill={["#FF8042", "#10069F", "#8884d8", "#5EACA3", "#ffc658"][i]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
