@@ -393,6 +393,9 @@ Deno.serve(async (req) => {
 
     const conversionRate = totalViews > 0 ? Math.round((data.length / totalViews) * 1000) / 10 : 0;
 
+    // withSexe: diagnostics where sexe column is set or diagnostic_data contains sexe
+    const withSexe = data.filter((d: any) => d.sexe || (d.diagnostic_data && typeof d.diagnostic_data === "object" && (d.diagnostic_data as any).sexe)).length;
+
     const result = {
       overview: { total: data.length, completed: completed.length, avgScore, today, thisWeek, withEmail, avgHydrationGap, avgPastilles },
       scoreBuckets,
@@ -405,7 +408,7 @@ Deno.serve(async (req) => {
       hourlyMap,
       scoreByAge: scoreByAge.map(s => ({ name: s.name, avg: s.count ? Math.round(s.total / s.count) : 0, count: s.count })),
       beverageMap,
-      funnel: { started: data.length, completed: completed.length, withEmail },
+      funnel: { views: totalViews, started: data.length, withSexe, completed: completed.length, withEmail },
       deviceMap,
       sourceMap,
       mediumMap,

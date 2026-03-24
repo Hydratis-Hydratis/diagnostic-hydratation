@@ -151,10 +151,17 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
   const showVuesLine = totalVues >= 50;
 
   const funnelData = [
-    { name: "Démarrés", value: data.funnel.started },
+    { name: "Vues page", value: data.funnel.views || data.pageViews?.totalViews || 0 },
+    { name: "Diag. démarrés", value: data.funnel.started },
+    { name: "Sexe validé", value: data.funnel.withSexe || 0 },
     { name: "Complétés", value: data.funnel.completed },
     { name: "Avec email", value: data.funnel.withEmail },
   ];
+
+  const funnelWithRates = funnelData.map((d, i) => ({
+    ...d,
+    rate: i === 0 ? null : funnelData[i - 1].value > 0 ? Math.round((d.value / funnelData[i - 1].value) * 100) : 0,
+  }));
 
   const kpiCards = [
     { title: "Total diagnostics", value: stats.total, icon: Activity, desc: `${stats.completed} complétés` },
