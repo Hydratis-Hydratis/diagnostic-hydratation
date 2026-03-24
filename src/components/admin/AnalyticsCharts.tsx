@@ -105,6 +105,21 @@ export function AnalyticsCharts() {
     return stepOrder.map(s => ({ name: s, value: data.abandonMap?.[s] || 0 }));
   })();
 
+  const abandonByQuestionData = (() => {
+    if (!data.abandonByQuestion || !data.questionLabels) return [];
+    const questionOrder = [
+      "sexe", "situation_particuliere", "age", "taille_cm", "poids_kg",
+      "temperature_ext", "sport_pratique", "metier_physique",
+      "sports_selectionnes", "frequence", "duree_minutes", "transpiration",
+      "crampes", "courbatures", "urine_couleur",
+      "boissons_journalieres", "firstName", "email"
+    ];
+    return questionOrder.map(q => ({
+      name: data.questionLabels![q] || q,
+      value: data.abandonByQuestion![q] || 0,
+    }));
+  })();
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Abandons par question */}
