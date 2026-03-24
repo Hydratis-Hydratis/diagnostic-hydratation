@@ -22,7 +22,7 @@ type Preset = "7d" | "30d" | "90d" | "all" | "custom";
 export interface AnalyticsData {
   overview: { total: number; completed: number; avgScore: number; today: number; thisWeek: number; withEmail: number; avgHydrationGap: number; avgPastilles: number };
   dailyMap: Record<string, { total: number; completed: number }>;
-  funnel: { started: number; completed: number; withEmail: number };
+  funnel: { views?: number; started: number; withSexe?: number; completed: number; withEmail: number };
   scoreDistribution: Record<string, number>;
   rankMap: Record<string, number>;
   genderMap: Record<string, number>;
