@@ -1,48 +1,70 @@
 
 
-# Tracking des abandons par question individuelle
+# Réorganisation du dashboard admin
 
-## Principe
+## Constat actuel
 
-Actuellement, `last_seen_step` enregistre l'ecran thematique (Profil, Activite physique, etc.). Pour savoir a quelle question precise l'utilisateur abandonne, il faut enregistrer l'ID de la derniere question vue/repondue.
+Le dashboard a 4 onglets mais souffre de plusieurs problemes :
+- **Vue d'ensemble** est surchargee : KPIs, evolution quotidienne, entonnoir, scores, rangs, sexe, pastilles, abandons, UTM, devices, derniers diagnostics — tout est melange
+- **Analyses** duplique beaucoup de graphiques deja presents dans Vue d'ensemble (funnel, genre, rank, abandons)
+- Pas de separation claire entre "performance business" et "profil utilisateurs"
 
-## Approche
+## Nouvelle organisation en 5 onglets
 
-### 1. Nouvelle colonne `last_seen_question` dans `diagnostics`
+### 1. Vue d'ensemble (KPIs + tendances)
+- Filtres de date (inchange)
+- 7 KPI cards (inchange)
+- Evolution quotidienne (diagnostics + vues + taux)
+- Entonnoir de conversion
+- Derniers diagnostics completes
 
-Colonne texte nullable qui stocke l'ID de la derniere question affichee ou repondue (ex: `"age"`, `"sport_pratique"`, `"boissons_journalieres"`).
+### 2. Acquisition (trafic + sources)
+- Trafic par Source / Medium (UTM)
+- Repartition par device
+- Sources des diagnostics
+- Taux de conversion vues → diagnostics
 
-### 2. Sauvegarder la question courante dans `ThematicScreen.tsx`
+### 3. Abandons (ou les utilisateurs decrochent)
+- Abandons par ecran (graphique existant)
+- Abandons par question (graphique existant)
+- Les deux graphiques sur toute la largeur, bien lisibles
 
-A chaque fois que l'utilisateur repond a une question dans un ecran thematique (changement de valeur d'un champ), appeler un update leger pour enregistrer l'ID de cette question. On reutilise le mode `step_update` existant de l'edge function en ajoutant le champ `last_seen_question`.
+### 4. Profils utilisateurs (qui sont les utilisateurs)
+- Repartition par sexe
+- Repartition par age
+- Sports les plus pratiques
+- Score moyen par sport
+- Boissons les plus consommees
+- Activite par heure
 
-### 3. Modifier l'edge function `save-diagnostic-progress`
+### 5. Resultats (scores et recommandations)
+- Repartition des scores (buckets fins)
+- Score moyen par tranche d'age
+- Hydra Rank
+- Pastilles recommandees (distribution + par rank)
 
-Accepter `last_seen_question` dans le mode `step_update` et le sauvegarder.
+### 6. Demandes d'aide (inchange)
 
-### 4. Modifier l'edge function `admin-analytics`
+## Changements techniques
 
-- Pour les diagnostics abandonnes, utiliser `last_seen_question` pour construire un `abandonByQuestion: Record<string, number>` (ex: `{ "age": 45, "sport_pratique": 30, ... }`).
-- Pour les anciens enregistrements sans `last_seen_question`, inferer depuis les cles presentes dans `diagnostic_data` (derniere cle remplie dans l'ordre des questions).
-- Retourner un mapping `questionLabels` avec les libelles lisibles (ex: `"age"` → `"Âge"`, `"boissons_journalieres"` → `"Boissons"`).
+- **Supprimer `AnalyticsCharts.tsx`** — son contenu est redistribue dans de nouveaux composants
+- **Creer 4 nouveaux composants** :
+  - `AdminAcquisition.tsx` — UTM, devices, sources
+  - `AdminAbandons.tsx` — abandons par ecran + par question
+  - `AdminProfiles.tsx` — sexe, age, sports, boissons, heure
+  - `AdminResults.tsx` — scores, ranks, pastilles
+- **Simplifier `AdminOverview.tsx`** — ne garde que KPIs, evolution, entonnoir, derniers diagnostics
+- **Mettre a jour `AdminDashboard.tsx`** — 6 onglets au lieu de 4
 
-### 5. Nouveau graphique dans `AnalyticsCharts.tsx`
+Les filtres de date restent dans Vue d'ensemble. Les autres onglets utilisent les donnees globales (comme Analyses actuellement).
 
-Remplacer ou completer le graphique "Abandons par ecran" par un graphique en barres horizontales "Abandons par question" montrant chaque question individuellement, avec le libelle court en ordonnee.
-
-## Inference pour les anciens enregistrements
-
-L'ordre des questions est connu. Pour chaque diagnostic abandonne sans `last_seen_question`, parcourir la liste des IDs dans l'ordre et trouver le dernier present dans `diagnostic_data`. La question suivante est celle ou l'utilisateur a abandonne.
-
-## Fichiers concernes
-
-| Fichier | Modification |
-|---------|-------------|
-| Migration SQL | Ajouter colonne `last_seen_question` |
-| `supabase/functions/save-diagnostic-progress/index.ts` | Accepter `last_seen_question` dans `step_update` |
-| `src/lib/diagnosticsRepo.ts` | Ajouter `lastSeenQuestion` au mode `step_update` |
-| `src/lib/saveDiagnostic.ts` | Nouvelle fonction `updateLastSeenQuestion(questionId)` |
-| `src/components/ThematicScreen.tsx` | Appeler `updateLastSeenQuestion` quand une reponse change |
-| `supabase/functions/admin-analytics/index.ts` | Calculer `abandonByQuestion` + inference anciens |
-| `src/components/admin/AnalyticsCharts.tsx` | Graphique abandons par question |
+| Fichier | Action |
+|---------|--------|
+| `src/pages/AdminDashboard.tsx` | 6 onglets |
+| `src/components/admin/AdminOverview.tsx` | Allege (KPIs + evolution + funnel + tableau) |
+| `src/components/admin/AdminAcquisition.tsx` | Nouveau — UTM, devices, sources |
+| `src/components/admin/AdminAbandons.tsx` | Nouveau — abandons ecran + question |
+| `src/components/admin/AdminProfiles.tsx` | Nouveau — sexe, age, sports, boissons |
+| `src/components/admin/AdminResults.tsx` | Nouveau — scores, ranks, pastilles |
+| `src/components/admin/AnalyticsCharts.tsx` | Supprime |
 
