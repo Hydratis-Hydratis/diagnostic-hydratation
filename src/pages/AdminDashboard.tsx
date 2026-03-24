@@ -1,15 +1,20 @@
+import { useState } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { AdminOverview } from "@/components/admin/AdminOverview";
+import { AdminOverview, type AnalyticsData } from "@/components/admin/AdminOverview";
+import { AdminAcquisition } from "@/components/admin/AdminAcquisition";
+import { AdminAbandons } from "@/components/admin/AdminAbandons";
+import { AdminProfiles } from "@/components/admin/AdminProfiles";
+import { AdminResults } from "@/components/admin/AdminResults";
 import { DiagnosticsTable } from "@/components/admin/DiagnosticsTable";
-import { AnalyticsCharts } from "@/components/admin/AnalyticsCharts";
 import { SupportRequests } from "@/components/admin/SupportRequests";
 import logoHydratis from "@/assets/logo-hydratis.png";
 
 const AdminDashboard = () => {
   const { loading, isAdmin, signOut } = useAdminAuth();
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
 
   if (loading || !isAdmin) {
     return (
@@ -35,14 +40,30 @@ const AdminDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="acquisition">Acquisition</TabsTrigger>
+            <TabsTrigger value="abandons">Abandons</TabsTrigger>
+            <TabsTrigger value="profiles">Profils</TabsTrigger>
+            <TabsTrigger value="results">Résultats</TabsTrigger>
             <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
-            <TabsTrigger value="analytics">Analyses</TabsTrigger>
             <TabsTrigger value="support">Demandes d'aide</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview"><AdminOverview /></TabsContent>
+          <TabsContent value="overview">
+            <AdminOverview onDataLoaded={setAnalyticsData} />
+          </TabsContent>
+          <TabsContent value="acquisition">
+            {analyticsData ? <AdminAcquisition data={analyticsData} /> : <p className="text-muted-foreground">Chargez d'abord la Vue d'ensemble</p>}
+          </TabsContent>
+          <TabsContent value="abandons">
+            {analyticsData ? <AdminAbandons data={analyticsData} /> : <p className="text-muted-foreground">Chargez d'abord la Vue d'ensemble</p>}
+          </TabsContent>
+          <TabsContent value="profiles">
+            {analyticsData ? <AdminProfiles data={analyticsData} /> : <p className="text-muted-foreground">Chargez d'abord la Vue d'ensemble</p>}
+          </TabsContent>
+          <TabsContent value="results">
+            {analyticsData ? <AdminResults data={analyticsData} /> : <p className="text-muted-foreground">Chargez d'abord la Vue d'ensemble</p>}
+          </TabsContent>
           <TabsContent value="diagnostics"><DiagnosticsTable /></TabsContent>
-          <TabsContent value="analytics"><AnalyticsCharts /></TabsContent>
           <TabsContent value="support"><SupportRequests /></TabsContent>
         </Tabs>
       </main>
