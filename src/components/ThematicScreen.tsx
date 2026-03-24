@@ -312,7 +312,7 @@ export const ThematicScreen = ({
                 </p>
               )}
             </div>
-            <BeverageSelector quantities={beverageQuantities} onChange={setBeverageQuantities} />
+            <BeverageSelector quantities={beverageQuantities} onChange={(q) => { trackQuestion(question.id); setBeverageQuantities(q); }} />
           </div>
         );
       case "temperatureSelector":
