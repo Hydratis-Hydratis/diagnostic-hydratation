@@ -56,7 +56,11 @@ export const ThematicScreen = ({
   });
   const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
 
-  // Pre-fill answers from previousAnswers when questions change
+  // Track the last answered question for abandon analytics
+  const trackQuestion = useCallback((questionId: string) => {
+    updateLastSeenQuestion(questionId);
+  }, []);
+
   useEffect(() => {
     const initialAnswers: Partial<DiagnosticData> = {};
     questions.forEach(q => {
