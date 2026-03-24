@@ -267,8 +267,8 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
                   const rate = props.payload.rate;
                   return [`${value}${rate !== null ? ` (${rate}%)` : ''}`, 'Utilisateurs'];
                 }} />
-                <Bar dataKey="value" fill="#8884d8">
-                  {funnelWithRates.map((_, i) => <Cell key={i} fill={["#FF8042", "#8884d8", "#ffc658", "#82ca9d", "#a78bfa"][i]} />)}
+                <Bar dataKey="value" fill="#10069F">
+                  {funnelWithRates.map((_, i) => <Cell key={i} fill={["#FF8042", "#10069F", "#8884d8", "#5EACA3", "#ffc658"][i]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
