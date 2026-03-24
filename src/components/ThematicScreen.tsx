@@ -264,10 +264,13 @@ export const ThematicScreen = ({
             </div>
             <ColorScaleSelector 
               value={answers[question.id] as string}
-              onSelect={value => setAnswers(prev => ({
-                ...prev,
-                [question.id]: value
-              }))} 
+              onSelect={value => {
+                trackQuestion(question.id);
+                setAnswers(prev => ({
+                  ...prev,
+                  [question.id]: value
+                }));
+              }} 
             />
           </div>
         );
