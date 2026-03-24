@@ -355,7 +355,7 @@ export const ThematicScreen = ({
             </div>
             <SportSelector 
               selectedSports={selectedSports}
-              onSelect={sports => setSelectedSports(sports)} 
+              onSelect={sports => { trackQuestion(question.id); setSelectedSports(sports); }} 
             />
           </div>
         );
