@@ -259,13 +259,16 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
           <CardHeader className="pb-2"><CardTitle className="text-sm">Entonnoir de conversion</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={funnelData} layout="vertical">
+              <BarChart data={funnelWithRates} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" tick={{ fontSize: 10 }} />
-                <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={80} />
-                <Tooltip />
+                <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={90} />
+                <Tooltip formatter={(value: number, name: string, props: any) => {
+                  const rate = props.payload.rate;
+                  return [`${value}${rate !== null ? ` (${rate}%)` : ''}`, 'Utilisateurs'];
+                }} />
                 <Bar dataKey="value" fill="#8884d8">
-                  {funnelData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
+                  {funnelWithRates.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
