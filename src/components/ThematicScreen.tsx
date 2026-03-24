@@ -238,10 +238,13 @@ export const ThematicScreen = ({
               type={question.inputType || "text"} 
               placeholder={question.placeholder} 
               value={answers[question.id] as string || ""} 
-              onChange={e => setAnswers(prev => ({
-                ...prev,
-                [question.id]: e.target.value
-              }))} 
+              onChange={e => {
+                trackQuestion(question.id);
+                setAnswers(prev => ({
+                  ...prev,
+                  [question.id]: e.target.value
+                }));
+              }} 
               className="w-full" 
             />
           </div>
