@@ -192,10 +192,13 @@ export const ThematicScreen = ({
             </div>
             <RadioGroup 
               value={answers[question.id] as string || ""} 
-              onValueChange={value => setAnswers(prev => ({
-                ...prev,
-                [question.id]: value
-              }))} 
+              onValueChange={value => {
+                trackQuestion(question.id);
+                setAnswers(prev => ({
+                  ...prev,
+                  [question.id]: value
+                }));
+              }} 
               className={cn("gap-2", question.multiColumn && "grid grid-cols-2")}
             >
               {question.options?.map((option, idx) => {
