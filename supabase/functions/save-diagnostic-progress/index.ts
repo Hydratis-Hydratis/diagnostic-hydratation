@@ -38,9 +38,10 @@ Deno.serve(async (req) => {
     let updateData: Record<string, unknown>;
 
     if (mode === "step_update") {
-      // Lightweight update: only last_seen_step
+      // Lightweight update: last_seen_step and/or last_seen_question
       updateData = {
         last_seen_step: data.last_seen_step ?? null,
+        ...(data.last_seen_question !== undefined && { last_seen_question: data.last_seen_question }),
       };
     } else if (mode === "progress") {
       updateData = {

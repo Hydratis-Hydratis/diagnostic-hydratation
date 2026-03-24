@@ -46,6 +46,25 @@ export async function updateLastSeenStep(params: {
   return { success: true };
 }
 
+export async function updateLastSeenQuestion(params: {
+  diagnosticId: string;
+  questionId: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const { diagnosticId, questionId } = params;
+
+  const { data, error } = await supabase.functions.invoke('save-diagnostic-progress', {
+    body: {
+      diagnosticId,
+      mode: 'step_update',
+      data: { last_seen_question: questionId },
+    },
+  });
+
+  if (error) return { success: false, error: error.message };
+  if (data?.error) return { success: false, error: data.error };
+  return { success: true };
+}
+
 export async function upsertDiagnosticCompletion(params: {
   diagnosticId: string;
   diagnosticData: DiagnosticData;
