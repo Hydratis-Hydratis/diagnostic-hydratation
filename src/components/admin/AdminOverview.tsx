@@ -247,7 +247,7 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 {showVuesLine && <Line yAxisId="left" type="monotone" dataKey="vues" stroke="#FF8042" name="Vues" strokeWidth={2} dot={false} />}
-                <Line yAxisId="left" type="monotone" dataKey="total" stroke="#8884d8" name="Diagnostics" strokeWidth={2} dot={false} />
+                <Line yAxisId="left" type="monotone" dataKey="total" stroke="#8884d8" name="Commencés" strokeWidth={2} dot={false} />
                 <Line yAxisId="left" type="monotone" dataKey="completed" stroke="#82ca9d" name="Complétés" strokeWidth={2} dot={false} />
                 <Line yAxisId="right" type="monotone" dataKey="taux" stroke="#ffc658" name="Taux %" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
               </LineChart>
