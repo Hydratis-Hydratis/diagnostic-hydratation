@@ -151,8 +151,8 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
   const showVuesLine = totalVues >= 50;
 
   const funnelData = [
-    { name: "Vues page", value: data.funnel.views || data.pageViews?.totalViews || 0 },
-    { name: "Diag. démarrés", value: data.funnel.started },
+    { name: "Vues", value: data.funnel.views || data.pageViews?.totalViews || 0 },
+    { name: "Commencés", value: data.funnel.started },
     { name: "Sexe validé", value: data.funnel.withSexe || 0 },
     { name: "Complétés", value: data.funnel.completed },
     { name: "Avec email", value: data.funnel.withEmail },
