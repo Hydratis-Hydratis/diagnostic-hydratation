@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Question, DiagnosticData } from "@/types/diagnostic";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -11,6 +11,7 @@ import { TemperatureSelector } from "./TemperatureSelector";
 import { SportSelector, Sport } from "./SportSelector";
 import { User, Baby } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { updateLastSeenQuestion } from "@/lib/saveDiagnostic";
 
 const parseQuestionText = (text: string) => {
   const hintMatch = text.match(/\n\n(💡.+)$/s);
@@ -55,7 +56,11 @@ export const ThematicScreen = ({
   });
   const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
 
-  // Pre-fill answers from previousAnswers when questions change
+  // Track the last answered question for abandon analytics
+  const trackQuestion = useCallback((questionId: string) => {
+    updateLastSeenQuestion(questionId);
+  }, []);
+
   useEffect(() => {
     const initialAnswers: Partial<DiagnosticData> = {};
     questions.forEach(q => {
@@ -187,10 +192,13 @@ export const ThematicScreen = ({
             </div>
             <RadioGroup 
               value={answers[question.id] as string || ""} 
-              onValueChange={value => setAnswers(prev => ({
-                ...prev,
-                [question.id]: value
-              }))} 
+              onValueChange={value => {
+                trackQuestion(question.id);
+                setAnswers(prev => ({
+                  ...prev,
+                  [question.id]: value
+                }));
+              }} 
               className={cn("gap-2", question.multiColumn && "grid grid-cols-2")}
             >
               {question.options?.map((option, idx) => {
@@ -230,10 +238,13 @@ export const ThematicScreen = ({
               type={question.inputType || "text"} 
               placeholder={question.placeholder} 
               value={answers[question.id] as string || ""} 
-              onChange={e => setAnswers(prev => ({
-                ...prev,
-                [question.id]: e.target.value
-              }))} 
+              onChange={e => {
+                trackQuestion(question.id);
+                setAnswers(prev => ({
+                  ...prev,
+                  [question.id]: e.target.value
+                }));
+              }} 
               className="w-full" 
             />
           </div>
@@ -253,10 +264,13 @@ export const ThematicScreen = ({
             </div>
             <ColorScaleSelector 
               value={answers[question.id] as string}
-              onSelect={value => setAnswers(prev => ({
-                ...prev,
-                [question.id]: value
-              }))} 
+              onSelect={value => {
+                trackQuestion(question.id);
+                setAnswers(prev => ({
+                  ...prev,
+                  [question.id]: value
+                }));
+              }} 
             />
           </div>
         );
@@ -275,10 +289,13 @@ export const ThematicScreen = ({
             </div>
             <TranspirationScale 
               value={answers[question.id] as string}
-              onSelect={value => setAnswers(prev => ({
-                ...prev,
-                [question.id]: value
-              }))} 
+              onSelect={value => {
+                trackQuestion(question.id);
+                setAnswers(prev => ({
+                  ...prev,
+                  [question.id]: value
+                }));
+              }} 
             />
           </div>
         );
@@ -295,7 +312,7 @@ export const ThematicScreen = ({
                 </p>
               )}
             </div>
-            <BeverageSelector quantities={beverageQuantities} onChange={setBeverageQuantities} />
+            <BeverageSelector quantities={beverageQuantities} onChange={(q) => { trackQuestion(question.id); setBeverageQuantities(q); }} />
           </div>
         );
       case "temperatureSelector":
@@ -313,10 +330,13 @@ export const ThematicScreen = ({
             </div>
             <TemperatureSelector 
               value={answers[question.id] as string}
-              onSelect={value => setAnswers(prev => ({
-                ...prev,
-                [question.id]: value
-              }))} 
+              onSelect={value => {
+                trackQuestion(question.id);
+                setAnswers(prev => ({
+                  ...prev,
+                  [question.id]: value
+                }));
+              }} 
             />
           </div>
         );
@@ -335,7 +355,7 @@ export const ThematicScreen = ({
             </div>
             <SportSelector 
               selectedSports={selectedSports}
-              onSelect={sports => setSelectedSports(sports)} 
+              onSelect={sports => { trackQuestion(question.id); setSelectedSports(sports); }} 
             />
           </div>
         );

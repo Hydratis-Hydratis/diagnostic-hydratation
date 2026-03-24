@@ -1,0 +1,1 @@
+ALTER TABLE public.diagnostics ADD COLUMN IF NOT EXISTS last_seen_question text;

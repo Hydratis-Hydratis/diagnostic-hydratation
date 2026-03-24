@@ -23,6 +23,7 @@ interface AnalyticsData {
   beverageMap: Record<string, number>;
   funnel: { started: number; completed: number; withEmail: number };
   abandonMap?: Record<string, number>;
+  abandonByQuestion?: Record<string, number>;
   questionLabels?: Record<string, string>;
 }
 
@@ -104,24 +105,59 @@ export function AnalyticsCharts() {
     return stepOrder.map(s => ({ name: s, value: data.abandonMap?.[s] || 0 }));
   })();
 
+  const abandonByQuestionData = (() => {
+    if (!data.abandonByQuestion || !data.questionLabels) return [];
+    const questionOrder = [
+      "sexe", "situation_particuliere", "age", "taille_cm", "poids_kg",
+      "temperature_ext", "sport_pratique", "metier_physique",
+      "sports_selectionnes", "frequence", "duree_minutes", "transpiration",
+      "crampes", "courbatures", "urine_couleur",
+      "boissons_journalieres", "firstName", "email"
+    ];
+    return questionOrder.map(q => ({
+      name: data.questionLabels![q] || q,
+      value: data.abandonByQuestion![q] || 0,
+    }));
+  })();
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Abandons par écran */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            Abandons par écran ({Object.values(data.abandonMap || {}).reduce((a: number, b: number) => a + b, 0)} abandons)
+          </CardTitle>
+        </CardHeader>
+        <CardContent style={{ height: Math.max(256, abandonData.length * 40) }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={abandonData} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" allowDecimals={false} />
+              <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill={COLORS[1]} radius={[0, 4, 4, 0]} name="Abandons" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
       {/* Abandons par question */}
-      {(
+      {abandonByQuestionData.length > 0 && (
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base">
-              Abandons par question ({Object.values(data.abandonMap!).reduce((a: number, b: number) => a + b, 0)} abandons)
+              Abandons par question ({Object.values(data.abandonByQuestion || {}).reduce((a: number, b: number) => a + b, 0)} abandons)
             </CardTitle>
           </CardHeader>
-          <CardContent style={{ height: Math.max(256, abandonData.length * 32) }}>
+          <CardContent style={{ height: Math.max(300, abandonByQuestionData.length * 28) }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={abandonData} layout="vertical">
+              <BarChart data={abandonByQuestionData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" allowDecimals={false} />
-                <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Bar dataKey="value" fill={COLORS[1]} radius={[0, 4, 4, 0]} name="Abandons" />
+                <Bar dataKey="value" fill={COLORS[2]} radius={[0, 4, 4, 0]} name="Abandons" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

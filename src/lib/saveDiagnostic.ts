@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DiagnosticData } from "@/types/diagnostic";
 import { HydrationResult } from "./hydrationCalculator";
 import { clearDiagnosticId, ensureDiagnosticId, getCurrentDiagnosticId } from "./diagnosticSession";
-import { upsertDiagnosticCompletion, upsertDiagnosticProgress, updateLastSeenStep as repoUpdateLastSeenStep } from "./diagnosticsRepo";
+import { upsertDiagnosticCompletion, upsertDiagnosticProgress, updateLastSeenStep as repoUpdateLastSeenStep, updateLastSeenQuestion as repoUpdateLastSeenQuestion } from "./diagnosticsRepo";
 
 // Backward-compatible re-exports
 export { clearDiagnosticId, getCurrentDiagnosticId };
@@ -110,6 +110,24 @@ export async function updateLastSeenStep(stepName: string): Promise<{ success: b
     return res;
   } catch (err) {
     console.error('Erreur updateLastSeenStep:', err);
+    return { success: false, error: String(err) };
+  }
+}
+
+// Update the last seen question (individual question) for abandon tracking
+export async function updateLastSeenQuestion(questionId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const diagnosticId = getCurrentDiagnosticId();
+    if (!diagnosticId) {
+      return { success: false, error: "No diagnostic ID" };
+    }
+    const res = await repoUpdateLastSeenQuestion({ diagnosticId, questionId });
+    if (!res.success) {
+      console.error('Erreur mise à jour last_seen_question:', res.error);
+    }
+    return res;
+  } catch (err) {
+    console.error('Erreur updateLastSeenQuestion:', err);
     return { success: false, error: String(err) };
   }
 }
