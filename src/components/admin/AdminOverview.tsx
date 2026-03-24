@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Activity, CheckCircle, TrendingUp, Calendar as CalendarLucide, Mail, Droplets, Pill, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  LineChart, Line, BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 
@@ -19,7 +19,7 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"
 
 type Preset = "7d" | "30d" | "90d" | "all" | "custom";
 
-interface AnalyticsData {
+export interface AnalyticsData {
   overview: { total: number; completed: number; avgScore: number; today: number; thisWeek: number; withEmail: number; avgHydrationGap: number; avgPastilles: number };
   dailyMap: Record<string, { total: number; completed: number }>;
   funnel: { started: number; completed: number; withEmail: number };
@@ -35,9 +35,19 @@ interface AnalyticsData {
   questionLabels?: Record<string, string>;
   recentDiagnostics: { created_at: string; first_name: string; score: number; hydra_rank: string; sport: string; nb_pastilles_total: number | string }[];
   pageViews?: { totalViews: number; viewsByDay: Record<string, number>; viewSourceMap: Record<string, number>; viewDeviceMap: Record<string, number>; conversionRate: number; viewByUtmSource?: Record<string, number>; viewByUtmMedium?: Record<string, number>; viewByUtmSourceMedium?: Record<string, number> };
+  scoreBuckets: number[];
+  ageBuckets: number[];
+  sportMap: Record<string, { count: number; totalScore: number }>;
+  beverageMap: Record<string, number>;
+  hourlyMap: Record<number, number>;
+  scoreByAge: { name: string; avg: number; count: number }[];
 }
 
-export function AdminOverview() {
+interface AdminOverviewProps {
+  onDataLoaded?: (data: AnalyticsData) => void;
+}
+
+export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [preset, setPreset] = useState<Preset>("custom");
@@ -61,8 +71,9 @@ export function AdminOverview() {
 
     if (error || !result?.overview) { setLoading(false); return; }
     setData(result);
+    onDataLoaded?.(result);
     setLoading(false);
-  }, []);
+  }, [onDataLoaded]);
 
   useEffect(() => {
     fetchStats(format(new Date("2026-02-04"), "yyyy-MM-dd"), format(new Date(), "yyyy-MM-dd"));
@@ -107,7 +118,6 @@ export function AdminOverview() {
 
   const { overview: stats } = data;
 
-  // Prepare daily chart data (last 30 days)
   const dailyChartData = (() => {
     const days: { date: string; total: number; completed: number; taux: number; vues: number }[] = [];
     const now = new Date();
@@ -122,7 +132,6 @@ export function AdminOverview() {
         days.push({ date: key.slice(5), total: entry.total, completed: entry.completed, taux: entry.total ? Math.round((entry.completed / entry.total) * 100) : 0, vues });
       }
     } else {
-      // "all" or "custom": start from first date with data
       const minDate = new Date("2026-02-04");
       const allDates = [...Object.keys(data.dailyMap), ...Object.keys(data.pageViews?.viewsByDay || {})].sort();
       const firstDataDate = allDates.length > 0 ? new Date(allDates[0]) : now;
@@ -147,25 +156,6 @@ export function AdminOverview() {
     { name: "Avec email", value: data.funnel.withEmail },
   ];
 
-  const scoreDistData = Object.entries(data.scoreDistribution)
-    .map(([name, value]) => ({ name, value }))
-    .filter(d => d.value > 0 || ["0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", "90-99", "100"].includes(d.name));
-
-  const rankData = Object.entries(data.rankMap).map(([name, value]) => ({ name, value }));
-  const genderData = Object.entries(data.genderMap).map(([name, value]) => ({ name, value }));
-  const sourceData = Object.entries(data.sourceMap).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
-  const deviceData = Object.entries(data.deviceMap).map(([name, value]) => ({ name, value }));
-  const utmCombinedData = (() => {
-    const smMap = data.pageViews?.viewByUtmSourceMedium || {};
-    return Object.entries(smMap)
-      .map(([name, value]) => ({ name, vues: value as number }))
-      .sort((a, b) => b.vues - a.vues)
-      .slice(0, 12);
-  })();
-  const pastillesDistData = Object.entries(data.pastillesDistribution).map(([name, value]) => ({ name: `${name} pastilles`, value, raw: Number(name) })).sort((a, b) => a.raw - b.raw);
-  const pastillesByRankData = Object.entries(data.pastillesByRank).map(([name, value]) => ({ name: name.replace("Hydra'", ""), value }));
-
-  const pv = data.pageViews;
   const kpiCards = [
     { title: "Total diagnostics", value: stats.total, icon: Activity, desc: `${stats.completed} complétés` },
     { title: "Taux de complétion", value: stats.total ? `${Math.round((stats.completed / stats.total) * 100)}%` : "0%", icon: CheckCircle, desc: `${stats.total - stats.completed} abandonnés` },
@@ -189,18 +179,11 @@ export function AdminOverview() {
       <Card>
         <CardContent className="p-3 flex flex-wrap items-center gap-2">
           {presets.map((p) => (
-            <Button
-              key={p.value}
-              variant={preset === p.value ? "default" : "outline"}
-              size="sm"
-              onClick={() => applyPreset(p.value)}
-            >
+            <Button key={p.value} variant={preset === p.value ? "default" : "outline"} size="sm" onClick={() => applyPreset(p.value)}>
               {p.label}
             </Button>
           ))}
-
           <div className="h-6 w-px bg-border mx-1" />
-
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className={cn("text-xs", preset === "custom" && dateFrom && "border-primary")}>
@@ -209,19 +192,10 @@ export function AdminOverview() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={dateFrom}
-                onSelect={(d) => applyCustomDate(d, dateTo)}
-                locale={fr}
-                initialFocus
-                className="p-3 pointer-events-auto"
-              />
+              <Calendar mode="single" selected={dateFrom} onSelect={(d) => applyCustomDate(d, dateTo)} locale={fr} initialFocus className="p-3 pointer-events-auto" />
             </PopoverContent>
           </Popover>
-
           <span className="text-xs text-muted-foreground">→</span>
-
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className={cn("text-xs", preset === "custom" && dateTo && "border-primary")}>
@@ -230,14 +204,7 @@ export function AdminOverview() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={dateTo}
-                onSelect={(d) => applyCustomDate(dateFrom, d)}
-                locale={fr}
-                initialFocus
-                className="p-3 pointer-events-auto"
-              />
+              <Calendar mode="single" selected={dateTo} onSelect={(d) => applyCustomDate(dateFrom, d)} locale={fr} initialFocus className="p-3 pointer-events-auto" />
             </PopoverContent>
           </Popover>
         </CardContent>
@@ -259,12 +226,10 @@ export function AdminOverview() {
         ))}
       </div>
 
-      {/* Row 2: Daily evolution + Funnel */}
+      {/* Daily evolution + Funnel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Évolution quotidienne</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Évolution quotidienne</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={dailyChartData}>
@@ -284,9 +249,7 @@ export function AdminOverview() {
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Entonnoir de conversion</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Entonnoir de conversion</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={funnelData} layout="vertical">
@@ -295,9 +258,7 @@ export function AdminOverview() {
                 <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={80} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#8884d8">
-                  {funnelData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i]} />
-                  ))}
+                  {funnelData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -305,145 +266,7 @@ export function AdminOverview() {
         </Card>
       </div>
 
-      {/* Row 3: Score distribution + Hydra Rank + Gender */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition des scores</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={scoreDistData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
-                <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#8884d8" name="Diagnostics" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Hydra Rank</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={rankData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {rankData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition par sexe</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={genderData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {genderData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Row 4: Pastilles analytics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition des pastilles recommandées</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={pastillesDistData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#8884d8" name="Utilisateurs" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Pastilles moyennes par Hydra Rank</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={pastillesByRankData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#00C49F" name="Moy. pastilles" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Row 5: Abandons par écran */}
-      {(() => {
-        const stepOrder = ["Profil", "Activité physique", "Santé & Conditions", "Habitudes", "Coordonnées"];
-        const abandonData = stepOrder.map(s => ({ name: s, value: data.abandonMap?.[s] || 0 }));
-        const totalAbandons = abandonData.reduce((a, b) => a + b.value, 0);
-        return (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Abandons par écran ({totalAbandons} abandons)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={Math.max(200, abandonData.length * 40)}>
-                <BarChart data={abandonData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={140} />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#FF8042" name="Abandons" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        );
-      })()}
-
-      {/* Row 6: UTM Source/Medium + Diagnostic Sources + Devices */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {utmCombinedData.length > 0 && (
-          <Card className="md:col-span-2">
-            <CardHeader className="pb-2"><CardTitle className="text-sm">Trafic par Source / Medium (UTM)</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={Math.max(240, utmCombinedData.length * 28)}>
-                <BarChart data={utmCombinedData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={160} />
-                  <Tooltip />
-                  <Bar dataKey="vues" fill="#FF8042" name="Vues" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Répartition par device</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={deviceData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {deviceData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Row 6: Recent diagnostics */}
+      {/* Recent diagnostics */}
       <Card>
         <CardHeader className="pb-2"><CardTitle className="text-sm">Derniers diagnostics complétés</CardTitle></CardHeader>
         <CardContent>
