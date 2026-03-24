@@ -250,7 +250,66 @@ Deno.serve(async (req) => {
       }
       abandonMap[step] = (abandonMap[step] || 0) + 1;
     });
-    const questionLabels: Record<string, string> = {};
+
+    // === ABANDON BY QUESTION (individual question level) ===
+    const questionOrder = [
+      "sexe", "situation_particuliere", "age", "taille_cm", "poids_kg",
+      "temperature_ext", "sport_pratique", "metier_physique",
+      "sports_selectionnes", "frequence", "duree_minutes", "transpiration",
+      "crampes", "courbatures", "urine_couleur",
+      "boissons_journalieres",
+      "firstName", "email"
+    ];
+    const questionLabelMap: Record<string, string> = {
+      sexe: "Sexe",
+      situation_particuliere: "Situation particulière",
+      age: "Âge",
+      taille_cm: "Taille",
+      poids_kg: "Poids",
+      temperature_ext: "Température",
+      sport_pratique: "Sport pratiqué ?",
+      metier_physique: "Métier physique ?",
+      sports_selectionnes: "Sports sélectionnés",
+      frequence: "Fréquence",
+      duree_minutes: "Durée séances",
+      transpiration: "Transpiration",
+      crampes: "Crampes",
+      courbatures: "Courbatures",
+      urine_couleur: "Couleur urine",
+      boissons_journalieres: "Boissons",
+      firstName: "Prénom",
+      email: "Email",
+    };
+    const abandonByQuestion: Record<string, number> = {};
+    questionOrder.forEach(q => { abandonByQuestion[q] = 0; });
+
+    abandoned.forEach((d: any) => {
+      let question = (d as any).last_seen_question;
+      // For old records without last_seen_question, infer from diagnostic_data
+      if (!question || !questionOrder.includes(question)) {
+        const dd = d.diagnostic_data;
+        if (dd && typeof dd === "object") {
+          let lastFound = "";
+          for (const qId of questionOrder) {
+            if ((dd as any)[qId] !== undefined && (dd as any)[qId] !== null && (dd as any)[qId] !== "") {
+              lastFound = qId;
+            }
+          }
+          // The abandon happened at the NEXT question after the last answered one
+          if (lastFound) {
+            const idx = questionOrder.indexOf(lastFound);
+            question = idx < questionOrder.length - 1 ? questionOrder[idx + 1] : lastFound;
+          } else {
+            question = "sexe"; // No data at all = abandoned at first question
+          }
+        } else {
+          question = "sexe";
+        }
+      }
+      abandonByQuestion[question] = (abandonByQuestion[question] || 0) + 1;
+    });
+
+    const questionLabels = questionLabelMap;
 
     // === NEW AGGREGATIONS ===
 
