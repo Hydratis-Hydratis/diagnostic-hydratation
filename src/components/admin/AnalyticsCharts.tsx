@@ -23,6 +23,7 @@ interface AnalyticsData {
   beverageMap: Record<string, number>;
   funnel: { started: number; completed: number; withEmail: number };
   abandonMap?: Record<string, number>;
+  abandonByQuestion?: Record<string, number>;
   questionLabels?: Record<string, string>;
 }
 
