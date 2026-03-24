@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Question, DiagnosticData } from "@/types/diagnostic";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -11,6 +11,7 @@ import { TemperatureSelector } from "./TemperatureSelector";
 import { SportSelector, Sport } from "./SportSelector";
 import { User, Baby } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { updateLastSeenQuestion } from "@/lib/saveDiagnostic";
 
 const parseQuestionText = (text: string) => {
   const hintMatch = text.match(/\n\n(💡.+)$/s);
