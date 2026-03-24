@@ -22,7 +22,7 @@ type Preset = "7d" | "30d" | "90d" | "all" | "custom";
 export interface AnalyticsData {
   overview: { total: number; completed: number; avgScore: number; today: number; thisWeek: number; withEmail: number; avgHydrationGap: number; avgPastilles: number };
   dailyMap: Record<string, { total: number; completed: number }>;
-  funnel: { started: number; completed: number; withEmail: number };
+  funnel: { views?: number; started: number; withSexe?: number; completed: number; withEmail: number };
   scoreDistribution: Record<string, number>;
   rankMap: Record<string, number>;
   genderMap: Record<string, number>;
@@ -151,10 +151,17 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
   const showVuesLine = totalVues >= 50;
 
   const funnelData = [
-    { name: "Démarrés", value: data.funnel.started },
+    { name: "Vues page", value: data.funnel.views || data.pageViews?.totalViews || 0 },
+    { name: "Diag. démarrés", value: data.funnel.started },
+    { name: "Sexe validé", value: data.funnel.withSexe || 0 },
     { name: "Complétés", value: data.funnel.completed },
     { name: "Avec email", value: data.funnel.withEmail },
   ];
+
+  const funnelWithRates = funnelData.map((d, i) => ({
+    ...d,
+    rate: i === 0 ? null : funnelData[i - 1].value > 0 ? Math.round((d.value / funnelData[i - 1].value) * 100) : 0,
+  }));
 
   const kpiCards = [
     { title: "Total diagnostics", value: stats.total, icon: Activity, desc: `${stats.completed} complétés` },
@@ -252,13 +259,16 @@ export function AdminOverview({ onDataLoaded }: AdminOverviewProps) {
           <CardHeader className="pb-2"><CardTitle className="text-sm">Entonnoir de conversion</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={funnelData} layout="vertical">
+              <BarChart data={funnelWithRates} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" tick={{ fontSize: 10 }} />
-                <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={80} />
-                <Tooltip />
+                <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={90} />
+                <Tooltip formatter={(value: number, name: string, props: any) => {
+                  const rate = props.payload.rate;
+                  return [`${value}${rate !== null ? ` (${rate}%)` : ''}`, 'Utilisateurs'];
+                }} />
                 <Bar dataKey="value" fill="#8884d8">
-                  {funnelData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
+                  {funnelWithRates.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

@@ -38,24 +38,6 @@ export function AdminAbandons({ data }: AdminAbandonsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Abandons par écran */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Abandons par écran ({totalAbandonsScreen} abandons)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={Math.max(200, abandonData.length * 40)}>
-            <BarChart data={abandonData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
-              <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={140} />
-              <Tooltip />
-              <Bar dataKey="value" fill={COLORS[0]} name="Abandons" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
       {/* Abandons par question */}
       {abandonByQuestionData.length > 0 && (
         <Card>
